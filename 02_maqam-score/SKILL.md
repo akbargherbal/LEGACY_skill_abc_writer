@@ -1,5 +1,5 @@
 ---
-name: maqam-score
+name: abc_score_writer
 description: >-
   Compose a NEW ABC score from Arabic lyrics and an arabmaqamrock style prompt:
   a small, declared set of deviations from the LoRA's own default arrangement.
@@ -7,10 +7,10 @@ description: >-
   offline in two commands.
   Use when asked to write, compose, generate or design a score, melody, or ABC
   file from lyrics and a style. Do NOT use for editing an existing SheetSage2
-  transcription — that is `maqam-edit`.
+  transcription.
 ---
 
-# maqam-score — composing a score from scratch
+# abc_score_writer — composing a score from scratch
 
 You are writing a **complete two-voice score** for a LoRA that already knows this
 genre and performs competently on its own. The score is not a sketch and not a

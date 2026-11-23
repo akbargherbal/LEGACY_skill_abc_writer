@@ -129,7 +129,7 @@ Bar arithmetic matters more than anything else: at L:1/16, 4/4, **every bar is
 
 ## 5. Melodic material (measured corpus)
 
-Source: `arabmaqamrock/skills/maqam-edit/SKILL.md`, 177 tracks.
+Source: the `arabmaqamrock` 177-track `five_stars` corpus.
 
 - Diatonic: **0.72** chromatic notes per 100 (pitch class outside the key at
   that note); median track **0**; **91 of 177** tracks have none. An earlier

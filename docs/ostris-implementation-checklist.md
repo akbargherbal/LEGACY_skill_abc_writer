@@ -6,7 +6,7 @@ M7 documented and in CI. Named-maqam work stays deferred.
 Implementation commit `ecde347`, pushed to `origin/main`; earlier `7ffae22`,
 `3115daa`.
 **Last verified:** 38 tests pass, `make selftest` and `make offline-check` pass,
-contract pins match, `dist/02_maqam-score.zip` rebuilt with the bundled data.
+contract pins match, `dist/abc_score_writer.zip` rebuilt with the bundled data.
 
 Legend: ✅ done · 🟡 partial · ⏳ not started · ⏸️ deferred/blocked.
 The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
@@ -201,7 +201,7 @@ Entry point: `python3 02_maqam-score/scripts/ostris_cli.py <command>`.
 ## Artifacts
 
 The shippable artifacts are bundled under `02_maqam-score/data/ostris/` and
-included in `dist/02_maqam-score.zip`; `analysis/out/ostris/` is the
+included in `dist/abc_score_writer.zip`; `analysis/out/ostris/` is the
 regeneration workspace. The reader commands default to the bundle.
 
 | Artifact | Status |

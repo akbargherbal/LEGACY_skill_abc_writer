@@ -14,13 +14,13 @@ justifies its numbers.
 | `02_maqam-score/scripts/ostris/` | OSTRIS corpus tools (M0–M6: sync, audit, build, features, priors, plan, idioms, similarity, check, eval) | **active** |
 | `02_maqam-score/data/ostris/` | Packaged corpus artifacts: source cache, records, priors, idiom bank, similarity index, eval split | **bundled, ships in the zip** |
 | `02_maqam-score/schemas/` | JSON contracts for records, priors, plans, reports, eval | **active** |
-| `dist/02_maqam-score.zip` | Built skill package | **build artifact** |
+| `dist/abc_score_writer.zip` | Built skill package | **build artifact** |
 | `analysis/` | Calibration scripts (`calibrate_177.py`, `test_checker_corpus.py`) | **active** |
 | `analysis/out/` | Regeneration workspace: `summary.json`, `tracks.jsonl`, `ostris/` | **generated, reproducible** |
 | `docs/` | Reports, plans, baseline inventory | **active docs** |
 | `docs/archive/` | Inputs that served their purpose | **frozen** |
 
-The skill source is the truth; `dist/02_maqam-score.zip` is rebuilt with
+The skill source is the truth; `dist/abc_score_writer.zip` is rebuilt with
 `make zip`. The old v1 zip lives in git history.
 
 ## Quick start
@@ -30,7 +30,7 @@ make selftest        # the example passes; the dialect is enforced
 make test            # unit tests
 make offline-check   # the corpus tools run on the bundled data, no flags
 make check-corpus    # 177/177 parse, 175/177 hard (98.9%)
-make zip             # build dist/02_maqam-score.zip
+make zip             # build dist/abc_score_writer.zip
 ```
 
 ## OSTRIS corpus tools

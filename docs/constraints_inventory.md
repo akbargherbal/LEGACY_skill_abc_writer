@@ -15,7 +15,7 @@
 | S1 | `arabmaqamrock/duration_cap.py` (انحدار على الحروف) | `reference.md:8`, `syllabify.py:34` |
 | S2 | حالة واحدة: مجموعة امرئ القيس، 28 سطر، 608 حرف، 389 علامة، سقف 301.2 ث، الرندر 262.15 ث | `reference.md:18-19, 33, 46` |
 | S3 | خمس تفريغات SheetSage2 (p01–p05) لنفس مجموعة الكلمات | `reference.md:127-137` |
-| S4 | مجموعة 177 مقطوعة (`maqam-edit`) | `reference.md:104-110` |
+| S4 | مجموعة 177 مقطوعة (`five_stars`) | `reference.md:104-110` |
 | S5 | حالة p02 بالتفصيل (نهاوند، Q=73، 80 مازورة) | `reference.md:153-186` |
 
 ---

@@ -18,6 +18,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from .links import FADL_EXTRA_SLUG_TO_STEM, FADL_SLUG_TO_STEM
+
 INSTRUMENTAL_MANIFEST = "OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset_manifest.json"
 V3_MANIFEST = "OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_dataset_manifest.json"
 YT500_MANIFEST = "TRANSCRIPTS/YT500/_manifest.jsonl"
@@ -27,6 +29,22 @@ FADL_SHORTLIST = "DATASET/fadhl_shaker_instrumental_18_shortlist/shortlist.json"
 FADL_REFERENCE_GLOB = "DATASET/fadhl_shaker_instrumental_18/abc/*.abc"
 FADL_SELECTED_MANIFEST = "TRANSCRIPTS/fadhl_shaker_selected_scores/transcribe_manifest.json"
 FADL_SELECTED_PREFIX = "TRANSCRIPTS/fadhl_shaker_selected_scores"
+
+STEM_TO_SLUG = {v: k for k, v in {**FADL_SLUG_TO_STEM, **FADL_EXTRA_SLUG_TO_STEM}.items()}
+
+
+def _zip_safe_name(name: str) -> str:
+    """Return the ASCII, space-free filename used by the bundled snapshot.
+
+    ``&`` becomes ``and``; apostrophes and opening parentheses are dropped;
+    a closing parenthesis and every space become ``_``.  The rule is derived
+    from the 15 FADL album filenames so a refresh reproduces the bundle.
+    """
+    text = name.replace("&", "and")
+    for character in ("'", "’", "‘", "("):
+        text = text.replace(character, "")
+    return text.replace(")", "_").replace(" ", "_")
+
 
 # Individual files that anchor the inventory.  Keep this list small and stable.
 FILES = (
@@ -100,8 +118,8 @@ def _copy_selected_scores(
         stem = track.get("stem")
         if not stem:
             continue
-        rel = f"{stem}/score.abc"
-        dst = out_dir / rel
+        rel = f"{stem}/score.abc"  # bucket layout keeps the original stem
+        dst = out_dir / f"{STEM_TO_SLUG.get(stem, stem)}/score.abc"  # ASCII-safe local path
         if dst.is_file() and not force:
             copied += 1
             continue
@@ -140,6 +158,16 @@ def sync(data_root: str, cache: str | Path, force: bool = False) -> dict:
         except (subprocess.CalledProcessError, FileNotFoundError):
             globbed[base] = 0
             missing_files.append(f"{base}/{pattern}")
+
+    # FADL album filenames contain spaces, apostrophes and parentheses; the
+    # bundle normalises them so the snapshot stays portable.  The JSON content
+    # carries the identity, so renaming the file is safe.
+    album_dir = root / "TRANSCRIPTS" / "FADL_SHAKER" / "abc"
+    if album_dir.is_dir():
+        for path in sorted(album_dir.glob("*.json")):
+            target = album_dir / _zip_safe_name(path.name)
+            if target != path and not target.exists():
+                path.rename(target)
 
     selected = _copy_selected_scores(root, force, data_root)
     return {

@@ -1,11 +1,33 @@
 # Changelog
 
+## Claude-compatible package — 2026-11-23
+
+### Portable bundle and skill name
+- Rename the skill to **`abc_score_writer`** (`SKILL.md` name and title); the
+  archive now extracts to `abc_score_writer/`.
+- Store bundled selected-score folders under their ASCII transliterated slug and
+  normalise FADL album filenames (`space` → `_`, `&` → `and`, apostrophes and
+  parentheses removed). `sync.py`/`links.py` accept both the slug and the
+  legacy Arabic-stem layout; `sync.py` normalises album names on refresh.
+- Add `scripts/package_skill.sh`; `make zip` now builds
+  `dist/abc_score_writer.zip` with `abc_score_writer/` at the root and excludes
+  `CHANGELOG.md`, `data/README.md` and generated reports. `make zip-public`
+  builds the code-only variant.
+- Remove every `maqam-edit` reference (`SKILL.md`, `references/reference.md`,
+  `docs/constraints_inventory.md`); the skill is being phased out.
+- New tests assert the bundle is ASCII, space-free, and that every record path
+  resolves or carries a "not in cache" note. 41 tests pass.
+- Verified on a clean extraction: selftest, tests, plan/exemplar/similarity/
+  check, and a full offline regeneration (audit/build/features/priors/idioms/
+  similarity/eval) reproduces the shipped records, idioms, priors, similarity
+  index and split exactly.
+
 ## Offline bundle — 2026-11-23
 
 ### Packaged corpus artifacts
 - The OSTRIS artifacts now ship **inside the skill** at
   `02_maqam-score/data/ostris/` and are included in
-  `dist/02_maqam-score.zip`, so the bucket is no longer a runtime dependency.
+  `dist/abc_score_writer.zip`, so the bucket is no longer a runtime dependency.
 - Bundle contents: `source/` (manifests, YT500 ABC shards, FADL album JSONs and
   reference ABCs), `records.jsonl`, `held_out.jsonl`, `audit.*`,
   `canonical.*`, `features.*`, `manifest_links.csv`, `priors/` (30 files),

@@ -17,7 +17,7 @@
 | M4 priors للـ 482 | ⏳ | يحتاج manifests GCS |
 | M5 تحديث المهارة | ✅ | `SKILL.md`, `reference.md`, `example/`, `selftest.sh`, `tests/` |
 | M6 التقييم | ⏳ | يحتاج عيّنة held-out |
-| M7 الإصدار | 🟡 | أُعيد بناء `dist/02_maqam-score.zip`؛ CI/الإصدار النهائي لاحقًا |
+| M7 الإصدار | 🟡 | أُعيد بناء `dist/abc_score_writer.zip`؛ CI/الإصدار النهائي لاحقًا |
 
 ---
 

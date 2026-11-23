@@ -21,6 +21,7 @@ from ostris.idioms import load_idioms, pick_idioms  # noqa: E402
 from ostris.plan import build_plan  # noqa: E402
 from ostris.priors import load_priors  # noqa: E402
 from ostris.similarity import load_index, query_score_text  # noqa: E402
+from ostris.sync import _zip_safe_name  # noqa: E402
 
 REQUIRED = (
     "records.jsonl",
@@ -95,6 +96,43 @@ class BundledDataTest(unittest.TestCase):
         with path.open(encoding="utf-8") as handle:
             first = json.loads(handle.readline())
         self.assertEqual(first.get("id"), "yt500-0001-fbK2ySlxAW4")
+
+    def test_bundle_paths_are_portable(self):
+        for path in BUNDLED_DATA.rglob("*"):
+            with self.subTest(path=path.relative_to(BUNDLED_DATA)):
+                self.assertTrue(path.name.isascii(), path)
+                self.assertNotIn(" ", path.name, path)
+
+    def test_album_filenames_match_sync_normalisation(self):
+        folder = BUNDLED_DATA / "source/TRANSCRIPTS/FADL_SHAKER/abc"
+        files = sorted(folder.glob("*.json"))
+        self.assertGreater(len(files), 0)
+        for path in files:
+            self.assertEqual(path.name, _zip_safe_name(path.name))
+
+    def test_record_source_paths_resolve(self):
+        records = [
+            json.loads(line)
+            for line in (BUNDLED_DATA / "records.jsonl").read_text().splitlines()
+            if line.strip()
+        ]
+        source = BUNDLED_DATA / "source"
+        for record in records:
+            notes = " ".join(record.get("qc", {}).get("notes", []))
+            for key in ("abc_uri", "selected_transcript_uri", "reference_abc_uri"):
+                uri = record.get(key)
+                if not uri or uri.startswith(("gs://", "http://", "https://", "/")):
+                    continue
+                with self.subTest(id=record["id"], key=key):
+                    if (source / uri).is_file():
+                        continue
+                    # A declared empty/missing transcript is part of the corpus
+                    # state; it must be documented on the record, not silent.
+                    self.assertIn(
+                        "not in cache",
+                        notes,
+                        f"{uri} is missing and the record does not say so",
+                    )
 
 
 if __name__ == "__main__":

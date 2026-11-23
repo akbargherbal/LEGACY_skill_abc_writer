@@ -3,7 +3,7 @@
 This directory makes the OSTRIS corpus tools work **offline**. It is a snapshot
 of the generated artifacts, copied from `analysis/out/ostris/` by
 `scripts/bundle_data.sh` (`make ostris-bundle`) and included in
-`dist/02_maqam-score.zip`.
+`dist/abc_score_writer.zip`.
 
 ## What is here
 
@@ -20,6 +20,19 @@ of the generated artifacts, copied from `analysis/out/ostris/` by
 Generated Markdown reports (`audit.md`, `canonical.md`, `features.md`,
 `idioms.md`, `priors/priors.md`) are developer documentation and are **not**
 copied into the bundle.
+
+## Portable filenames
+
+The snapshot uses ASCII, space-free names so it survives any zip/OS layer:
+
+- selected-score folders are stored under their transliterated slug
+  (`al_qamari` style) instead of the Arabic stem; `sync.py` and `links.py`
+  understand both layouts;
+- FADL album JSONs are normalised (`01.Walla Zaman.1998.json` →
+  `01.Walla_Zaman.1998.json`) by `sync.py` before `audit` runs.
+
+`tests/test_bundled_data.py` fails if a bundled path is non-ASCII, contains a
+space, or points at a missing file without a matching "not in cache" note.
 
 Every reader command defaults to this directory (`cli.py` resolves it from
 `__file__`), so no `--out`/`--priors`/`--cache` flag is needed from any working

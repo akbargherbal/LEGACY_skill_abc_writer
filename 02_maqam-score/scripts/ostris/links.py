@@ -57,6 +57,13 @@ FADL_SLUG_TO_STEM = {
 }
 
 
+# Selected-scores tracks outside the 22-song shortlist.  Their folders are stored
+# under ASCII slugs too, so the bundled snapshot stays zip-safe.
+FADL_EXTRA_SLUG_TO_STEM = {
+    "lilhin_ayesh": "للحين عايش",
+    "ya_takoon_habibi": "يا تكون حبيبي",
+}
+
 def rel_from_uri(uri: str) -> str:
     """Return the cache-relative path for a bucket or local source URI."""
     text = str(uri)
@@ -272,7 +279,12 @@ def link_library(inv: Inventory, cache: Cache) -> list[dict]:
                 sel = selected.get(stem)
                 if sel:
                     base["selected_transcribe_status"] = sel.get("status")
-                    sel_rel = f"{FADL_SELECTED_PREFIX}/{stem}/score.abc"
+                    # Bundled snapshots store these folders under the ASCII slug (zip-safe);
+                    # fall back to the original Arabic stem for caches synced from the bucket.
+                    sel_rel = f"{FADL_SELECTED_PREFIX}/{slug}/score.abc"
+                    legacy_rel = f"{FADL_SELECTED_PREFIX}/{stem}/score.abc"
+                    if not cache.exists(sel_rel) and cache.exists(legacy_rel):
+                        sel_rel = legacy_rel
                     base["selected_transcript_uri"] = sel_rel
                     if cache.exists(sel_rel):
                         base["selected_abc_text"] = cache.read_text(sel_rel)

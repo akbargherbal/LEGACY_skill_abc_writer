@@ -2,7 +2,8 @@
 
 CORPUS ?= $(HOME)/Jupyter_Notebooks/OpenCode/arabmaqamrock/datasets/five_stars
 DIST := dist
-ZIP := $(DIST)/02_maqam-score.zip
+SKILL_NAME := abc_score_writer
+ZIP := $(DIST)/$(SKILL_NAME).zip
 OSTRIS_CACHE ?= analysis/out/ostris/source
 OSTRIS_OUT ?= analysis/out/ostris
 MANIFEST ?= song.json
@@ -18,18 +19,12 @@ selftest:
 	cd 02_maqam-score && bash scripts/selftest.sh
 
 zip:
-	mkdir -p $(DIST)
-	rm -f $(ZIP)
-	zip -r $(ZIP) 02_maqam-score -x '*.pyc' -x '*__pycache__*' \
-		-x '02_maqam-score/data/README.md'
+	scripts/package_skill.sh "$(DIST)"
 
 # Public variant: skill code only, no bundled corpus artifacts (licensing, see
 # docs/ostris-licensing.md). Reader commands then need explicit --out/--priors.
 zip-public:
-	mkdir -p $(DIST)
-	rm -f $(DIST)/02_maqam-score-public.zip
-	zip -r $(DIST)/02_maqam-score-public.zip 02_maqam-score \
-		-x '*.pyc' -x '*__pycache__*' -x '02_maqam-score/data/*'
+	scripts/package_skill.sh --public "$(DIST)"
 
 check-corpus:
 	python3 analysis/test_checker_corpus.py --corpus "$(CORPUS)"
