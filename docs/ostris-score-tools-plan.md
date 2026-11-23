@@ -11,8 +11,10 @@
 **Upstream data:**
 - Manifest: `OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset_manifest.json`
 - Audio bundle: `OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset.zip`
-- Transcripts: `TRANSCRIPTS/YT500` و `.../FADL_SHAKER`
+- Transcripts: `TRANSCRIPTS/YT500` و `TRANSCRIPTS/FADL_SHAKER`
 - Labels: `OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_dataset_manifest.json`
+
+> المسارات أعلاه **نسبية إلى جذر بيانات المشروع**؛ اسم الـ bucket محذوف من هذا المستند.
 
 ---
 
