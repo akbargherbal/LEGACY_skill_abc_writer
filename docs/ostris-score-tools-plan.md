@@ -6,13 +6,12 @@
 > **Implementation note (2026-11-23, English):** The separate-repository scope is
 > dropped. The tools live in the skill: offline code in
 > `02_maqam-score/scripts/ostris/`, contracts in `02_maqam-score/schemas/`, and
-> generated evidence in `analysis/out/ostris/`. M0 (audit + links + parse +
-> records), M1 (canonical ABC + contract pins), and the label-free M2 (features
-> + unreviewed mode hypothesis) are implemented and pass on the real corpus.
-> M3+ remains gated on the decisions in §13. No maqam labels are claimed.
+> generated evidence in `analysis/out/ostris/`. M0–M5 are implemented and pass
+> on the real corpus; M6 implements the deterministic split and the objective
+> metrics only. No maqam label or maqam-fit score is produced.
 > Progress checklist: `docs/ostris-implementation-checklist.md`.
 
-**Status:** proposal — **M0–M2 implemented; M3+ blocked by §13 decisions**
+**Status:** proposal — **M0–M5 implemented; M6 objective half; maqam work deferred**
 **Date:** 2026-11-22
 **Last updated:** 2026-11-23 — سجل القرارات + تكامل مهارة v0.2.0
 **Scope:** مستودع جديد مستقل عن `arabmaqamrock`
@@ -622,21 +621,21 @@ Rules:
 
 | # | القرار | الخيارات | التوصية | يحجب | الحالة |
 |---:|---|---|---|---|---|
-| **D1** | هدف الجودة النهائي | ABC quality / rendered audio / كلاهما | **ABC أولًا**؛ audio في M6 إن توفر رندر | M6 | ⏳ |
-| **D2** | وظيفة الـ35 held-out | توليد / استرجاع / كلاهما | **كلاهما**؛ 12–16 للتوليد والباقي للاسترجاع | M6 | ⏳ |
+| **D1** | هدف الجودة النهائي | ABC quality / rendered audio / كلاهما | **ABC أولًا**؛ audio في M6 إن توفر رندر | M6 | 🔶 ABC only — no render/audio judge |
+| **D2** | وظيفة الـ35 held-out | توليد / استرجاع / كلاهما | **كلاهما**؛ 12–16 للتوليد والباقي للاسترجاع | M6 | ✅ 2026-11-23 (14 + 17) |
 | **D3** | مراجعة maqam | 482 كاملة / عينة 100–150 / مرحلتان | **مرحلتان:** 120 عينة + كل low-confidence | M2 | ⏸️ deferred — no reviewer |
 | **D4** | 438 v3 | تُترك / cross-check / تدريب | **cross-check فقط**؛ لا تدريب ولا priors/eval | M2 | ✅ 2026-11-23 |
 | **D5** | مخطط `plan.json` | `brief.json`+`skill_plan.json` / ملف واحد / `check` يبني | **`brief.json` + `skill_plan.json`** | M1/M3/M5 | ✅ 2026-11-23 |
 | **D6** | الوضع instrumental | إضافة `--voices ins` الآن / `Vocal+Ins` فقط / checker منفصل | **`Vocal+Ins` في v1**؛ instrumental لاحقًا | M1/M5 | ✅ 2026-11-23 |
 | **D7** | عقد المهارة | تثبيت v0.2.0 + flags / تجميد v1 | **v0.2.0** + hash + `--require-final-rest` | M1/M5 | ✅ 2026-11-23 |
-| **D8** | سياسة البوابات | contract+sanity / +style / درجة مركبة | **contract+sanity فقط hard**؛ style WARN | M4/M5/M6 | ⏳ |
+| **D8** | سياسة البوابات | contract+sanity / +style / درجة مركبة | **contract+sanity فقط hard**؛ style WARN | M4/M5/M6 | ✅ 2026-11-23 |
 | **D9** | المتر المتغير | حفظ `M:` / توحيد 4/4 / رفض | **حفظ `M:` و`[K:...]`** | M1 | ✅ 2026-11-23 |
-| **D10** | دمج `report.json` | `skill_report` nested / دمج مسطح / ملفان | **nested + `class`** | M4/M5 | ⏳ |
+| **D10** | دمج `report.json` | `skill_report` nested / دمج مسطح / ملفان | **nested + `class`** | M4/M5 | ✅ 2026-11-23 |
 | **D11** | دور 177 | calibration only / priors/eval / تجاهل | **calibration only** | M2/M6 | ✅ 2026-11-23 |
 | **D12** | تعريف maqam coverage | labelled incl. other / accuracy / كلاهما | **coverage + accuracy منفصلان** | M2/M6 | ⏸️ N/A until D3 |
-| **D13** | مصدر held-out | 35 / 177 / خارجي | **35 YT500 غير المستخدمة** | M6 | 🔶 |
+| **D13** | مصدر held-out | 35 / 177 / خارجي | **35 YT500 غير المستخدمة** | M6 | ✅ 2026-11-23 |
 | **D14** | parser | vendor `abc_tools` / جديد / pin hash | **vendor أو pin hash** | M1 | ✅ 2026-11-23 |
-| **D15** | السكتة الأخيرة | عقد دائم / WARN + flag / تجاهل | **WARN + `--require-final-rest`** | M5 | 🔶 |
+| **D15** | السكتة الأخيرة | عقد دائم / WARN + flag / تجاهل | **WARN + `--require-final-rest`** | M5 | ✅ 2026-11-23 |
 | **D16** | sanity على 482 | تطبيقها / فقط على السكور المولّد / لا | **فقط على السكور المولّد**، لا priors الـ482 | M2/M4 | ✅ 2026-11-23 |
 
 > **M2 amendment (2026-11-23):** no expert maqam review is available. D3 and
@@ -646,11 +645,23 @@ Rules:
 > `null`. No maqam coverage or accuracy is claimed. See
 > `docs/ostris-decisions.md` and `docs/ostris-m2-features.md`.
 
+> **M3–M6 implementation note (2026-11-23, English):** D5/D8/D10/D13/D15 are
+> applied as recorded above. M3 builds objective priors and generates
+> `brief.json` + `skill_plan.json`; M4 builds a structural idiom bank, an
+> interval k-gram index, and a combined `check`; M5 wires the three online
+> commands into `SKILL.md` and a wrapper; M6 builds the deterministic held-out
+> split and scores supplied runs. D1 stays ABC-only (no audio judge) and D2 is
+> applied as 14 generation + 17 retrieval tracks. No maqam label or maqam-fit
+> score is produced. See `docs/ostris-m3-priors-plan.md`,
+> `docs/ostris-m4-idioms-check.md`, and
+> `docs/ostris-m5-m6-integration-eval.md`.
+
 ### 13.3 بوابة البدء
 
 > **M1 gate resolved (2026-11-23):** D5, D6, D7, D9, D14 are recorded with
 > concrete pins in `docs/ostris-decisions.md`. M1 (`ostris build`) is
-> implemented and passes on 482/482 tracks. M2+ remains gated below.
+> implemented and passes on 482/482 tracks. M2–M6 gates are recorded in §13.2
+> and in the stage reports; D3/D12 remain deferred.
 
 - **قبل M1:** D5, D6, D7, D9, D14. ✅
 - **قبل M2:** D3, D4, D11, D12, D16. — D4/D11/D16 ✅ 2026-11-23; D3/D12

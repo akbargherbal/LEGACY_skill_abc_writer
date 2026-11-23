@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+# Run the OSTRIS tools from anywhere (CPU only, standard library only).
+#
+#   scripts/ostris plan --manifest song.json --out plans/song
+#   scripts/ostris check score.abc --plan plans/song/skill_plan.json
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec python3 "$ROOT/02_maqam-score/scripts/ostris_cli.py" "$@"

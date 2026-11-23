@@ -170,6 +170,47 @@ def _voice_features(voice, bars: list) -> dict:
 CHORD_ROOT = re.compile(r"^([A-G](?:bb|##|b|#)?)(.*)$")
 NATURAL = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 ACCIDENTAL = {"#": 1, "##": 2, "b": -1, "bb": -2}
+TIE_TOKEN = re.compile(
+    r'"(?P<chord>[^"\n]*)"|\[K:[^\]\n]+\]|'
+    r"(?P<acc>\^\^|__|\^|_|=)?(?P<note>[A-Ga-gz])"
+    r"(?P<oct>[,']*)(?P<dur>[0-9]*)(?P<tie>-?)"
+)
+
+
+def _vocal_tie_groups(text: str) -> int:
+    """Count maximal tie-connected groups in the Vocal voice.
+
+    This mirrors the skill checker's rule so a prior built from a track is
+    comparable with the score it later checks: a chain ``d8-d8-d8`` is one
+    group, and a rest resets the run.
+    """
+    voice = None
+    in_run = False
+    groups = 0
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("V:"):
+            voice = stripped[2:].strip().split()[0]
+            continue
+        if not stripped or stripped[0] in "XTLQVKM%":
+            continue
+        if voice != "Vocal" or not stripped.endswith("|"):
+            continue
+        for body in stripped[:-1].split("|"):
+            if re.fullmatch(r"Z[2-9]?", body.strip()):
+                in_run = False
+                continue
+            for match in TIE_TOKEN.finditer(body):
+                if match.group("chord") is not None or match.group("note") is None:
+                    continue
+                if match.group("note") == "z":
+                    in_run = False
+                    continue
+                tied = bool(match.group("tie"))
+                if tied and not in_run:
+                    groups += 1
+                in_run = tied
+    return groups
 
 
 def _chord_root(symbol: str) -> tuple[str | None, int | None]:
@@ -289,6 +330,7 @@ def extract_features(text: str, source_sections: int | None = None) -> Extractio
         "vocal": _voice_features(vocal, vocal.bars),
         "ins": _voice_features(ins, ins.bars),
         "harmony": _harmony(vocal.chords, vocal.bars),
+        "ties": _vocal_tie_groups(text),
         "maqam": None,
         "maqam_source": "unlabelled",
         "maqam_reviewed": False,

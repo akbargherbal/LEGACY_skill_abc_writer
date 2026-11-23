@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/maqam-score/report.schema.json",
+  "title": "OSTRIS check report",
+  "description": "Combined report: the skill checker nested under skill_report (D10), plus priors and similarity. pass means no contract/sanity failure, not zero warnings.",
+  "type": "object",
+  "required": [
+    "stage",
+    "score",
+    "plan",
+    "pass",
+    "class",
+    "failures",
+    "warnings",
+    "plan_valid",
+    "maqam_fit",
+    "maqam_conditioned"
+  ],
+  "properties": {
+    "stage": { "type": "string", "const": "M4-check" },
+    "generated_at": { "type": "string" },
+    "score": { "type": "string" },
+    "plan": { "type": "string" },
+    "pass": { "type": "boolean" },
+    "class": { "type": "string", "enum": ["pass", "warn", "fail"] },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "class", "detail"],
+        "properties": {
+          "code": { "type": "string" },
+          "class": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "class", "detail"],
+        "properties": {
+          "code": { "type": "string" },
+          "class": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "hard_classes": { "type": "array", "items": { "type": "string" } },
+    "strict_style": { "type": "boolean" },
+    "require_final_rest": { "type": "boolean" },
+    "measured": { "type": "object" },
+    "plan_valid": { "type": "boolean" },
+    "skill_report": { "type": ["object", "null"] },
+    "prior": { "type": ["object", "null"] },
+    "similarity": { "type": ["object", "null"] },
+    "quotation": {
+      "type": "object",
+      "properties": {
+        "used": { "type": "boolean" },
+        "source_id": { "type": ["string", "null"] },
+        "bars": { "type": "integer", "minimum": 0 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "maqam_fit": {
+      "type": "object",
+      "required": ["available"],
+      "properties": {
+        "available": { "type": "boolean", "const": false },
+        "reason": { "type": "string" }
+      }
+    },
+    "maqam_conditioned": { "type": "boolean", "const": false }
+  },
+  "additionalProperties": true
+}

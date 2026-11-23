@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/maqam-score/eval.schema.json",
+  "title": "OSTRIS M6 held-out split and objective evaluation",
+  "description": "Either a split object (stage M6-split) or a scored-run report (stage M6-eval). Quality and token reduction are explicitly not measured.",
+  "type": "object",
+  "required": ["stage", "version", "gate_pass", "maqam_conditioned"],
+  "properties": {
+    "stage": { "type": "string", "enum": ["M6-split", "M6-eval"] },
+    "version": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "maqam_conditioned": { "type": "boolean", "const": false },
+    "gate_pass": { "type": "boolean" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "required", "ok", "detail"],
+        "properties": {
+          "name": { "type": "string" },
+          "required": { "type": "boolean" },
+          "ok": { "type": "boolean" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "held_out": { "type": "integer", "minimum": 0 },
+    "usable": { "type": "integer", "minimum": 0 },
+    "no_abc": { "type": "array", "items": { "type": "object" } },
+    "generation": { "type": "array", "items": { "type": "object" } },
+    "retrieval": { "type": "array", "items": { "type": "object" } },
+    "rule": { "type": "string" },
+    "runs_dir": { "type": "string" },
+    "runs": { "type": "array", "items": { "type": "object" } },
+    "aggregate": { "type": "object" },
+    "quality_evaluated": { "type": "boolean", "const": false },
+    "token_reduction_measured": { "type": "boolean", "const": false },
+    "limitations": { "type": "array", "items": { "type": "string" } },
+    "files": { "type": "object" }
+  },
+  "additionalProperties": true
+}

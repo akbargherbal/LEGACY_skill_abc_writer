@@ -1,8 +1,9 @@
 # OSTRIS plan — implementation checklist
 
 **Snapshot:** 2026-11-23 · **Repo:** `skill_abc_writer` · **Skill:** v0.2.0
-**Overall:** M0–M2 are implemented (M2 label-free); M3–M7 are not started.
-No commit has been made.
+**Tools:** 0.3.0 · **Overall:** M0–M5 implemented; M6 objective half implemented;
+M7 documented and in CI. Named-maqam work stays deferred.
+Pushed to `origin/main`; earlier commits `7ffae22` and `3115daa`.
 
 Legend: ✅ done · 🟡 partial · ⏳ not started · ⏸️ deferred/blocked.
 The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
@@ -14,12 +15,12 @@ The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
 |---|---|---|---|
 | **M0** Audit & contracts | Links, audit, schemas, inventory re-check | ✅ done | PASS |
 | **M1** Ingest & canonicalize | Canonical ABC, FADL links, records + provenance | ✅ done with deviations (no tar sidecars) | PASS |
-| **M2** Features & labels | Features, maqam, mood, prosody | 🟡 label-free subset (no maqam/mood/prosody) | PASS (amended) |
-| **M3** Priors & plan | Quantiles, backoff, `brief.json` + `skill_plan.json` | ⏳ not started | not run |
-| **M4** Idioms, similarity, check | Idiom bank, k-gram index, combined `check` | ⏳ not started | not run |
-| **M5** Integration | `ostris check`, TOOLS section, wrapper | 🟡 pin only | not run |
-| **M6** Evaluation | Held-out A/B, quality + token metrics | ⏳ not started | not run |
-| **M7** Hardening & handoff | Licensing, CI, release | 🟡 docs/provenance/build only | not run |
+| **M2** Features & labels | Features, maqam, mood, prosody | 🟡 label-free subset | PASS (amended) |
+| **M3** Priors & plan | Quantiles, backoff, `brief.json` + `skill_plan.json` | ✅ done, objective-only | PASS |
+| **M4** Idioms, similarity, check | Idiom bank, k-gram index, combined `check` | ✅ done; maqam-fit unavailable | PASS for objective subset |
+| **M5** Integration | `ostris check`, TOOLS section, wrapper | ✅ CLI-level | PASS (CLI roundtrip) |
+| **M6** Evaluation | Held-out A/B, quality + token metrics | 🟡 split + objective metrics only | PASS (objective half) |
+| **M7** Hardening & handoff | Licensing, CI, release | 🟡 docs, CI, notes; no clearance/tag | not a gate |
 
 ## M0 — Audit & contracts ✅
 
@@ -27,10 +28,10 @@ The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
 - [x] `audit.json`: parse status, bars, chords, duration mismatch, duplicates, quality flags
 - [x] `track_record` schema v1 and `audit` schema v1
 - [x] Fixtures + tests (`OstrisFixture`, parse/link/duplicate/schema tests)
-- [x] Inventory re-verified from manifests: 482 library, 495 YT500, 35 held-out, 438 v3, 3,162,110,202 bytes / 36.6 h
+- [x] Inventory re-verified: 482 library, 495 YT500, 35 held-out, 438 v3, 3,162,110,202 bytes / 36.6 h
 - [x] Duplicate inventory: 5 groups / 10 tracks
-- [x] Missing list with a decision: 4 YT500 tracks without ABC, all in the held-out set
-- [x] Gate: ≥95% linked and parsed → **482/482 matched, 482/482 parsed (100%)**
+- [x] Missing list with a decision: 4 YT500 tracks without ABC, all held out
+- [x] Gate: 482/482 matched, 482/482 parsed (100%)
 - [x] Extra evidence: `held_out.jsonl`, duplicate groups, quality flags
 
 **Result:** `docs/ostris-m0-audit.md`.
@@ -39,19 +40,18 @@ The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
 
 - [x] Manifests and YT500 ABC shards copied to the local cache
 - [x] FADL shortlist + selected-score transcripts + reference conditioner ABCs copied
-- [ ] Sample `tar.gz` download — **not done, intentionally**. The YT500 shard JSON already carries the ABC text; the 2.95 GiB audio bundle and 495 tar shards were not downloaded.
+- [ ] Sample `tar.gz` download — **not done, intentionally**. The shard JSON carries the ABC; the 2.95 GiB bundle was not downloaded.
 - [x] `score.abc` content extracted from the shard JSON
-- [ ] Tar sidecars / `structure.lab` — **not extracted**. M2 uses the manifest `sections` count and ABC comment labels instead.
+- [ ] Tar sidecars / `structure.lab` — **not extracted**. M2 uses the manifest `sections` count and ABC comment labels.
 - [x] Canonical ABC, structural normalization only
 - [x] Per-bar `M:` and inline `[K:...]` preserved (D9)
-- [x] `L`/`Q` preserved as written (no risky duration rescale)
-- [x] FADL linking: 22/22, selected transcript preferred, reference conditioner as fallback
+- [x] `L`/`Q` preserved as written
+- [x] FADL linking: 22/22, selected transcript preferred, reference as fallback
 - [x] `records.jsonl` with per-field provenance and a `canonical` object
 - [x] Gate: 482/482 canonical and re-parsed; 1.84 MB; unique hashes
 - [x] D7/D14 contract pins checked by `ostris contract`
 
-**Deviations:** no tar extraction, no sidecars. The shard JSON is the extracted
-score source; this is documented in `docs/ostris-m1-ingest.md`.
+**Result:** `docs/ostris-m1-ingest.md`.
 
 ## M2 — Features & labels 🟡
 
@@ -59,9 +59,10 @@ score source; this is documented in `docs/ostris-m1-ingest.md`.
 
 - [x] Bars, duration, key, tempo, tempo band
 - [x] Meter timeline: declared meters, change count, family
-- [x] Section count (manifest) + section comment labels (`intro`, `verse`, `chorus`, …)
-- [x] Melody/rhythm features: density, range, median pitch, intervals, durations, phrases
-- [x] Harmony features: chord count, vocabulary, per-bar rate, roots, qualities
+- [x] Section count (manifest) + section comment labels
+- [x] Melody/rhythm: density, range, median pitch, intervals, durations, phrases
+- [x] Harmony: chord count, vocabulary, per-bar rate, roots, qualities
+- [x] Ties per track (M3 uses them as a prior)
 - [x] Objective feature rows: **482/482**
 - [x] Unreviewed `mode_hypothesis`: **482/482**, `reviewed: false`, key-anchored
 - [x] Zero named-maqam claims: `maqam: null` on **482/482**
@@ -70,156 +71,173 @@ score source; this is documented in `docs/ostris-m1-ingest.md`.
 ### Not done
 
 - [ ] Full form/structure spans from `structure.lab` (no sidecars downloaded)
-- [ ] Prosody features (the ABC has no lyric text; the syllabifier owns this)
+- [ ] Prosody features (no lyric text in the ABC; the syllabifier owns this)
 - [ ] Maqam classifier + manual review — **deferred** with D3
 - [ ] Maqam coverage/accuracy reporting — **not applicable** until D3
 - [ ] Mood tags + 50-track lexicon review — **not done**
 
-**Result:** `docs/ostris-m2-features.md`. Keys: `maqam_conditioned: false`,
-`maqam_reviewed: false`.
+**Result:** `docs/ostris-m2-features.md`.
 
-## M3 — Priors & plan ⏳
+## M3 — Priors & plan ✅
 
-- [ ] Quantiles per stratum, with `n` and confidence
-- [ ] Backoff for small strata
-- [ ] `ostris plan` generator
-- [ ] `brief.json` output
-- [ ] `skill_plan.json` output (the 15 keys `checker.py` requires)
-- [ ] Fixtures for 10 manifests
-- [ ] Gate: 100% valid `skill_plan.json`, bars within ±10% of target
+- [x] Priors by objective stratum: meter, tempo, bars, density, sections, mode
+- [x] Two interactions (meter×tempo, meter×mode) when n ≥ 12
+- [x] Quantiles (p10/p25/median/p75/p90), `n`, and confidence per stratum
+- [x] Backoff: meter×tempo → meter×mode → meter → tempo → bars → mode → global
+- [x] `ostris plan`: `brief.json` + `skill_plan.json` (15 checker keys)
+- [x] Assumptions recorded when key/tempo/meter/bars come from the prior
+- [x] Sections scale to `bars`; `section_bars` sums exactly
+- [x] Duration target within ±10%
+- [x] Plan fixtures and a `plan → score → check` roundtrip covered by tests
+- [x] Gate: **PASS** — 29 strata, 472 eligible, every plan valid
+- [x] Every prior records `maqam_conditioned: false`
+- [ ] Named-maqam priors — **blocked by D3/D12**
 
-**Prerequisite:** D5 is resolved. Priors must be stratified by objective
-features (meter, tempo, bars, density, section count, range, chords) and must
-record `maqam_conditioned: false`. Named-maqam priors remain blocked by D3/D12.
+**Result:** `docs/ostris-m3-priors-plan.md`.
 
-## M4 — Idioms, similarity, check ⏳
+## M4 — Idioms, similarity, check ✅
 
-- [ ] Idiom bank, 2–4 bars per function (maqam-conditioned idioms blocked by D3)
-- [ ] k-gram similarity index
-- [ ] `ostris check` combining skill checker + priors + similarity
-- [ ] Maqam-fit component (blocked by D3; can be omitted or marked unavailable)
-- [ ] Gate policy D8: `contract` + `sanity` hard, `style` WARN
-- [ ] Gate: three known scores distinguish good/medium/bad with `class` and `percentiles`
+- [x] Structural idiom bank, 2–4 bars: opening / phrase / cadence
+- [x] 1,304 idioms across 481 tracks; every row `reviewed: false`
+- [x] Interval k-gram index (k=3,4): 1,304 idioms, 3,714 grams
+- [x] `similarity --score` returns matches, longest shared run, quotation flag
+- [x] `ostris check` combines checker + priors + similarity
+- [x] Report nests the checker under `skill_report` (D10)
+- [x] Gate policy D8: contract/sanity/structure hard; style WARN
+- [x] Maqam-fit component: **marked unavailable** (no labels)
+- [x] Gate: a matching score passes and a bars mismatch fails
+- [ ] Three labelled good/medium/bad scores — **partial**: good and bad are covered, “medium” needs a quality label
+- [ ] Maqam-conditioned idioms — **blocked by D3**
 
-**Blocked by:** D8, D10, D15.
+**Result:** `docs/ostris-m4-idioms-check.md`.
 
-## M5 — Integration 🟡
+## M5 — Integration ✅
 
 - [x] Skill v0.2.0 pinned (checker `bd3645…`, calibration `c5cd51…`)
 - [x] Vendored parser pinned (`abc_tools.py` `e99e5c…`)
-- [ ] `ostris check` passes `--require-final-rest` on the render path
-- [ ] `TOOLS` section in `SKILL.md` (3 online commands)
-- [ ] Wrapper that runs in `/content/chat` on CPU
-- [ ] D6 two-voice contract enforced end to end (`Vocal+Ins`; decision recorded)
-- [ ] Gate: full session `plan → write → check → patch` without corpus in context
+- [x] `ostris check` passes `--require-final-rest` to the checker
+- [x] `TOOLS`/corpus section in `SKILL.md` (three online commands)
+- [x] Wrapper `scripts/ostris` that runs on CPU from any directory
+- [x] D6 enforced: plans emit `vocal+ins`; `check` consumes only that plan
+- [x] Gate: CLI roundtrip `plan → score → check` covered by tests, including the final-rest failure
+- [ ] A live composition session outside CI — **not run**
 
-**Blocked by:** M3 and M4; D8, D10, D15.
+**Result:** `docs/ostris-m5-m6-integration-eval.md`.
 
-## M6 — Evaluation ⏳
+## M6 — Evaluation 🟡
 
 - [x] Natural held-out set identified: 35 YT500 tracks not in the library
-- [x] Usable subset measured: 4 of the 35 have no ABC, leaving **31**
-- [ ] Reserve 12–16 manifests from the 35 for generation (D13)
-- [ ] Use the remaining held-out tracks for retrieval
-- [ ] A/B: prompt-only vs tool-assisted
-- [ ] Quality, token, and time metrics
-- [ ] Gate: non-inferiority + ≥30% token reduction
+- [x] Usable subset measured: 4 without ABC, leaving **31**
+- [x] Reserve 14 for generation / 17 for retrieval (D13)
+- [x] `eval --build-split` writes a deterministic disjoint split
+- [x] `eval --runs` scores supplied runs: class, contract+sanity, bars delta, size
+- [x] Gate: **PASS** on contract+sanity for supplied runs
+- [ ] A/B prompt-only vs tool-assisted — **not run**
+- [ ] Blind quality / non-inferiority — **not measured** (no judge)
+- [ ] Token reduction — **not measured** (`tokens_proxy` only)
 
-**Blocked by:** D1, D2, D13.
+**Result:** `docs/ostris-m5-m6-integration-eval.md`.
 
 ## M7 — Hardening & handoff 🟡
 
-- [x] Docs for M0–M2
+- [x] Docs for M0–M6
 - [x] Provenance: source URIs, hashes, contract pins, limitations
-- [x] Reproducible build: `make ostris-sync / audit / build / features`
-- [x] Unit tests: **19 passing**; `make selftest` passes
-- [ ] Licensing review
-- [ ] CI on fixtures
-- [ ] Release v0.1
-- [ ] Final handoff notes for a future reviewer/labelled dataset
+- [x] Reproducible build: `make ostris-sync / audit / build / features / online`
+- [x] Unit tests: **30 passing**; `make selftest` passes
+- [x] CI on Python 3.11/3.12: tests, selftest, contract pins
+- [x] Licensing **inventory** (`docs/ostris-licensing.md`)
+- [x] Release notes for tools v0.3.0
+- [x] Handoff notes for a future reviewer (`docs/ostris-handoff.md`)
+- [ ] Licence clearance for the data sources — **unknown, needs the owner**
+- [ ] Public release / git tag — **not created**
 
 ## Decisions
 
 | # | Topic | Status |
 |---|---|---|
-| D1 | Final quality target | ⏳ open |
-| D2 | Held-out function | ⏳ open |
+| D1 | Final quality target | 🔶 ABC only; no audio judge |
+| D2 | Held-out function | ✅ 14 generation + 17 retrieval |
 | D3 | Maqam review | ⏸️ deferred — no reviewer |
 | D4 | 438 v3 labels | ✅ cross-check only |
 | D5 | Plan schema | ✅ `brief.json` + `skill_plan.json` |
 | D6 | Instrumental voices | ✅ `Vocal+Ins` only in v1 |
 | D7 | Skill contract | ✅ v0.2.0 + hashes + `--require-final-rest` |
-| D8 | Gate policy | ⏳ open |
+| D8 | Gate policy | ✅ contract+sanity hard; style WARN |
 | D9 | Variable meter | ✅ preserve `M:`/`[K:...]` |
-| D10 | `report.json` merge | ⏳ open |
+| D10 | `report.json` merge | ✅ nested `skill_report` + `class` |
 | D11 | 177 role | ✅ calibration only |
 | D12 | Maqam coverage | ⏸️ N/A until D3 |
-| D13 | Held-out source | ⏳ open (recommendation: 35 YT500) |
+| D13 | Held-out source | ✅ 35 YT500, 14/17 split |
 | D14 | Parser | ✅ vendored + pinned |
-| D15 | Final rest | ⏳ open |
+| D15 | Final rest | ✅ WARN + `--require-final-rest` |
 | D16 | Sanity on 482 | ✅ generated scores only |
 
 ## CLI surface
 
 | Command | Status |
 |---|---|
-| `sync` | ✅ added for the lightweight cache |
+| `sync` | ✅ lightweight cache |
 | `audit` | ✅ M0 |
 | `build` | ✅ M1 |
 | `features` | ✅ M2 |
+| `priors` | ✅ M3 |
+| `plan` | ✅ M3 |
+| `idioms` | ✅ M4 |
+| `exemplar` | ✅ M4 |
+| `similarity` | ✅ M4 (build + query) |
+| `check` | ✅ M4/M5 |
+| `eval` | ✅ M6 (split + runs) |
 | `contract` | ✅ hash verification |
-| `plan` | ⏳ M3 |
-| `exemplar` | ⏳ M4 |
-| `check` | ⏳ M4 |
-| `similarity` / `originality` | ⏳ M4 |
-| `state` | ⏳ later |
-| `search` | ⏳ optional |
-| `eval` | ⏳ M6 |
+| `state` | ⏳ not implemented |
+| `search` | ⏳ optional, not implemented |
 
-Entry point: `python3 02_maqam-score/scripts/ostris_cli.py <command>`.
+Entry point: `scripts/ostris <command>` or
+`python3 02_maqam-score/scripts/ostris_cli.py <command>`.
 
 ## Artifacts
 
 | Artifact | Status |
 |---|---|
-| `records.jsonl` | ✅ 482 rows; M1 canonical + M2 features |
+| `records.jsonl` | ✅ 482 rows; canonical + features + ties |
 | `manifest_links.csv` | ✅ 482 rows |
 | `audit.json` / `audit.md` | ✅ M0 |
 | `canonical.json` / `canonical.md` | ✅ M1 |
 | `features.json` / `features.md` | ✅ M2 |
 | `held_out.jsonl` | ✅ 35 rows |
-| `priors/<stratum>.json` | ⏳ M3 |
-| `idioms.jsonl` | ⏳ M4 |
-| `similarity/index.*` | ⏳ M4 |
-| `eval/queries.jsonl` | ⏳ M6 |
-| `report.json` from `check` | ⏳ M4 |
+| `priors/priors.json` + 29 strata | ✅ M3 |
+| `brief.json` / `skill_plan.json` | ✅ M3, generated per manifest |
+| `idioms.jsonl` / `idioms.json` | ✅ M4 (1,304 rows) |
+| `similarity/index.json` | ✅ M4 (1.6 MB) |
+| `report.json` from `check` | ✅ M4 |
+| `eval/split.json` | ✅ M6 (31 usable, 14/17) |
+| `eval/report.json` | ✅ on demand from `eval --runs` (objective metrics only) |
 
 ## Verified numbers
 
-- [x] 482 library tracks = 460 YT500 + 22 FADL shortlist
+- [x] 482 library tracks = 460 YT500 + 22 FADL
 - [x] 495 YT500 transcripts; 460 used; 35 held out
-- [x] 35 held out; 4 without ABC; **31 usable** for M6
+- [x] 35 held out; 4 without ABC; **31 usable**; 14 generation + 17 retrieval
 - [x] 438 v3 labels, excluded from priors/eval (D4)
 - [x] 2.95 GiB / 36.6 h audio inventory
-- [x] 5 duplicate groups / 10 tracks; 10 tracks excluded from priors
+- [x] 5 duplicate groups / 10 tracks; 10 excluded from priors
 - [x] 22 FADL shortlist; 24 selected-score tracks, 23 with ABC
 - [x] 482/482 parse, canonical, and feature coverage
-- [x] 0 named-maqam claims
+- [x] 472/482 eligible for priors; 29 strata
+- [x] 1,304 idioms; 3,714 interval grams
+- [x] 0 named-maqam claims; 0 maqam-conditioned priors
 
 ## Deviations from the plan
 
-1. **No separate repository.** The user rejected it; the tools live in the skill.
+1. **No separate repository.** The tools live in the skill.
 2. **No audio bundle.** Only lightweight manifests/ABCs are cached.
-3. **No M1 tar/sidecar extraction.** The shard JSON already contains the ABC;
-   `structure.lab` was not downloaded. M2 uses manifest section counts and
-   comment labels instead.
-4. **Canonicalization is structural.** `L`/`Q` values are preserved; `M:` and
-   `[K:...]` are preserved. There is no duration rescale.
-5. **M2 is label-free.** No maqam labels, no mood tags, no prosody; the gate was
-   amended. The `mode_hypothesis` is unreviewed and key-anchored.
-6. **FADL source corrected.** The 22 tracks link through
-   `fadhl_shaker_selected_scores` + reference conditioner ABCs, not the broader
-   15-album `TRANSCRIPTS/FADL_SHAKER` set.
+3. **No M1 tar/sidecar extraction.** The shard JSON already contains the ABC.
+4. **Canonicalization is structural.** `L`/`Q`/`M:`/`[K:...]` are preserved.
+5. **M2 is label-free.** No maqam labels, mood tags, or prosody; the gate was amended.
+6. **FADL source corrected.** Selected scores + reference conditioner, not the 15-album set.
+7. **Similarity index is JSON, not `.npz`.** The tools stay standard-library only.
+8. **Priors use objective strata, not `<maqam>_<form>`.**
+9. **`check` has no maqam-fit score.** It reports `available: false`.
+10. **M6 measures only the objective half.** Quality and token reduction are not claimed.
 
 ## Reproduce and verify
 
@@ -228,14 +246,28 @@ DATA_ROOT=gs://<bucket> make ostris-sync
 make ostris-audit
 make ostris-build
 make ostris-features
+make ostris-online          # priors + idioms + similarity + eval split
+make test                   # 30 tests
+make selftest               # dialect + checker sanity
 python3 02_maqam-score/scripts/ostris_cli.py contract --strict
-make test          # 19 tests
-make selftest      # dialect + checker sanity
+```
+
+Per song:
+
+```bash
+scripts/ostris plan  --manifest song.json --out plans/song
+scripts/ostris check score.abc --plan plans/song/skill_plan.json --report report.json
 ```
 
 ## Next
 
-M3 is the next unblocked stage. It can build priors by objective features and
-emit `brief.json` + `skill_plan.json`, with `maqam_conditioned: false` recorded
-everywhere. Named-maqam work stays deferred until a reviewer or a licensed
-labelled dataset exists.
+Nothing in the objective plan remains unstarted. The remaining work needs a
+person or data this build does not have:
+
+1. **D3/D12** — reviewed maqam labels. Then add maqam strata and a maqam-fit
+   component; keep `mode_hypothesis` separate.
+2. **D1** — an audio/blind judge. Then evaluate quality and non-inferiority.
+3. **M6 token reduction** — instrument prompt-only vs tool-assisted runs with
+   real token counts.
+4. **M7 release** — confirm data licences, then tag and publish.
+5. **M5 live session** — compose one real score end to end and record it.

@@ -16,11 +16,17 @@ sys.path.insert(0, str(SKILL / "scripts"))
 from ostris.audit import audit  # noqa: E402
 from ostris.build import build  # noqa: E402
 from ostris.canonical import canonicalize  # noqa: E402
+from ostris.check import check  # noqa: E402
 from ostris.contract import SKILL_VERSION, verify  # noqa: E402
+from ostris.eval import build_split, score_runs  # noqa: E402
 from ostris.features import build_features, extract_features  # noqa: E402
+from ostris.idioms import build_idioms, extract_idioms, load_idioms  # noqa: E402
 from ostris.links import FADL_SLUG_TO_STEM, rel_from_uri  # noqa: E402
 from ostris.mode import classify_mode, key_info  # noqa: E402
 from ostris.parse import parse_abc  # noqa: E402
+from ostris.plan import build_plan, validate_plan  # noqa: E402
+from ostris.priors import build_priors, load_priors, select_prior  # noqa: E402
+from ostris.similarity import build_index, load_index, query_score_text  # noqa: E402
 
 ABC = """X:1
 T:
@@ -40,6 +46,26 @@ V: Vocal
 "C"C4D4E4F4|G8z8|"C"C4D4E4F4|G8z8|
 V: Ins
 C2D2E2F2G2A2B2c2|C8z8|C2D2E2F2G2A2B2c2|C8z8|
+"""
+
+DEMO_ABC = """X:1
+T:
+M:4/4
+L:1/16
+Q:1/4=120
+V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
+V: Ins clef=treble name="Ins Melody" snm="Inst."
+K:C
+% intro
+V: Vocal
+"C"d2e2f4g8|"G"a8e8|"C"d6e6f4|"G"a8z8|
+V: Ins
+z16|z16|z16|z8c8|
+% verse 1
+V: Vocal
+"C"d2e2f4g8|"G"a8e8|"C"d6e6f4|"G"a8z8|
+V: Ins
+z16|z16|z16|z8c8|
 """
 
 REFERENCE_ABC = """X:1
@@ -316,6 +342,202 @@ class FeatureTests(unittest.TestCase):
             self.assertIn(record["mode_hypothesis"]["family"], {
                 "major_like", "minor_like", "phrygian_like", "hijaz_like", "unknown"
             })
+
+
+class OnlineTests(unittest.TestCase):
+    """M3-M6: priors, plan, idioms, similarity, check, eval."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        root = Path(cls.tmp.name)
+        cls.root = root
+        cls.cache = root / "cache"
+        cls.out = root / "out"
+        OstrisFixture(cls.cache)
+        audit(cls.cache, cls.out)
+        build(cls.cache, cls.out)
+        cls.features = build_features(cls.cache, cls.out)
+        cls.priors = build_priors(cls.out)
+        cls.idioms = build_idioms(cls.out)
+        cls.index = build_index(cls.out)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def manifest(self, **overrides) -> dict:
+        data = {
+            "title": "Test",
+            "key": "C",
+            "tempo": 120,
+            "meter": "4/4",
+            "bars": 8,
+            "sections": ["intro", "verse 1"],
+        }
+        data.update(overrides)
+        return data
+
+    def write_plan(self, name: str = "plan", **overrides):
+        folder = self.root / name
+        result = build_plan(self.manifest(**overrides), self.priors, folder)
+        return folder, result
+
+    def test_priors_are_objective_and_covered(self):
+        priors = self.priors
+        self.assertEqual(priors["stage"], "M3")
+        self.assertTrue(priors["gate_pass"], priors["checks"])
+        self.assertFalse(priors["maqam_conditioned"])
+        self.assertEqual(priors["eligible"] + priors["excluded"], priors["records"])
+        self.assertEqual(priors["strata"]["global"]["n"], priors["eligible"])
+        for stratum in priors["strata"].values():
+            self.assertFalse(stratum["maqam_conditioned"])
+            self.assertEqual(stratum["metrics"]["bars"]["n"], stratum["n"])
+        selection = select_prior(priors, meter="4/4", tempo=120, bars=8)
+        self.assertIn("global", selection["backoff"])
+        self.assertEqual(selection["stratum"], "global")
+        self.assertTrue(load_priors(self.out)["gate_pass"])
+
+    def test_plan_is_valid_and_not_maqam_conditioned(self):
+        _folder, result = self.write_plan()
+        plan = result["plan"]
+        self.assertEqual(validate_plan(plan), [])
+        self.assertTrue(result["brief"]["gate_pass"], result["brief"]["checks"])
+        self.assertEqual(sum(plan["section_bars"]), plan["bars"])
+        self.assertIsNone(plan["maqam"])
+        self.assertFalse(plan["maqam_conditioned"])
+        self.assertEqual(plan["voices"], "vocal+ins")
+        self.assertNotIn("maqam", [key for key in plan if plan[key]])
+
+    def test_plan_derives_bars_from_duration(self):
+        folder, result = self.write_plan(
+            "duration-plan", bars=None, target_duration_s=16, sections=None
+        )
+        plan = result["plan"]
+        self.assertGreaterEqual(plan["bars"], 8)
+        self.assertEqual(validate_plan(plan), [])
+        self.assertTrue((folder / "brief.json").is_file())
+        self.assertTrue((folder / "skill_plan.json").is_file())
+
+    def test_check_accepts_a_matching_score(self):
+        folder, _result = self.write_plan()
+        score = self.root / "demo.abc"
+        write_text(score, DEMO_ABC)
+        report = check(score, folder / "skill_plan.json", out_dir=self.out)
+        self.assertTrue(report["pass"], report["failures"])
+        self.assertIn(report["class"], {"pass", "warn"})
+        self.assertFalse(report["maqam_fit"]["available"])
+        self.assertIsNotNone(report["skill_report"])
+
+    def test_check_fails_on_plan_mismatch(self):
+        folder, _result = self.write_plan("mismatch", bars=9)
+        score = self.root / "demo-mismatch.abc"
+        write_text(score, DEMO_ABC)
+        report = check(score, folder / "skill_plan.json", out_dir=self.out)
+        self.assertFalse(report["pass"])
+        self.assertTrue(any(item["code"] == "bars" for item in report["failures"]))
+
+    def test_generated_online_artifacts_match_schemas(self):
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema is not installed")
+        folder, result = self.write_plan("schema-plan")
+        score = self.root / "schema-demo.abc"
+        write_text(score, DEMO_ABC)
+        report = check(score, folder / "skill_plan.json", out_dir=self.out)
+        split = build_split(self.cache, self.out)
+        schemas = SKILL / "schemas"
+        pairs = [
+            (load_priors(self.out), "priors.schema.json"),
+            (result["plan"], "plan.schema.json"),
+            (report, "report.schema.json"),
+            (split, "eval.schema.json"),
+        ]
+        for instance, name in pairs:
+            schema = json.loads((schemas / name).read_text(encoding="utf-8"))
+            jsonschema.validate(instance, schema)
+
+    def test_cli_roundtrip_and_final_rest(self):
+        import contextlib
+        import io
+
+        from ostris.cli import main
+
+        manifest_path = self.root / "cli-manifest.json"
+        write_json(manifest_path, self.manifest())
+        plan_folder = self.root / "cli-plan"
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = main([
+                "plan",
+                "--manifest", str(manifest_path),
+                "--priors", str(self.out / "priors" / "priors.json"),
+                "--out", str(plan_folder),
+                "--strict",
+            ])
+        self.assertEqual(code, 0)
+        score = self.root / "cli-demo.abc"
+        write_text(score, DEMO_ABC)
+        with contextlib.redirect_stdout(io.StringIO()):
+            ok = main([
+                "check", str(score),
+                "--plan", str(plan_folder / "skill_plan.json"),
+                "--out", str(self.out),
+            ])
+            strict = main([
+                "check", str(score),
+                "--plan", str(plan_folder / "skill_plan.json"),
+                "--out", str(self.out),
+                "--require-final-rest",
+            ])
+        self.assertEqual(ok, 0)
+        self.assertEqual(strict, 1)
+
+    def test_idioms_are_structural(self):
+        rows = load_idioms(self.out)
+        self.assertGreaterEqual(len(rows), 1)
+        for row in rows:
+            self.assertTrue(2 <= row["bars"] <= 4)
+            self.assertFalse(row["reviewed"])
+            self.assertIn(row["function"], {"opening", "phrase", "cadence"})
+            self.assertNotIn("maqam", row)
+        self.assertTrue(self.idioms["gate_pass"], self.idioms["checks"])
+        extracted = extract_idioms(DEMO_ABC, "demo", "C")
+        self.assertGreaterEqual(len(extracted), 1)
+        self.assertEqual(extracted[0]["function"], "opening")
+
+    def test_similarity_finds_shared_intervals(self):
+        self.assertTrue(self.index["gate_pass"])
+        result = query_score_text(ABC, load_index(self.out))
+        self.assertGreaterEqual(result["max_shared_run"], 3)
+        self.assertIn("quotation", result)
+        self.assertFalse(result["maqam_conditioned"])
+
+    def test_eval_split_is_deterministic(self):
+        first = build_split(self.cache, self.out)
+        second = build_split(self.cache, self.out)
+        self.assertTrue(first["gate_pass"], first["checks"])
+        self.assertEqual(
+            [row["track_id"] for row in first["generation"]],
+            [row["track_id"] for row in second["generation"]],
+        )
+        self.assertFalse(
+            {row["track_id"] for row in first["generation"]}
+            & {row["track_id"] for row in first["retrieval"]}
+        )
+
+    def test_eval_scores_runs_without_quality_claim(self):
+        plan_folder, _result = self.write_plan("eval-plan")
+        runs = self.root / "runs"
+        run = runs / "demo"
+        write_text(run / "score.abc", DEMO_ABC)
+        write_text(run / "skill_plan.json",
+                   (plan_folder / "skill_plan.json").read_text())
+        report = score_runs(runs, self.out)
+        self.assertTrue(report["gate_pass"], report["runs"])
+        self.assertFalse(report["quality_evaluated"])
+        self.assertFalse(report["token_reduction_measured"])
+        self.assertEqual(report["aggregate"]["runs"], 1)
 
 
 class CanonicalTests(unittest.TestCase):

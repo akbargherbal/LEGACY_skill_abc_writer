@@ -34,8 +34,8 @@
 - M1 result: 482/482 canonical and re-parsed; 1.84 MB; 482 unique hashes;
   135 tracks with declared meter changes; 3 with inline `[K:...]`; 0 failures.
 - `make ostris-build` runs with `--require-contract`.
-- No priors, plan, exemplar, or check command yet: M3+ remains gated on
-  the decisions in `docs/ostris-score-tools-plan.md` §13.
+- At M1 no priors, plan, exemplar, or check command existed; the M3–M6
+  sections below add them.
 
 ### OSTRIS M2 features (label-free)
 - No expert maqam review is available, so D3 and D12 are **deferred** and
@@ -58,6 +58,58 @@
   `maqam_conditioned: false`.
 - Added `docs/ostris-implementation-checklist.md`: phase-by-phase status,
   decisions, CLI/artifact coverage, deviations, and next work.
+
+### OSTRIS M3 priors & plan
+- New `scripts/ostris/stats.py`: quantiles, five-number summaries, percentile
+  lookup, bands, and confidence.
+- New `scripts/ostris/priors.py` + `ostris priors`: 29 objective strata
+  (meter, tempo, bars, density, sections, mode, plus meter×tempo and meter×mode),
+  472/482 eligible, 10 duplicates excluded, minimum stratum 10.
+- New `scripts/ostris/plan.py` + `ostris plan`: writes `brief.json`,
+  `skill_plan.json` (the 15 checker targets), and `plan.md`; records assumptions
+  and the selected prior; sections sum to `bars`; duration within ±10%.
+- New `make ostris-priors` / `ostris-plan`; new `schemas/priors.schema.json` and
+  `schemas/plan.schema.json`.
+- M3 result: every plan valid, no maqam claim, every prior
+  `maqam_conditioned: false`.
+
+### OSTRIS M4 idioms, similarity, check
+- New `scripts/ostris/idioms.py` + `ostris idioms`: 1,304 structural 2–4 bar
+  phrases (opening/phrase/cadence) across 481 tracks; `reviewed: false`.
+- New `scripts/ostris/similarity.py` + `ostris similarity`: JSON interval
+  k-gram index (1,304 idioms, 3,714 grams) and score queries with a longest
+  shared run and quotation flag. JSON replaces `.npz` to stay stdlib-only.
+- New `scripts/ostris/check.py` + `ostris check`: runs the pinned checker as a
+  subprocess, nests its report under `skill_report`, adds prior percentiles and
+  similarity, and reports `maqam_fit.available: false`.
+- D8 applied: contract/sanity/structure hard, style WARN. D10 applied: nested
+  report with a top-level `class`. D15 applied: `--require-final-rest` passthrough.
+- New `make ostris-idioms` / `ostris-similarity` / `ostris-check`; new
+  `schemas/report.schema.json`.
+- M4 result on a real canonical track: 0 hard failures, 5 style warnings,
+  similarity run 11, prior percentile reported.
+
+### OSTRIS M5 integration
+- New `scripts/ostris` wrapper that runs on CPU from any directory.
+- `SKILL.md` §8 documents `plan`, `exemplar`, and `check`, and repeats that no
+  maqam label or maqam-fit score exists.
+- CLI roundtrip `plan → score → check` and the final-rest failure are covered
+  by tests.
+
+### OSTRIS M6 objective evaluation
+- New `scripts/ostris/eval.py` + `ostris eval`: deterministic held-out split
+  (31 usable, 4 without ABC, 14 generation + 17 retrieval) and run scoring with
+  contract+sanity, bars delta, characters, and `tokens_proxy`.
+- `quality_evaluated` and `token_reduction_measured` are always false; the
+  report states what was not measured.
+- New `make ostris-online` / `ostris-eval`; new `schemas/eval.schema.json`.
+
+### OSTRIS M7 hardening
+- New CI workflow (Python 3.11/3.12): tests, selftest, contract pins.
+- New `docs/ostris-licensing.md` (inventory, not clearance),
+  `docs/ostris-handoff.md`, `docs/ostris-release-notes.md`, and stage reports
+  for M3, M4, and M5–M6.
+- Tools version `0.3.0`; **30 tests pass**.
 
 ## 0.2.0 — 2026-11-23
 

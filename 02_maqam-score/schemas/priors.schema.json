@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/maqam-score/priors.schema.json",
+  "title": "OSTRIS M3 objective priors",
+  "description": "Priors conditioned on objective features only. maqam_conditioned is always false.",
+  "type": "object",
+  "required": [
+    "stage",
+    "version",
+    "records",
+    "eligible",
+    "excluded",
+    "maqam_conditioned",
+    "global",
+    "meta",
+    "strata",
+    "checks",
+    "gate_pass",
+    "files"
+  ],
+  "properties": {
+    "stage": { "type": "string", "const": "M3" },
+    "version": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "records": { "type": "integer", "minimum": 0 },
+    "eligible": { "type": "integer", "minimum": 0 },
+    "excluded": { "type": "integer", "minimum": 0 },
+    "missing_features": { "type": "integer", "minimum": 0 },
+    "strata_count": { "type": "integer", "minimum": 1 },
+    "global": { "type": "string", "const": "global" },
+    "maqam_conditioned": { "type": "boolean", "const": false },
+    "maqam_reviewed": { "type": "boolean", "const": false },
+    "meta": { "type": "object" },
+    "strata": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["stratum", "n", "confidence", "maqam_conditioned", "metrics"],
+        "properties": {
+          "stratum": { "type": "string" },
+          "keys": { "type": "object" },
+          "n": { "type": "integer", "minimum": 0 },
+          "excluded": { "type": "integer", "minimum": 0 },
+          "confidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low", "insufficient"]
+          },
+          "maqam_conditioned": { "type": "boolean", "const": false },
+          "maqam_reviewed": { "type": "boolean", "const": false },
+          "metrics": { "type": "object" }
+        }
+      }
+    },
+    "limitations": { "type": "array", "items": { "type": "string" } },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "required", "ok", "detail"],
+        "properties": {
+          "name": { "type": "string" },
+          "required": { "type": "boolean" },
+          "ok": { "type": "boolean" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "gate_pass": { "type": "boolean" },
+    "files": { "type": "object" }
+  },
+  "additionalProperties": true
+}

@@ -106,3 +106,23 @@ Nahawand/Bayati are not separable in this dialect; the output families are
 
 If a reviewer or a licensed labelled dataset becomes available later, it can
 upgrade D3 and add named-maqam priors without changing the M2 feature layer.
+
+## M3–M6 resolutions (2026-11-23)
+
+No new expertise was required for these; the plan's recommended defaults were
+applied and are recorded in code and outputs.
+
+| Decision | Resolution | Where |
+|---|---|---|
+| **D5** plan schema | `brief.json` + `skill_plan.json`; `check` refuses a brief | `plan.py`, `check.py` |
+| **D8** gate policy | `contract`/`sanity`/`structure` hard; `style` WARN unless `--strict-style` | `check.py` |
+| **D10** report merge | checker report nested under `skill_report`; top-level `class` | `check.py`, `schemas/report.schema.json` |
+| **D13** held-out source | the 35 unused YT500 tracks; 14 generation + 17 retrieval | `eval.py` |
+| **D15** final rest | WARN by default; `--require-final-rest` promotes it to contract | `check.py` |
+| **D1** quality target | **ABC only.** Contract+sanity and objective metrics; no audio judge | `eval.py` |
+| **D2** held-out function | both: generation reserve and retrieval reserve are disjoint | `eval.py` |
+| **D3/D12** maqam | still deferred; `maqam_fit.available: false` in every report | `mode.py`, `check.py` |
+
+Priors stay objective-only (`maqam_conditioned: false` on all 29 strata). The
+online surface is `plan`, `exemplar`, `similarity`, and `check`; the offline
+surface adds `priors`, `idioms`, `eval`, and the existing M0–M2 commands.

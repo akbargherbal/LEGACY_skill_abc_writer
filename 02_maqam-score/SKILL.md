@@ -409,3 +409,26 @@ chords at all. See `references/reference.md` §9 for the boundary.
 
 One `syllabify` run, one plan, one score, one check, at most one repair. If you
 are past that, the plan was wrong — go back to 3.2, not to the parser.
+
+## 8. Corpus tools (optional)
+
+When the project has generated OSTRIS priors, three commands use the corpus
+without putting it in context. They are optional: the skill still runs with the
+bundled checker alone.
+
+```bash
+scripts/ostris plan     --manifest song.json --out plans/song
+scripts/ostris exemplar --function cadence --bars 2
+scripts/ostris check    score.abc --plan plans/song/skill_plan.json --report report.json
+```
+
+- `plan` writes `brief.json` and `skill_plan.json`. `skill_plan.json` carries the
+  15 targets `checker.py` requires; pass it to `check`, never `brief.json`.
+- `exemplar` returns 2–4 bar structural phrases. They are unreviewed. Do not
+  call them maqam examples.
+- `check` runs `checker.py`, adds a prior percentile and an interval-similarity
+  run, and nests the checker report under `skill_report`. `pass` means no
+  contract or sanity failure; style warnings stay warnings.
+
+There is no maqam label and no maqam-fit score in this build. Do not present a
+prior, `mode_hypothesis`, or an exemplar as a maqam judgement.

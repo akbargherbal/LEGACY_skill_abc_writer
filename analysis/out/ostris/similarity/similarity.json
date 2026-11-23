@@ -1,0 +1,21 @@
+{
+ "stage": "M4-similarity",
+ "index": "analysis/out/ostris/similarity/index.json",
+ "idioms": 1304,
+ "grams": 3714,
+ "gate_pass": true,
+ "checks": [
+  {
+   "name": "index_populated",
+   "required": true,
+   "ok": true,
+   "detail": "1304 idioms, 3714 distinct grams"
+  },
+  {
+   "name": "unique_ids",
+   "required": true,
+   "ok": true,
+   "detail": "1304 indexed / 1304 rows"
+  }
+ ]
+}
