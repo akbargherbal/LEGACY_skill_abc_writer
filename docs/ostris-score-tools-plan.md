@@ -3,8 +3,9 @@
 > **Provenance:** نُقل هذا الملف من `arabmaqamrock/docs/plans/` إلى مستودع المهارة في 2026-11-23.
 > المسارات `arabmaqamrock/...` تخص المستودع الخارجي؛ مستودع المهارة هو `skill_abc_writer`.
 
-**Status:** proposal — يبدأ بعد تثبيت مهارة `maqam-score` (v1 frozen)
+**Status:** proposal — **قرارات ما قبل التنفيذ مطلوبة (§13)**
 **Date:** 2026-11-22
+**Last updated:** 2026-11-23 — سجل القرارات + تكامل مهارة v0.2.0
 **Scope:** مستودع جديد مستقل عن `arabmaqamrock`
 **Owner:** Akbar (المستودع الجديد)
 **Upstream skill:** `~/Jupyter_Notebooks/OpenCode/skill_abc_writer` (مستودع المهارة الجديد)
@@ -29,9 +30,16 @@
 - ليس vector DB فوق 400 سكور كاملة.
 - ليس pipeline صوتي كامل.
 
+> **بوابة البدء:** راجع **§13.3**. كل مرحلة لها قرارات محجبة، ولا تبدأ مرحلة
+> قبل حسم قراراتها. `ostris audit` (M0) يمكن أن يبدأ الآن؛ لكن لا تُبنى
+> priors ولا `plan` ولا `check` قبل حسم قرارات المرحلة.
+
 ---
 
-## 1. جرد البيانات (تم التحقق 2026-11-22)
+## 1. جرد البيانات (جرد 2026-11-22 — يُعاد التحقق في M0)
+
+> هذه الأرقام من جرد سابق. **M0 audit** يعيد التحقق منها من manifests قبل
+> بناء أي بريور أو eval، ويسجّل الفروق إن وُجدت.
 
 | الأصل | المسار | العدد | الحجم | ملاحظات |
 |---|---|---:|---:|---|
@@ -83,12 +91,18 @@ notation/song_structures.txt, song_keys.txt, song_beats.txt
 
 ### 2.2 لا توجد تسميات maqam في manifest الـ482
 - الحقول: `title, artist, duration, caption, lyrics_tags` — لا `maqam`.
-- **177 five_stars و438 v3 مستثناة** من priors/eval بقرار المشروع (داخل تدريب LoRA v3).
+- **177 five_stars:** مستثناة من priors/eval (داخل تدريب LoRA v3)، وتُستخدم
+  **فقط كمجموعة معايرة قيود** للمهارة (`scripts/calibration.json` و
+  `references/numbers.md`). ليست priors ولا eval.
+- **438 v3:** مستثناة من priors/eval؛ cross-check فقط إن سُمح.
 - الحل: طبقة وسوم تعتمد على:
   1. **قاعدة symbolic**: key + scale-degree + interval + presence of aug-2 / minor-2 / major-3.
-  2. **مراجعة يدوية** لعينة طبقية (100–150) لمعايرة القاعدة وقياس دقتها.
+  2. **مراجعة يدوية** لعينة طبقية (100–150) من **الـ482** لمعايرة القاعدة وقياس دقتها.
   3. **captions** كإشارة ضعيفة فقط (نادرًا ما تذكر maqam صراحة).
   4. **438 v3** تُستخدم فقط كـ cross-check خارجي إن سُمح؛ لا تدخل priors ولا eval.
+- **مهم:** لا تُدرَّب القاعدة على تسميات الـ177 (هي prompt، وتقرير M1 يقول 0%
+  Hijaz-shaped). الـ177 تُستخدم لفحص **سلوك** القاعدة فقط، لا لدقة التسمية.
+  القرار D3/D4 في §13.
 - كل سجل يحمل `maqam`, `maqam_confidence`, `maqam_source`.
 - التوقع: ليست كل الأغاني من الأربعة؛ أضف `other/unknown` ولا تُجبر التسمية.
 
@@ -100,7 +114,8 @@ notation/song_structures.txt, song_keys.txt, song_beats.txt
 
 ### 2.4 الـ corpus أوسع من الستايل المستهدف
 - `arabic_instrumental_dataset` = "Middle Eastern fusion, instrumental" (captions)، وليس بالضرورة `arabmaqamrock, 110 BPM`.
-- 177 five_stars كانت أقرب للستايل، لكنها **مستثناة**؛ لذلك:
+- 177 five_stars كانت أقرب للستايل، لكنها **مستثناة من priors/eval**؛ تُستخدم
+  فقط لمعايرة قيود المهارة، لا لبناء priors الـ482. لذلك:
   - استخدم stratified priors: `maqam × mood × form × tempo band`، مع `n` ظاهرًا لكل طبقة.
   - إن كانت الطبقة صغيرة (< 10)، ادمجها أو وسّعها؛ لا تُخرج بريورًا من 3 أمثلة.
   - اقبل أن priors الـ482 قد تكون أوسع/أقل دقة من five_stars؛ وثّق ذلك.
@@ -116,7 +131,7 @@ notation/song_structures.txt, song_keys.txt, song_beats.txt
 | السؤال | القرار |
 |---|---|
 | حجم المكتبة | **482** (460 + 22 مدمجة). الـ495 عدد مصادر ترانكريبت، و**35** منها held-out. |
-| 177 five_stars | **مستثناة** من priors/eval (داخل تدريب LoRA v3). |
+| 177 five_stars | **مستثناة من priors/eval** (داخل تدريب LoRA v3)؛ **معايرة قيود فقط**. |
 | 438 v3 | **مستثناة** من priors/eval؛ cross-check فقط إن سُمح. |
 | maqam labels | قاعدة symbolic + مراجعة يدوية؛ لا اعتماد على 177. |
 | Voices | الـchecker الحالي **يفرض `Vocal` + `Ins`**؛ الافتراضي `Vocal + Ins`، مع دعم `Ins` فقط عند إضافة وضع instrumental للمهارة. |
@@ -255,6 +270,15 @@ ONLINE (عند الطلب، < 1s)
 **قاعدة:** إذا مرّرت المهارة `bars`، استخدمه؛ وإذا مرّرت `target_duration_s` فقط،
 اشتق `bars` من `tempo` و`meter`. لا تقرأ `cap` من المانيفست.
 
+> **تعارض مخطط (يجب حسمه — D5):** هذا `plan.json` عالي المستوى **ليس** مخطط
+> `checker.py`. `checker.py` v0.2.0 يطلب 15 مفتاحًا:
+> `key, tempo, meter, unit, bars, syllables, sections(strings), melisma_min,
+> melisma_max, register{mean,top,tolerance}, max_top_duration_share,
+> min_distinct_durations, ties_min, min_fill_notes, chords_min`.
+> لا تمرّر `brief.json` مباشرة إلى `checker.py`؛ إما أن يُخرج `ostris plan`
+> **`brief.json` + `skill_plan.json`**، أو يبني `ostris check` مخطط المهارة من
+> `brief.json` + النص/البارات. راجع D5 في §13.
+
 ### 5.3 `report.json`
 
 ```json
@@ -270,6 +294,11 @@ ONLINE (عند الطلب، < 1s)
   "maqam_fit": {"scale_degree_cos":0.91,"aug2_present":true}
 }
 ```
+
+> **دمج مع تقرير المهارة (D10):** `checker.py` v0.2.0 يُخرج
+> `{ok, checks:[{tag,name,ok,class,detail}], measured{percentiles}, calibration_version}`.
+> لا تستبدله: أضف `skill_report` كحقل nested، أو ادمج `checks` مع `class`.
+> `pass` هنا يعني «لا FAIL في contract/sanity»، وليس «لا WARN».
 
 ---
 
@@ -339,6 +368,10 @@ ostris-score-tools/
     build_all.sh
 ```
 
+> **`parse/abc.py` (D14):** يجب أن يلفّ/يثبّت `abc_tools.py` نفسه (نفس عقد
+> الرندر) أو يثبّت hash له. لا تكتب parser متسامحًا جديدًا؛ الـ checker
+> والـ renderer يشتركان في نفس اللهجة.
+
 ---
 
 ## 7. CLI (السطح الذي تراه المهارة)
@@ -375,43 +408,57 @@ ostris eval     --suite v1 --out results/
 - schemas v1 + fixtures.
 
 **Gate:** ≥95% من 460 قابلة للربط والتحليل؛ قائمة الـ missing مع قرار.
+**+ إعادة التحقق** من أرقام §1 (482/495/35/438/2.95GiB/36.6h) من manifests.
+**+** لا تُبنى priors/plan/check قبل حسم قرارات M1/M2/M4/M5 في §13.3؛
+الـ audit يمكن أن يبدأ الآن.
 
 ### M1 — Ingest & canonicalize (أسبوع)
 - تنزيل manifests + عينة tar.gz (لا الـ2.95GiB كاملة).
 - استخراج `score.abc` + sidecars.
-- canonical ABC (توحيد `L/M/Q`، voices، sections).
+- canonical ABC (توحيد `L/M/Q`، voices، sections) **مع الحفاظ على `M:` و`[K:...]`**
+  — لا تفرض 4/4 (D9).
 - ربط FADL.
 **Gate:** 460 + 22 في `records.jsonl`، مع `provenance` لكل حقل.
 
 ### M2 — Features & labels (1–2 أسبوع)
 - form/bars/sections من `structure.lab` + ABC.
 - melody/rhythm/harmony/prosody.
-- maqam classifier: تدريب/معايرة على 177 five_stars، تطبيق على 460، مراجعة 100 يدويًا.
+- maqam classifier: **قاعدة symbolic + مراجعة يدوية على الـ482** (D3)؛
+  **لا تدريب على تسميات 177** (هي prompt، M1: 0% Hijaz). الـ177 فحص سلوك فقط.
 - mood tags من captions + lexicon، مراجعة 50.
-**Gate:** ≥90% من 460 لها `maqam` مع confidence؛ تقرير دقة على 177.
+**Gate:** ≥90% من 460 لها `maqam` مع confidence **بما فيها `other/unknown`**؛
+تقرير دقة على **عينة مراجعة من 482**، وفحص سلوك على 177 — لا «دقة على 177».
 
 ### M3 — Priors & plan (أسبوع)
 - quantiles لكل stratum، مع `n` و`confidence`.
 - backoff للطبقات الصغيرة.
 - `plan` generator + fixtures.
-**Gate:** 10 مانيفستات تجريبية → plan صالح 100%، bars داخل ±10% من الهدف.
+- **المخرج (D5):** `brief.json` + `skill_plan.json` (15 مفتاحًا)، لا `plan.json` غامض.
+**Gate:** 10 مانيفستات تجريبية → `skill_plan.json` صالح 100%، bars داخل ±10% من الهدف.
 
 ### M4 — Idioms, similarity, check (أسبوع)
 - استخراج 2–4 bars لكل function/maqam.
 - k-gram similarity index (تتبّع الاقتباس، لا منعه).
 - `check` يجمع: skill checker + maqam fit + priors + similarity.
-**Gate:** 3 سكورات معروفة (جيد/متوسط/سيئ) → report يميزها.
+- **سياسة البوابات (D8):** `contract` + `sanity` = FAIL؛ `style` = WARN افتراضيًا.
+  `ostris check` لا يفشل على WARN.
+**Gate:** 3 سكورات معروفة (جيد/متوسط/سيئ) → report يميزها، مع `class` و`percentiles`.
 
 ### M5 — Integration (أسبوع)
-- تثبيت نسخة المهارة (hash).
+- تثبيت نسخة المهارة: **v0.2.0** + hash `checker.py` + hash `calibration.json` (D7).
+- `ostris check` يمرّر `--require-final-rest` عند الرندر، ويترك `style` WARN
+  افتراضيًا؛ `--strict-style` اختياري.
 - إضافة قسم TOOLS إلى `SKILL.md` (3 أوامر فقط).
 - wrapper يعمل في `/content/chat` وعلى CPU.
+- **الوضع instrumental (D6):** إما `Vocal+Ins` فقط في v1، أو `--voices ins` بعد
+  إضافته للمهارة. لا تفترض أن `Ins` فقط يمرّ.
 **Gate:** جلسة كاملة على مانيفست واحد: plan → write → check → patch، دون corpus في السياق.
 
 ### M6 — Evaluation (أسبوع)
-- 12–16 مانيفست محجوزًا.
+- 12–16 مانيفست محجوزًا **من الـ35 غير المستخدمة في YT500** (D13)، لا من الـ177.
 - A/B: prompt-only vs tool-assisted.
 - مقاييس الجودة + التوكنز + الزمن.
+- **D1:** إن كان الهدف ABC quality، فالتقييم على ABC؛ إن كان audio، أضف جلسة رندر.
 **Gate:** non-inferiority في الجودة، وتوفير ≥30% في التوكنز.
 
 ### M7 — Hardening & handoff (3–5 أيام)
@@ -433,8 +480,11 @@ ostris eval     --suite v1 --out results/
 
 **المقاييس:** Recall@1/5/10، MRR، nDCG@10، silhouette، linear probe.
 
+> **تنبيه (D12):** تسميات maqam في مجموعة الاسترجاع يجب أن تكون **مراجعة
+> يدويًا**، لا prompt tags. وإلا فالاسترجاع يقيس تسمية النموذج لنفسه.
+
 ### 9.2 مهام التوليد
-- 12–16 مانيفست محجوز (lyrics + maqam + mood + sections).
+- 12–16 مانيفست محجوز **من الـ35 غير المستخدمة في YT500** (D13)، لا من الـ177.
 - A: prompt + skill فقط.
 - B: + `plan` + `exemplar` + `check`.
 - قياس:
@@ -455,20 +505,30 @@ ostris eval     --suite v1 --out results/
 ## 10. التكامل مع المهارة
 
 ### 10.1 الشروط المسبقة (من المهارة)
-- `checker.py --json` بعقد ثابت؛ حاليًا `VOICES = ("Vocal","Ins")` إلزامي.
-- `plan.json` schema.
-- `abc_tools.py` parser/dialect.
-- `syllabify.py --json` (للمانيفستات ذات الكلمات).
+- **`checker.py` v0.2.0** (وليس v1):
+  - `--json` يُخرج `{ok, checks:[{tag,name,ok,class,detail}], measured{percentiles}, calibration_version}`.
+  - `--require-final-rest` يجعل السكتة الأخيرة عقد رندر؛ بدونها WARN.
+  - `--strict-style` يحوّل `style` إلى FAIL؛ افتراضيًا `style` = WARN.
+  - `--calibration` لتثبيت `scripts/calibration.json`.
+  - `VOICES = ("Vocal","Ins")` ما زال إلزاميًا؛ `Ins` فقط غير مدعوم (D6).
+- **مخطط المهارة:** `skill_plan.json` بـ 15 مفتاحًا (D5)، وليس `brief.json` عالي المستوى.
+- **`abc_tools.py`** parser/dialect (D14) — لا parser جديد.
+- **`references/numbers.md`** هو سجل الأرقام البشري؛ `scripts/calibration.json`
+  هو النسخة الآلية. لا تنسخ الأرقام إلى `ostris` يدويًا.
+- **`syllabify.py` v0.2 `--json`** يُخرج أيضًا `pace`, `case_ratio`,
+  `seconds_per_bar`, `tempo_source`, `syllables_p25/p75`.
 - **المهارة تمرّر `bars` أو `target_duration_s`**؛ الأداة لا تفسّر `cap`.
-- version/hash مثبتة في `ostris.toml`.
+- version/hash مثبتة في `ostris.toml`: `skill_version = 0.2.0` + hash
+  `checker.py` + hash `calibration.json` (D7).
 
 ### 10.2 ما يُضاف إلى `SKILL.md`
 ```text
 ## TOOLS (ostris v0.1)
-1) ostris plan --manifest <song> --bars <n> --voices vocal+ins --out plan.json
+1) ostris plan --manifest <song> --bars <n> --voices vocal+ins
+                --out brief.json --skill-plan skill_plan.json
    (أو --duration-s <s> بدل --bars)
 2) ostris exemplar --maqam <m> --function <f> --mood <mood> --bars 2
-3) ostris check score.abc --plan plan.json --voices vocal+ins --json report.json
+3) ostris check score.abc --plan skill_plan.json --voices vocal+ins --json report.json
 
 Rules:
 - Do not paste the corpus.
@@ -477,6 +537,8 @@ Rules:
 - Do not install packages.
 - Patch; do not rewrite.
 - Duration/bars belong to the skill, not to the corpus tool.
+- WARN is not FAIL; fix contract/sanity, read style.
+- Pass --require-final-rest before rendering.
 ```
 
 ### 10.3 ما لا تفعله الأداة
@@ -519,25 +581,48 @@ Rules:
 
 ---
 
-## 13. أسئلة مفتوحة (تحتاج حسمًا قبل M2)
+## 13. قرارات ما قبل التنفيذ
 
-**تم حسمها (2026-11-22):**
+> **القاعدة:** كل قرار هنا له خيارات وتوصية ومرحلة يحجبها. لا تبدأ المرحلة
+> المحجوبة قبل الحسم. الحالة: ⏳ مفتوح · 🔶 موصى به بانتظار تأكيد · ✅ محسوم.
+
+### 13.1 محسومة سابقًا (2026-11-22)
+
 - ~~حجم المكتبة~~ → **482** (460 + 22)؛ الـ495 مصادر، و35 held-out.
-- ~~177 five_stars~~ → **مستثناة** من priors/eval.
+- ~~177 five_stars~~ → **مستثناة من priors/eval**؛ تُستخدم الآن **لمعايرة القيود فقط**.
 - ~~438 v3~~ → **مستثناة** من priors/eval؛ cross-check فقط إن سُمح.
 - ~~Vocal + Ins أم Ins~~ → الافتراضي **Vocal + Ins** لأن الـchecker يفرضه؛ `Ins` فقط لاحقًا.
 - ~~cap أم duration~~ → **المهارة تملكها**؛ الأداة تستقبل `bars`/`target_duration_s`.
 - ~~الاقتباس~~ → **مسموح صريحًا وضمنيًا**، بما في ذلك جملة كاملة/سطر حرفيًا؛ الأداة تتبّع وتنسب ولا تمنع.
 
-**مسجّل بانتظار إجابة المستخدم:**
-| # | السؤال | الحالة |
-|---:|---|---|
-| 1 | الهدف النهائي: **ABC quality** أم **rendered audio quality**؟ | ⏳ بانتظار |
-| 2 | الـ35 held-out: لتقييم **التوليد** أم **الاسترجاع** فقط؟ | ⏳ بانتظار |
-| 3 | مراجعة maqam: **482 كاملة** أم **عينة 100–150** مع confidence؟ | ⏳ بانتظار |
-| 4 | هل تُستخدم **438 v3** كـ cross-check مسموح، أم تُترك تمامًا؟ | ⏳ بانتظار |
+### 13.2 قرارات مطلوبة
 
-> هذه لا تعطّل M0. تُحسم قبل M2/M6 حسب الجدول.
+| # | القرار | الخيارات | التوصية | يحجب | الحالة |
+|---:|---|---|---|---|---|
+| **D1** | هدف الجودة النهائي | ABC quality / rendered audio / كلاهما | **ABC أولًا**؛ audio في M6 إن توفر رندر | M6 | ⏳ |
+| **D2** | وظيفة الـ35 held-out | توليد / استرجاع / كلاهما | **كلاهما**؛ 12–16 للتوليد والباقي للاسترجاع | M6 | ⏳ |
+| **D3** | مراجعة maqam | 482 كاملة / عينة 100–150 / مرحلتان | **مرحلتان:** 120 عينة + كل low-confidence | M2 | ⏳ |
+| **D4** | 438 v3 | تُترك / cross-check / تدريب | **cross-check فقط**؛ لا تدريب ولا priors/eval | M2 | ⏳ |
+| **D5** | مخطط `plan.json` | `brief.json`+`skill_plan.json` / ملف واحد / `check` يبني | **`brief.json` + `skill_plan.json`** | M1/M3/M5 | ⏳ |
+| **D6** | الوضع instrumental | إضافة `--voices ins` الآن / `Vocal+Ins` فقط / checker منفصل | **`Vocal+Ins` في v1**؛ instrumental لاحقًا | M1/M5 | ⏳ |
+| **D7** | عقد المهارة | تثبيت v0.2.0 + flags / تجميد v1 | **v0.2.0** + hash + `--require-final-rest` | M1/M5 | 🔶 |
+| **D8** | سياسة البوابات | contract+sanity / +style / درجة مركبة | **contract+sanity فقط hard**؛ style WARN | M4/M5/M6 | ⏳ |
+| **D9** | المتر المتغير | حفظ `M:` / توحيد 4/4 / رفض | **حفظ `M:` و`[K:...]`** | M1 | 🔶 |
+| **D10** | دمج `report.json` | `skill_report` nested / دمج مسطح / ملفان | **nested + `class`** | M4/M5 | ⏳ |
+| **D11** | دور 177 | calibration only / priors/eval / تجاهل | **calibration only** | M2/M6 | 🔶 |
+| **D12** | تعريف maqam coverage | labelled incl. other / accuracy / كلاهما | **coverage + accuracy منفصلان** | M2/M6 | ⏳ |
+| **D13** | مصدر held-out | 35 / 177 / خارجي | **35 YT500 غير المستخدمة** | M6 | 🔶 |
+| **D14** | parser | vendor `abc_tools` / جديد / pin hash | **vendor أو pin hash** | M1 | 🔶 |
+| **D15** | السكتة الأخيرة | عقد دائم / WARN + flag / تجاهل | **WARN + `--require-final-rest`** | M5 | 🔶 |
+| **D16** | sanity على 482 | تطبيقها / فقط على السكور المولّد / لا | **فقط على السكور المولّد**، لا priors الـ482 | M2/M4 | ⏳ |
+
+### 13.3 بوابة البدء
+
+- **قبل M1:** D5, D6, D7, D9, D14.
+- **قبل M2:** D3, D4, D11, D12, D16.
+- **قبل M4/M5:** D8, D10, D15.
+- **قبل M6:** D1, D2, D13.
+- **M0 audit** يمكن أن يبدأ الآن؛ لا يبنى priors/plan/check قبله.
 
 ---
 
@@ -545,12 +630,12 @@ Rules:
 
 | البُعد | الهدف |
 |---|---|
-| تغطية البيانات | ≥95% من 482 مرتبطة ومحللة |
-| maqam coverage | ≥90% بتسمية موثوقة |
-| plan validity | 100% من المانيفستات |
-| check | 100% hard gates، warnings قابلة للتنفيذ |
+| تغطية البيانات | ≥95% من 482 مرتبطة ومحللة (بعد M0 audit) |
+| maqam coverage | ≥90% **مع confidence بما فيها `other/unknown`**؛ الدقة تُقاس على عينة مراجعة منفصلة (D12) |
+| plan validity | 100% من المانيفستات تُنتج `skill_plan.json` صالحًا (D5) |
+| check | 100% **contract + sanity**؛ `style` warnings معروضة وقابلة للتنفيذ (D8) |
 | quotation | 100% من الاقتباسات المتعمدة موثّقة (`source_id`, `bar_range`) |
 | جودة | non-inferiority في تقييم أعمى |
 | كلفة | ≥30% خفض توكنز (هدف 30–40k/سكور) |
 | integration | 3 أوامر فقط من المهارة |
-| reproducibility | build من GCS في أمر واحد |
+| reproducibility | build من جذر البيانات في أمر واحد |
