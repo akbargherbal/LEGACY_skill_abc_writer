@@ -3,7 +3,9 @@
 **Snapshot:** 2026-11-23 · **Repo:** `skill_abc_writer` · **Skill:** v0.2.0
 **Tools:** 0.3.0 · **Overall:** M0–M5 implemented; M6 objective half implemented;
 M7 documented and in CI. Named-maqam work stays deferred.
-Pushed to `origin/main`; earlier commits `7ffae22` and `3115daa`.
+Latest commit `ecde347`, pushed to `origin/main`; earlier `7ffae22`, `3115daa`.
+**Last verified:** 30 tests pass, `make selftest` passes, contract pins match,
+`dist/02_maqam-score.zip` rebuilt.
 
 Legend: ✅ done · 🟡 partial · ⏳ not started · ⏸️ deferred/blocked.
 The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
@@ -19,7 +21,7 @@ The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
 | **M3** Priors & plan | Quantiles, backoff, `brief.json` + `skill_plan.json` | ✅ done, objective-only | PASS |
 | **M4** Idioms, similarity, check | Idiom bank, k-gram index, combined `check` | ✅ done; maqam-fit unavailable | PASS for objective subset |
 | **M5** Integration | `ostris check`, TOOLS section, wrapper | ✅ CLI-level | PASS (CLI roundtrip) |
-| **M6** Evaluation | Held-out A/B, quality + token metrics | 🟡 split + objective metrics only | PASS (objective half) |
+| **M6** Evaluation | Held-out A/B, quality + token metrics | 🟡 split + objective metrics; mechanics smoke-tested | PASS (objective half, no generated runs) |
 | **M7** Hardening & handoff | Licensing, CI, release | 🟡 docs, CI, notes; no clearance/tag | not a gate |
 
 ## M0 — Audit & contracts ✅
@@ -131,7 +133,8 @@ The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
 - [x] Reserve 14 for generation / 17 for retrieval (D13)
 - [x] `eval --build-split` writes a deterministic disjoint split
 - [x] `eval --runs` scores supplied runs: class, contract+sanity, bars delta, size
-- [x] Gate: **PASS** on contract+sanity for supplied runs
+- [x] Mechanics smoke-tested on one canonical track: contract+sanity 1/1, bars delta 0
+- [ ] Generated held-out runs — **not produced**; the smoke run is not a model output
 - [ ] A/B prompt-only vs tool-assisted — **not run**
 - [ ] Blind quality / non-inferiority — **not measured** (no judge)
 - [ ] Token reduction — **not measured** (`tokens_proxy` only)
@@ -148,6 +151,7 @@ The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
 - [x] Licensing **inventory** (`docs/ostris-licensing.md`)
 - [x] Release notes for tools v0.3.0
 - [x] Handoff notes for a future reviewer (`docs/ostris-handoff.md`)
+- [x] Eight JSON schemas: record, audit, canonical, features, priors, plan, report, eval
 - [ ] Licence clearance for the data sources — **unknown, needs the owner**
 - [ ] Public release / git tag — **not created**
 
@@ -211,6 +215,7 @@ Entry point: `scripts/ostris <command>` or
 | `report.json` from `check` | ✅ M4 |
 | `eval/split.json` | ✅ M6 (31 usable, 14/17) |
 | `eval/report.json` | ✅ on demand from `eval --runs` (objective metrics only) |
+| `schemas/*.json` | ✅ 8 contracts: record, audit, canonical, features, priors, plan, report, eval |
 
 ## Verified numbers
 
@@ -225,6 +230,8 @@ Entry point: `scripts/ostris <command>` or
 - [x] 472/482 eligible for priors; 29 strata
 - [x] 1,304 idioms; 3,714 interval grams
 - [x] 0 named-maqam claims; 0 maqam-conditioned priors
+- [x] 8 schemas parse; generated artifacts validate against them
+- [x] 30 tests pass; `make selftest` passes; contract pins match; zip rebuilt
 
 ## Deviations from the plan
 
@@ -261,13 +268,15 @@ scripts/ostris check score.abc --plan plans/song/skill_plan.json --report report
 
 ## Next
 
-Nothing in the objective plan remains unstarted. The remaining work needs a
-person or data this build does not have:
+Nothing in the tooling or objective split remains unstarted. The remaining work
+needs a model run, a judge, or data this build does not have:
 
-1. **D3/D12** — reviewed maqam labels. Then add maqam strata and a maqam-fit
+1. **M6 generated runs** — compose on the 14 held-out generation briefs, then
+   score them with `eval --runs`; the current smoke run is not model output.
+2. **D3/D12** — reviewed maqam labels. Then add maqam strata and a maqam-fit
    component; keep `mode_hypothesis` separate.
-2. **D1** — an audio/blind judge. Then evaluate quality and non-inferiority.
-3. **M6 token reduction** — instrument prompt-only vs tool-assisted runs with
+3. **D1** — an audio/blind judge. Then evaluate quality and non-inferiority.
+4. **M6 token reduction** — instrument prompt-only vs tool-assisted runs with
    real token counts.
-4. **M7 release** — confirm data licences, then tag and publish.
-5. **M5 live session** — compose one real score end to end and record it.
+5. **M7 release** — confirm data licences, then tag and publish.
+6. **M5 live session** — compose one real score end to end and record it.
