@@ -9,11 +9,11 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-SKILL_VERSION = "0.3.0"
+SKILL_VERSION = "0.4.0"
 
 PINNED = {
-    "checker.py": "dedfb8516ad57339d29eb318ab8beb880d311bb1f1897bead6761ae10cbd2829",
-    "calibration.json": "9d5d01eca30231c59b505c622e3b9eebff80622fa7546194a1610fe1600e9e45",
+    "checker.py": "e322b78b22b0f46b6cc41bd88a452cea7d9aabea1c4bbf79dfd6924e91e02380",
+    "calibration.json": "9ef8cf61e0b7db4cc2c67b69f1ab4ef8edfa012f65e163f5b09297f73410cd2d",
     "abc_tools.py": "e99e5cf9dff4647f48322e3319065ba793e7dbc808222e1848bab7aa8c4bd11c",
 }
 

@@ -13,6 +13,13 @@
 > تشغيل `analysis/eval/runs/2026-11-23-claude-session-01/`. الثلاث تمرّ
 > 177/177، فيبقى المجموع 175/177. التوزيعات في `references/reference.md §7.2`
 > والأداة `analysis/measure_phrasing.py`.
+>
+> **تحديث 0.4.0 (2026-11-23):** أضاف `strict_shape` وأهداف الأسلوب
+> `tessitura_share_ge_c5_max 0.80`، `register.max_top 86`،
+> `chorus_lift_min 4/5`، وجسر `phrases.json` لكل سطر (0.5s/1.0s). هذه
+> **أهداف عقد/أسلوب** لا بوابات انحطاط جديدة: البوابات الصلبة تبقى 9 و175/177.
+> التوزيعات الجديدة (tessitura، verse→chorus) في `calibration.json` و
+> `references/numbers.md`.
 
 ---
 

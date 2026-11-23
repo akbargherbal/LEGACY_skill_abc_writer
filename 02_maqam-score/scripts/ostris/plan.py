@@ -88,6 +88,8 @@ def validate_plan(plan: dict) -> list[str]:
         ("chords_min", 0),
         ("max_unbroken_seconds", 0.1),
         ("min_phrase_endings", 1),
+        ("tessitura_share_ge_c5_max", 0.0),
+        ("chorus_lift_min", 0.0),
         ("maqam_fit_min", 0.0),
     ):
         if key in plan and float(plan[key]) < minimum:
@@ -230,6 +232,11 @@ def build_plan(manifest: dict, priors: dict, out_dir: str | Path) -> dict:
         "chords_min": targets["chords_min"],
         "max_unbroken_seconds": 10,
         "min_phrase_endings": 3,
+        "tessitura_share_ge_c5_max": targets["tessitura_share_ge_c5_max"],
+        "chorus_lift_min": targets["chorus_lift_min"],
+        # The generated plan is objective; strict_shape is an opt-in brief
+        # decision. The composer template sets it true.
+        "strict_shape": False,
         "maqam_fit_min": 0.95,
         "voices": "vocal+ins",
         "cadence": manifest.get("cadence") or "any",
@@ -380,7 +387,7 @@ def _markdown(brief: dict, plan: dict) -> str:
         f"| syllables | {plan['syllables']} |",
         f"| melisma | {plan['melisma_min']}-{plan['melisma_max']} |",
         f"| register | mean {plan['register']['mean']} ± {plan['register']['tolerance']}, "
-        f"top ≥ {plan['register']['top']} |",
+        f"top ≥ {plan['register']['top']}, max top {plan['register'].get('max_top', '-')} |",
         f"| max top-duration share | {plan['max_top_duration_share']} |",
         f"| distinct durations | ≥ {plan['min_distinct_durations']} |",
         f"| ties | ≥ {plan['ties_min']} |",

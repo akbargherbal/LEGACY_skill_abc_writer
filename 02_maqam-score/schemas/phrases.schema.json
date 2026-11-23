@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/maqam-score/phrases.schema.json",
+  "title": "Per-line phrase sidecar",
+  "description": "One record per lyric line/hemistich: the absolute bar range and the minimum pause after the line. These are planning facts, not syllable-to-note alignment.",
+  "type": "object",
+  "required": ["tempo", "meter", "unit", "lines"],
+  "properties": {
+    "tempo": { "type": "number", "exclusiveMinimum": 0 },
+    "meter": { "type": "string", "pattern": "^[0-9]+/[0-9]+$" },
+    "unit": { "type": "string", "pattern": "^1/[0-9]+$" },
+    "body_bars": { "type": "integer", "minimum": 0 },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["line", "bar_start", "bar_end", "pause_after_s"],
+        "properties": {
+          "line": { "type": "integer", "minimum": 1 },
+          "section": { "type": "string" },
+          "syllables": { "type": "integer", "minimum": 0 },
+          "bars": { "type": "integer", "minimum": 1 },
+          "body_bar_start": { "type": "integer", "minimum": 1 },
+          "body_bar_end": { "type": "integer", "minimum": 1 },
+          "bar_start": { "type": "integer", "minimum": 1 },
+          "bar_end": { "type": "integer", "minimum": 1 },
+          "pause_after_s": { "type": "number", "minimum": 0 }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

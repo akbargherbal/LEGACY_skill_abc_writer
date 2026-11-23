@@ -1,7 +1,12 @@
-# OSTRIS release notes — tools v0.3.0
+# OSTRIS release notes — tools v0.4.0
 
-**Date:** 2026-11-23 · **Skill:** `maqam-score` v0.2.0 · **Python:** 3.11+
+**Date:** 2026-11-23 · **Skill:** `abc_score_writer` v0.4.0 · **Python:** 3.11+
 standard library only (tests optionally use `jsonschema`)
+
+**0.4.0 note:** `plan` now also emits `tessitura_share_ge_c5_max`,
+`register.max_top`, `chorus_lift_min`, and `strict_shape: false` (an objective
+generated plan; the composer template sets `strict_shape: true`). The priors
+and corpus bundle are unchanged.
 
 ## Included
 

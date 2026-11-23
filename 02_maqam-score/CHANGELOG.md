@@ -1,5 +1,52 @@
 # Changelog
 
+## 0.4.0 — acceptance, anti-anchoring, and the remaining expert findings
+
+**Evidence:** `analysis/eval/inbox/claude_session_02/expert_opinion.md` (the
+same pair as `analysis/eval/reports/2026-11-23-claude-session-01.md`) and the
+0.3.0 source review. 0.3.0 closed the three metrics that were outside the 177
+corpus; 0.4.0 closes the inside-the-corpus findings and removes the template
+that taught the mediocre run's frame.
+
+### Gate / plan
+- Add optional `strict_shape` (default false). When true, the plan's declared
+  shape targets are hard: `max_unbroken_seconds`, `max_top_duration_share`,
+  `tessitura_share_ge_c5_max`, `register` mean/top/max_top,
+  `chorus_lift_min`, `silence`, `maqam_fit`, `min_phrase_endings`, and the
+  optional phrase sidecar. Old plans without the flag keep 0.3.0 behaviour.
+- Add `tessitura_share_ge_c5_max` (0.80), `register.max_top` (86),
+  `register.tolerance` 3 style, `chorus_lift_min` (4 default / 5 release),
+  `verse_chorus_semitones` measured.
+- Add `syllabify.py --phrases` and `checker.py --phrases`: a per-line
+  `phrases.json` with absolute bar ranges and a 0.5 s hemistich / 1.0 s bayt
+  pause minimum.
+- Add `checker.py --strict-shape` override; report `strict_shape`,
+  `phrases_checked`, `phrase_violations`, `verse_chorus_semitones`.
+
+### Instructions / example
+- De-anchor §3.2: replace the 78-bar/74-BPM/361-syllable run plan with a
+  16-bar generic plan; remove the four session-01 deviations.
+- `example/` is now Am / 80 BPM, mixed register (tessitura 50%), Ins 31%,
+  silence 56%; it passes `--strict-style`, `strict_shape`, and `--phrases`
+  with 0 WARN.
+- Add `references/style-tags.md`: belting → planned peaks, tarab → cadence
+  melisma, call-and-response → separate voices, symphonic metal → Ins.
+- Revise `SKILL.md` §3.2/§3.3/§3.5/§3.6/§4/§5/§6/§7 for strict shape, phrase
+  sidecar, WARN accountability, and the anti-anchoring traps.
+- `ostris plan` emits the new targets with `strict_shape: false`; the composer
+  template sets it true.
+
+### Tests / docs
+- Add tests for strict_shape backward compatibility, tessitura/register
+  ceilings, chorus median, phrase plan, and the strict example.
+- Add `schemas/phrases.schema.json`; align `schemas/plan.schema.json` with the
+  checker's required fields; extend the schema test.
+- Add `analysis/verify_0_4_0.py` and `make acceptance`.
+- Update `references/numbers.md`, `references/reference.md`,
+  `docs/agent-eval-protocol.md` (T17, T21–T24), `README.md`,
+  `dist/RELEASE-0.4.0.md`, and this changelog.
+- Contract pins re-pinned; `SKILL_VERSION 0.4.0`.
+
 ## 0.3.0 — shape gate after eval run `2026-11-23-claude-session-01`
 
 **Evidence:** `analysis/eval/runs/2026-11-23-claude-session-01/postmortem.md`.

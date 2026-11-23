@@ -1,4 +1,4 @@
-.PHONY: test selftest zip zip-public release check-corpus offline-check ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval clean
+.PHONY: test selftest acceptance zip zip-public release check-corpus offline-check ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval clean
 
 CORPUS ?= $(HOME)/Jupyter_Notebooks/OpenCode/arabmaqamrock/datasets/five_stars
 DIST := dist
@@ -19,6 +19,9 @@ test:
 selftest:
 	cd 02_maqam-score && bash scripts/selftest.sh
 
+acceptance:
+	python3 analysis/verify_0_4_0.py
+
 zip:
 	scripts/package_skill.sh "$(DIST)"
 
@@ -29,7 +32,7 @@ zip-public:
 
 # Build, verify, and archive a versioned release. The unversioned zips stay as
 # the "current" aliases; dist/releases/ keeps every version, including 0.2.0.
-release: test selftest offline-check zip zip-public
+release: test selftest acceptance offline-check zip zip-public
 	@test -n "$(VERSION)" || { echo "release: cannot read SKILL_VERSION"; exit 1; }
 	@mkdir -p "$(DIST)/releases"
 	@cp "$(DIST)/$(SKILL_NAME).zip" "$(DIST)/releases/$(SKILL_NAME)-$(VERSION).zip"

@@ -108,6 +108,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--calibration", type=Path, default=None,
                     help="calibration.json (default: next to this script)")
     ap.add_argument("--json", type=Path, default=None, help="write prosody JSON here")
+    ap.add_argument("--phrases", type=Path, default=None,
+                    help="write the per-line phrase sidecar here")
     args = ap.parse_args(argv)
 
     text = args.lyrics.read_text(encoding="utf-8")
@@ -166,6 +168,28 @@ def main(argv: list[str] | None = None) -> int:
     body_bars = sum(per_line_bars)
     instrumental = bars - body_bars
 
+    # Per-line phrase plan: the lines are hemistichs in the source lyrics.
+    # The first line of a pair gets a short breath; the second (bayt end) gets
+    # a longer one. These are minimums, not a transcription of the score.
+    line_sections = [sec["name"] for sec in sections for _ in sec["lines"]]
+    line_rows: list[dict] = []
+    section_seen: dict[str, int] = {}
+    body_start = 1
+    for i, (n, b, section) in enumerate(
+            zip(sylls, per_line_bars, line_sections), 1):
+        pair_index = section_seen.get(section, 0)
+        section_seen[section] = pair_index + 1
+        line_rows.append({
+            "line": i,
+            "section": section,
+            "syllables": n,
+            "bars": b,
+            "body_bar_start": body_start,
+            "body_bar_end": body_start + b - 1,
+            "pause_after_s": 0.5 if pair_index % 2 == 0 else 1.0,
+        })
+        body_start += b
+
     print("INPUTS")
     print(f"  lines            {len(lines)}")
     print(f"  words            {words}")
@@ -193,18 +217,21 @@ def main(argv: list[str] | None = None) -> int:
         offset += n_lines
         print(f"  {sec['name']:<12} {n_lines:2d} lines  {n_syll:3d} syllables  {n_bars:3d} bars")
 
-    print("\nLINES  syllables  bars  sixteenths/syllable")
+    print("\nLINES  syllables  bars  sixteenths/syllable  pause_s")
     for i, (line, n, b) in enumerate(zip(lines, sylls, per_line_bars), 1):
         flag = ""
         if n > p75_syll + 1:
             flag = "  <-- long line: consider more bars"
         elif n < p25_syll - 1:
             flag = "  <-- short line: consider fewer bars"
+        pause = line_rows[i - 1]["pause_after_s"]
         if n == 0:
-            print(f"  {i:2d}        0      {b}     N/A  <-- line has no harakat")
+            print(f"  {i:2d}        0      {b}     N/A                  {pause:.2f}"
+                  "  <-- line has no harakat")
         else:
             per = b * sixteenths_per_bar / n
-            print(f"  {i:2d}      {n:3d}      {b}     {per:.2f}{flag}")
+            print(f"  {i:2d}      {n:3d}      {b}     {per:.2f}                "
+                  f"{pause:.2f}{flag}")
 
     if instrumental < 6:
         print("\nwarn  fewer than 6 instrumental bars: the intro/outro have no room")
@@ -242,10 +269,24 @@ def main(argv: list[str] | None = None) -> int:
                 for sec in sections
             ],
             "prosody": [{"line": l, "syllables": n} for l, n in zip(lines, sylls)],
+            "phrase_plan": {"body_bars": body_bars, "lines": line_rows},
         }
         args.json.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n",
                              encoding="utf-8")
         print(f"\nwrote {args.json}")
+    if args.phrases:
+        sidecar = {
+            "tempo": tempo,
+            "meter": args.meter,
+            "unit": args.unit,
+            "body_bars": body_bars,
+            "lines": line_rows,
+        }
+        args.phrases.write_text(
+            json.dumps(sidecar, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8")
+        print(f"\nwrote {args.phrases} (add absolute bar_start/bar_end before "
+              "checker.py --phrases)")
     return 0
 
 

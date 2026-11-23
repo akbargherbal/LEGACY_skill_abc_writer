@@ -1,6 +1,6 @@
 # سجل الأرقام — من أين جاء كل رقم
 
-**النسخة:** 0.3.0 · **التاريخ:** 2026-11-23 (تحديث shape)
+**النسخة:** 0.4.0 · **التاريخ:** 2026-11-23 (تحديث acceptance/anti-anchoring)
 **الملف الآلي (المرجع):** `scripts/calibration.json`
 **التحليل:** `analysis/calibrate_177.py` → `analysis/out/summary.json`
 **التقرير الكامل:** `docs/constraints-calibration.md`
@@ -127,6 +127,10 @@ Kurd 43 · Nahawand 42)، prompt 110 BPM، 105 × `L:1/16` و72 × `L:1/32`،
 | نطاق melisma معًا | 1.10–1.45 | 93.8% من S1 | 93.8% | `checker.py` |
 | register mean | 74 ± 5 | وسيط 73.5 | 100% | `checker.py` |
 | register top | 84 | الوسيط 84 (P25 = 82) | ~50% | `checker.py` |
+| register max top | 86 | P95 (الوسيط 84؛ الأدنى 80) | — | `checker.py` |
+| register tolerance (style) | 3 | هامش أسلوب؛ sanity يبقى ±5 | — | `checker.py` |
+| tessitura ≥ C5 max | 0.80 | بين P75 0.776 وP95 0.845؛ A = 0.821 | — | `checker.py` |
+| chorus lift median | 4 style / 5 release | P50 2 · P75 4 · P95 7 | — | `checker.py` |
 | top duration share | 0.65 | الوسيط 0.614 (P75 0.691) | ~58% | `checker.py` |
 | distinct durations | 5 | P5 = 5 | 97.2% | `checker.py` |
 | ties / 10 bars | 0.40 | P25 = 0.59؛ الوسيط 1.07 | 88.1% | `checker.py` |
@@ -139,6 +143,8 @@ Kurd 43 · Nahawand 42)، prompt 110 BPM، 105 × `L:1/16` و72 × `L:1/32`،
 | maqam fit | 0.95 | تصميم (لا عيّنة maqam) | — | `checker.py` |
 | cadence | `"any"` افتراضي | 44.1% فقط على التونيك | — | `checker.py` |
 | sections | تطبيع + أقسام آلية | تطابق حرفي 1.1% | — | `checker.py` |
+| phrase pause | 0.5s hemistich / 1.0s bayt | design + expert brief | — | `checker.py`, `syllabify.py` |
+| strict_shape | false default / true template | design: brief targets are hard only when declared | — | `checker.py` |
 
 **أرقام أُلغيت كبوابات:** `top 85` (يمر 22.6%)، `Ins 0.30` (31.6%)،
 `melisma_max 1.30` (57.6%)، `ties 5` (87% مطلق، 70.6% لكل 10 مازورات)،
@@ -247,6 +253,7 @@ Kurd 43 · Nahawand 42)، prompt 110 BPM، 105 × `L:1/16` و72 × `L:1/32`،
 | 2026-11-22 | v1 (02_maqam-score) | الأرقام من p01–p05 وحالة امرئ القيس؛ melisma 1.30، top 85، Ins 0.30، chords 37 |
 | 2026-11-23 | v0.2.0 | 177 سكورًا؛ قاعدة 95%؛ 6 sanity؛ style WARN؛ meter متغير؛ percentiles؛ هذا السجل |
 | 2026-11-23 | **v0.3.0** | +3 بوابات شكل (unbroken ≤23s، تكرار ≥20%، قفلات ≥3)؛ plan.maqam؛ chromatic نسبة للمقام؛ أهداف 10s/3 endings؛ eval `2026-11-23-claude-session-01` |
+| 2026-11-23 | **v0.4.0** | strict_shape؛ tessitura ≤0.80؛ register max_top 86/tolerance 3؛ chorus median 5 release؛ phrase sidecar 0.5/1.0s؛ style-tag table؛ anti-anchoring template/example |
 
 ---
 

@@ -15,13 +15,16 @@ Gate classes
 ------------
 contract   the renderer's contract: dialect, header, complete bars, voices,
            plan targets present, key/tempo/meter/bars agreement.
-sanity     six broad degeneracy guards calibrated on the 177-track corpus:
-           none of them prescribes a style. They pass 175/177 (98.9%).
+sanity     nine broad degeneracy guards calibrated on the 177-track corpus:
+           six validity + three shape. They pass 175/177 (98.9%).
+structure  declared shape targets: breath, duration mix, tessitura, register,
+           chorus median, silence, maqam fit, phrase plan. Hard when the plan
+           has strict_shape: true; otherwise style. cadence=tonic is always
+           hard.
 style      targets and comparisons that describe taste, not validity:
            melisma band, high register, Ins density, tie count, chords,
-           cadence, section names, silence, answer mutation, chorus lift.
-           WARN by default; FAIL only with --strict-style. A cadence the plan
-           explicitly declares as "tonic" is the one self-imposed exception.
+           sections, answer mutation, chorus max lift. WARN by default; FAIL
+           only with --strict-style.
 
 The calibration lives in `calibration.json` next to this file. Every hard
 threshold has a corpus basis (min/max or a 95% rule), not a single case.
@@ -375,7 +378,8 @@ def _phrasing(score: Score) -> dict:
                 "phrase_seconds_median": None, "repeated_share": None,
                 "stepwise_share": None, "distinct_phrase_endings": None,
                 "phrase_endings": {}, "breaths_per_bar": None,
-                "tessitura_share_ge_c5": None}
+                "tessitura_share_ge_c5": None,
+                "verse_chorus_semitones": None}
     unit_seconds = 4.0 / score.unit_den * 60.0 / score.tempo
 
     runs: list[list[Note]] = []
@@ -407,6 +411,13 @@ def _phrasing(score: Score) -> dict:
     for e in endings:
         counts[e] = counts.get(e, 0) + 1
 
+    verse = [n.pitch for n in vocal if n.section.startswith("verse")]
+    chorus = [n.pitch for n in vocal if n.section == "chorus"]
+    verse_chorus = (
+        round(statistics.median(chorus) - statistics.median(verse), 1)
+        if verse and chorus else None
+    )
+
     return {
         "intervals": intervals,
         "unbroken_seconds_max": round(max(span(r) for r in runs), 2),
@@ -420,7 +431,75 @@ def _phrasing(score: Score) -> dict:
         "breaths_per_bar": round(len(breaths) / score.n_bars, 3) if score.n_bars else None,
         "tessitura_share_ge_c5": round(
             sum(1 for n in vocal if n.pitch >= 72) / len(vocal), 3),
+        "verse_chorus_semitones": verse_chorus,
     }
+
+
+def _phrase_violations(score: Score, phrases: dict,
+                       plan: dict) -> tuple[list[str], list[dict]]:
+    """Check the optional per-line phrase sidecar against the vocal line.
+
+    The sidecar is a list of ``{line, bar_start, bar_end, pause_after_s}``.
+    Bar numbers are 1-based. A line must contain notes, end before the next
+    line's first note by at least ``pause_after_s``, and stay within the plan's
+    ``max_unbroken_seconds``. It does not claim syllable-to-note alignment.
+    """
+    lines = phrases.get("lines") if isinstance(phrases, dict) else None
+    if not isinstance(lines, list) or not lines:
+        return ["phrases sidecar has no lines"], []
+
+    vocal = sorted(score.notes_of("Vocal"), key=lambda n: n.onset)
+    unit_seconds = 4.0 / score.unit_den * 60.0 / score.tempo
+    max_span = plan.get("max_unbroken_seconds")
+    rows: list[dict] = []
+    violations: list[str] = []
+    previous_end = 0
+
+    for index, line in enumerate(lines, 1):
+        if not isinstance(line, dict):
+            violations.append(f"line {index}: not an object")
+            continue
+        try:
+            start = int(line["bar_start"])
+            end = int(line["bar_end"])
+        except (KeyError, TypeError, ValueError):
+            violations.append(f"line {index}: missing/invalid bar_start or bar_end")
+            continue
+        if start < 1 or end < start or end > score.n_bars:
+            violations.append(
+                f"line {index}: bar range {start}-{end} outside 1-{score.n_bars}")
+            continue
+        if start <= previous_end:
+            violations.append(f"line {index}: ranges overlap or are unordered")
+        previous_end = end
+
+        notes = [n for n in vocal if start - 1 <= n.bar <= end - 1]
+        pause = float(line.get("pause_after_s", 0.5))
+        if not notes:
+            violations.append(f"line {index}: no vocal notes in bars {start}-{end}")
+            rows.append({"line": index, "bars": f"{start}-{end}", "notes": 0})
+            continue
+        span = (notes[-1].onset + notes[-1].dur - notes[0].onset) * unit_seconds
+        rows.append({"line": index, "bars": f"{start}-{end}", "notes": len(notes),
+                     "seconds": round(span, 2), "pause_after_s": pause})
+        if max_span is not None and span > float(max_span):
+            violations.append(
+                f"line {index}: {span:.1f}s > plan max {float(max_span):g}s")
+
+        if index < len(lines) and isinstance(lines[index], dict):
+            try:
+                next_start = int(lines[index]["bar_start"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            later = [n for n in vocal if n.bar >= next_start - 1]
+            if later:
+                gap = (later[0].onset - (notes[-1].onset + notes[-1].dur)) * unit_seconds
+                if gap < pause:
+                    violations.append(
+                        f"line {index}: pause {gap:.2f}s < {pause:.2f}s "
+                        f"before line {index + 1}")
+
+    return violations, rows
 
 
 def _sections_match(want: list[str], got: list[str]) -> bool:
@@ -433,14 +512,20 @@ def _sections_match(want: list[str], got: list[str]) -> bool:
 
 
 def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool = True,
-          strict_style: bool = False, require_final_rest: bool = False,
+          strict_style: bool = False, strict_shape: bool | None = None,
+          require_final_rest: bool = False, phrase_plan: dict | None = None,
           calibration: dict | None = None) -> tuple[list[tuple[str, str, bool, str, str]], dict]:
     """Return (checks, measured).
 
     A check is (tag, name, ok, detail, class). `tag` is PASS, FAIL or WARN.
+    `strict_shape` makes the plan's shape targets hard; when omitted it comes
+    from ``plan["strict_shape"]``. `phrases` is the optional per-line sidecar.
     """
     cal = calibration if calibration is not None else load_calibration()
     sanity = cal.get("sanity", {})
+    if strict_shape is None:
+        strict_shape = bool(plan.get("strict_shape", False))
+    shape_cls = "structure" if strict_shape else "style"
     vocal = score.notes_of("Vocal")
     ins = score.notes_of("Ins")
     results: list[tuple[str, str, bool, str, str]] = []
@@ -489,7 +574,7 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
         add("plan targets", False,
             "missing --plan: every score requires a plan with quality targets", "contract")
 
-    # ---- sanity: six broad degeneracy guards ---------------------------
+    # ---- sanity: six validity guards -----------------------------------
     max_overlap = float(sanity.get("simultaneity_le4", {}).get("max", 4))
     overlap_units = 0.0
     overlap_bars: set[int] = set()
@@ -550,11 +635,25 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
         target_mean = float(reg.get("mean", 74))
         tolerance = float(reg.get("tolerance", 4))
         add("register target mean", abs(mean_pitch - target_mean) <= tolerance,
-            f"mean {mean_pitch:.1f} vs plan {target_mean:g} +/- {tolerance:g}", "style")
+            f"mean {mean_pitch:.1f} vs plan {target_mean:g} +/- {tolerance:g}",
+            shape_cls)
         target_top = reg.get("top")
         if target_top is not None:
             add("register target top", top_pitch >= int(target_top),
-                f"top {top_pitch} vs plan >={target_top}", "style")
+                f"top {top_pitch} vs plan >={target_top}", shape_cls)
+        target_max = reg.get("max_top")
+        if target_max is not None:
+            add("register max top", top_pitch <= int(target_max),
+                f"top {top_pitch} vs plan <={target_max}", shape_cls)
+
+    tess_max = plan.get("tessitura_share_ge_c5_max")
+    shape_tessitura = None
+    if vp:
+        shape_tessitura = round(sum(1 for p in vp if p >= 72) / len(vp), 3)
+    if tess_max is not None and shape_tessitura is not None:
+        add("tessitura share", shape_tessitura <= float(tess_max),
+            f"{shape_tessitura:.0%} of vocal notes at/above C5 "
+            f"(plan max {float(tess_max):.0%})", shape_cls)
 
     durations = [n.dur for n in vocal]
     duration_counts = Counter(durations)
@@ -567,7 +666,7 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
             "sanity")
         style_cap = float(plan.get("max_top_duration_share", cap))
         add("duration spread target", top_duration_share <= style_cap,
-            f"{top_duration_share:.0%} (plan max {style_cap:.0%})", "style")
+            f"{top_duration_share:.0%} (plan max {style_cap:.0%})", shape_cls)
 
     distinct_floor = int(sanity.get("distinct_durations_ge4", {}).get("min", 4))
     add("duration variety", len(duration_counts) >= distinct_floor,
@@ -674,7 +773,7 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
     silence_floor = float(cal.get("style_defaults", {}).get("silence_share_min", 0.22))
     add("silence", silence >= silence_floor,
         f"{silence:.0%} of the sung span is rest (floor {silence_floor:.0%}; corpus ~30%)",
-        "style")
+        shape_cls)
     if len(fills) >= 3:
         top = max(shape_counts.values()) if shape_counts else 0
         add("answer mutation", top <= math.ceil(len(fills) / 2),
@@ -690,6 +789,11 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
         add("chorus lift", not verse or not chorus or max(chorus) >= max(verse),
             f"verse max {max(verse) if verse else '-'}, chorus max {max(chorus) if chorus else '-'}",
             "style")
+        if verse and chorus and "chorus_lift_min" in plan:
+            delta = statistics.median(chorus) - statistics.median(verse)
+            add("chorus lift median", delta >= float(plan["chorus_lift_min"]),
+                f"chorus median {delta:+.1f} semitones vs verse "
+                f"(plan min {float(plan['chorus_lift_min']):g})", shape_cls)
 
     # ---- shape: breath, repetition, phrase endings ----------------------
     shape = _phrasing(score)
@@ -702,7 +806,7 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
         if "max_unbroken_seconds" in plan:
             target = float(plan["max_unbroken_seconds"])
             add("unbroken target", unbroken <= target,
-                f"{unbroken:g}s (plan max {target:g}s)", "style")
+                f"{unbroken:g}s (plan max {target:g}s)", shape_cls)
 
     repeated = shape["repeated_share"]
     if repeated is not None and len(shape["intervals"]) >= 20:
@@ -721,7 +825,17 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
     if endings is not None and "min_phrase_endings" in plan:
         target_n = int(plan["min_phrase_endings"])
         add("phrase endings target", endings >= target_n,
-            f"{endings} distinct ending(s) (plan min {target_n})", "style")
+            f"{endings} distinct ending(s) (plan min {target_n})", shape_cls)
+
+    # ---- optional per-line phrase sidecar ------------------------------
+    phrase_violations: list[str] = []
+    if phrase_plan is not None:
+        phrase_violations, phrase_rows = _phrase_violations(score, phrase_plan, plan)
+        detail = f"{len(phrase_rows)} line(s)"
+        if phrase_violations:
+            detail += f", {len(phrase_violations)} violation(s): " + "; ".join(
+                phrase_violations[:3])
+        add("phrase plan", not phrase_violations, detail, shape_cls)
 
     # ---- maqam: measure against the declared pitch set, not the K: key ---
     maqam = plan.get("maqam")
@@ -747,7 +861,7 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
             floor_fit = float(plan.get("maqam_fit_min", 0.95))
             add("maqam fit", fit >= floor_fit,
                 f"{fit:.0%} of vocal notes in {maqam_name} (min {floor_fit:.0%})",
-                "style")
+                shape_cls)
             tonic = maqam.get("tonic")
             if tonic:
                 add("maqam tonic", _pc(str(tonic)) == tonic_pc(score.key),
@@ -799,6 +913,10 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
         "distinct_phrase_endings": shape["distinct_phrase_endings"],
         "phrase_endings": shape["phrase_endings"],
         "tessitura_share_ge_c5": shape["tessitura_share_ge_c5"],
+        "verse_chorus_semitones": shape["verse_chorus_semitones"],
+        "strict_shape": strict_shape,
+        "phrases_checked": bool(phrase_plan),
+        "phrase_violations": phrase_violations,
         "simultaneities": overlap_units,
         "ties": ties,
         "ties_per_10_bars": round(10 * ties / score.n_bars, 2) if score.n_bars else None,
@@ -821,7 +939,7 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
                   "distinct_durations", "ties_per_10_bars", "ins_active_share",
                   "silence_share", "chromatic_per_100", "unbroken_seconds_max",
                   "phrase_seconds_median", "repeated_share", "distinct_phrase_endings",
-                  "tessitura_share_ge_c5")
+                  "tessitura_share_ge_c5", "verse_chorus_semitones")
     }
     return results, measured
 
@@ -835,6 +953,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--calibration", type=Path, default=None)
     ap.add_argument("--strict-style", action="store_true",
                     help="turn style warnings into failures")
+    ap.add_argument("--strict-shape", action="store_true", default=None,
+                    help="override the plan's strict_shape flag")
+    ap.add_argument("--phrases", type=Path, default=None,
+                    help="per-line phrase sidecar from syllabify.py --phrases")
     ap.add_argument("--require-final-rest", action="store_true",
                     help="treat the final full-bar rest as a render contract")
     args = ap.parse_args(argv)
@@ -864,9 +986,20 @@ def main(argv: list[str] | None = None) -> int:
 
     plan_present = args.plan is not None
     plan = json.loads(args.plan.read_text(encoding="utf-8")) if plan_present else {}
+    phrases = None
+    if args.phrases:
+        try:
+            phrases = json.loads(args.phrases.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"FAIL  [contract] phrases  {exc}")
+            return 1
+    strict_shape = (args.strict_shape if args.strict_shape is not None
+                    else bool(plan.get("strict_shape", False)))
     results, measured = check(score, plan, plan_present=plan_present,
                               strict_style=args.strict_style,
+                              strict_shape=strict_shape,
                               require_final_rest=args.require_final_rest,
+                              phrase_plan=phrases,
                               calibration=calibration)
     width = max(len(name) for _, name, _, _, _ in results)
     failed = warned = 0
@@ -885,6 +1018,8 @@ def main(argv: list[str] | None = None) -> int:
         args.json.write_text(json.dumps(
             {"ok": failed == 0,
              "strict_style": args.strict_style,
+             "strict_shape": strict_shape,
+             "phrases_checked": bool(phrases),
              "require_final_rest": args.require_final_rest,
              "calibration_version": calibration.get("version"),
              "checks": [{"tag": t, "name": n, "ok": o, "class": c, "detail": d}

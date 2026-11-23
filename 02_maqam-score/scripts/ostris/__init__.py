@@ -23,4 +23,4 @@ Everything is standard-library only and runs on CPU.  The vendored
 ``abc_tools.py`` next to this package is the parser contract; do not replace it.
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"

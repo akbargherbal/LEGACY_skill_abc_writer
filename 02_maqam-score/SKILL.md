@@ -29,13 +29,13 @@ them.** This file and `references/reference.md` are the interface.
 <skill>/scripts/calibration.json   the 177-track thresholds (do not edit)
 <skill>/scripts/abc_tools.py       vendored runtime parser (the renderer's contract)
 <skill>/scripts/selftest.sh        proves both work on example/ (run once if in doubt)
-<skill>/example/                   a passing 16-bar score with the shape to copy
+<skill>/example/                   a 16-bar syntax fixture; derive your own shape
 ```
 
 `<skill>` is the directory holding this file. Run the scripts by absolute path;
 write `plan.json`, `score.abc` and the reports in your working directory.
 
-**Gate classes.** The checker has three:
+**Gate classes.** The checker has four:
 
 - **contract** — the renderer's rules: dialect, header, complete bars, voices,
   and plan/score agreement. Always hard.
@@ -45,8 +45,12 @@ write `plan.json`, `score.abc` and the reports in your working directory.
   unbroken singing, repeated-pitch share, and distinct phrase endings. Always
   hard. They pass **175/177 (98.9%)**, because they are wide enough to describe
   the corpus, not a taste.
+- **structure** — declared shape targets: breath, duration mix, tessitura,
+  register ceiling, chorus median lift, silence, maqam fit, phrase plan. Hard
+  when the plan has `strict_shape: true`; otherwise `style`. A declared
+  `cadence: "tonic"` is always hard.
 - **style** — melisma band, high register, Ins density, tie count, chords,
-  cadence, sections, silence, answer mutation, chorus lift. **Warn by default.**
+  sections, answer mutation, chorus max lift. **Warn by default.**
   `--strict-style` turns them into failures if you want that.
 
 The final rest warns by default; pass `--require-final-rest` before rendering.
@@ -122,6 +126,8 @@ else is a warning or a prior.
 | longest unbroken singing | 5.5–22.9 s (median 10.4) | **sanity ≤ 23 s**; target 10 |
 | repeated-pitch share | 25.2–42.6% (median 32.4) | **sanity ≥ 20%** |
 | distinct phrase endings | 4–8 (median 7) | **sanity ≥ 3** (when ≥ 6 phrases) |
+| tessitura ≥ C5 | 55.3–84.5% (median 71.2) | style/structure target ≤ 0.80 |
+| verse→chorus median | −4 to +7 semitones (median +2) | style/structure target +5 in release mode |
 | answer length | floor 3; answers can run long | style |
 | chord symbols | no chords in the 177 ABCs | style / optional |
 | final rest | 92.1% | warn; `--require-final-rest` before render |
@@ -145,7 +151,8 @@ Who owns what — do not fight another row:
 | Listener | whether it is beautiful |
 
 Density is yours; balance is not. Never write a busy part to "fix" the mix — the
-score can only avoid causing the problem.
+score can only avoid causing the problem. Translate style tags with
+`references/style-tags.md`; a tag never overrides a quality target.
 
 ## 3. The pipeline — one pass
 
@@ -172,35 +179,37 @@ prior; they compressed the vocal.
 
 Write `plan.json`. This is the brief; every value is a number or a name. The
 checker fails a plan that omits a required target, so write the complete object
-before the first bar.
+before the first bar. The block below is the 16-bar fixture: use it for the
+field names, not for its bars, tempo, key, sections, or deviations.
 
 ```json
 {
-  "key": "Dm", "tempo": 74, "meter": "4/4", "unit": "1/16",
-  "bars": 78,
-  "syllables": 361,
-  "sections": ["intro", "verse 1", "chorus", "interlude", "verse 2", "chorus", "interlude", "outro"],
+  "key": "Am", "tempo": 80, "meter": "4/4", "unit": "1/16",
+  "bars": 16,
+  "syllables": 16,
+  "sections": ["intro", "verse", "chorus", "outro"],
   "simultaneity_exception": null,
   "cadence": "tonic",
   "melisma_min": 1.10,
   "melisma_max": 1.45,
-  "register": {"mean": 74, "top": 84, "tolerance": 5},
+  "register": {"mean": 70, "top": 80, "max_top": 84, "tolerance": 3},
+  "tessitura_share_ge_c5_max": 0.80,
+  "chorus_lift_min": 5,
   "max_top_duration_share": 0.65,
   "min_distinct_durations": 5,
-  "ties_min": 3,
+  "ties_min": 1,
   "min_fill_notes": 3,
   "ins_active_share_min": 0.20,
   "chords_min": 0,
   "max_unbroken_seconds": 10,
   "min_phrase_endings": 3,
-  "maqam": {"name": "kurd", "tonic": "D",
-            "degrees": ["D", "Eb", "F", "G", "A", "Bb", "C"],
-            "resting": ["D", "F", "A", "Bb", "C"]},
+  "strict_shape": true,
+  "maqam": null,
+  "maqam_fit_min": 0.95,
   "deviations": [
-    {"bars": "5-58", "channel": "gap rate", "before": "an answer after every line", "after": "answers thin through verse 1, vanish for four lines, then return"},
-    {"bars": "34-38, 61-65", "channel": "density", "before": "guitar present under the voice", "after": "Ins rests through both choruses"},
-    {"bars": "34-65", "channel": "section register", "before": "one verse-level register", "after": "choruses lift, verse 2 sits lower"},
-    {"bars": "66-78", "channel": "repetition rate", "before": "the voice sings to the last bar", "after": "voice stops on the tonic, the guitar closes alone"}
+    {"bars": "1-2, 15-16", "channel": "section register", "before": "guitar under the voice", "after": "guitar owns the intro and outro"},
+    {"bars": "3-14", "channel": "gap rate", "before": "an answer after every line", "after": "answers thin to the first and third lines"},
+    {"bars": "9-14", "channel": "section register", "before": "one verse-level register", "after": "the chorus lifts the median without sitting above C5 throughout"}
   ]
 }
 ```
@@ -222,9 +231,18 @@ before the first bar.
   target: it warns by default. **If the brief asks for less ornament, set
   `melisma_min` to 1.00 and keep `melisma_max` around 1.15; a style WARN is
   acceptable. Never add notes the user asked you to remove.**
-- `register`: the verse mean and the highest note the take should reach. The
-  corpus mean is 73.5 and the top median is 84. Use `{"mean": 74, "top": 84,
-  "tolerance": 5}`; 82 is P25, not a target. 85 is a stretch, not a default.
+- `register`: `mean` is the verse centre; `top` is the note the take must
+  reach; `max_top` is the ceiling. `tolerance` is the style band around the
+  mean (use 3; the sanity guard stays ±5). For a full song the corpus mean is
+  73.5, top median 84, top P95 86; the 16-bar fixture uses 70/80 only because
+  it is a miniature, not a register target. A high note alone is not a style:
+  the chorus lifts the median, not the whole line.
+- `tessitura_share_ge_c5_max`: the share of vocal notes at or above C5. Corpus
+  median 71%, P95 84.5%, max 91%. The style target is **0.80**: a score can
+  reach high notes without sitting there. `strict_shape` makes a miss hard.
+- `chorus_lift_min`: the median chorus pitch minus the median verse pitch, in
+  semitones. Corpus median 2, P95 7; the release target is **5**. It is a
+  brief target, not a corpus sanity guard.
 - `max_top_duration_share`: the corpus median is 61%, P75 is 69%, and the
   sanity ceiling is **0.85**. Use **0.65** as the style target. Never copy
   0.85 as a target: it is the last value before the gate fails.
@@ -247,12 +265,17 @@ before the first bar.
   §3.3.
 - `max_unbroken_seconds`: the longest a singer goes without a breath. Corpus
   median 10.4 s, max 22.9 s; the sanity ceiling is 23 s and the style target is
-  **10**. Use 10. A 14-syllable line at 74 BPM is about 8 s; 10 s is one line,
-  not two.
+  **10**. Use 10. A 14-syllable line at 80 BPM is about 7.5 s; 10 s is one
+  line, not two.
 - `min_phrase_endings`: at least **3** distinct phrase-ending pitches, with the
   final one on the tonic. Corpus min 4, median 7. The checker counts them from
   the phrase boundaries; a score with fewer than 3 (and at least 6 phrases)
   fails the sanity guard.
+- `strict_shape`: `true` in the template. It makes the shape targets the plan
+  declares (`max_unbroken_seconds`, `max_top_duration_share`, `tessitura`,
+  `register`, `chorus_lift_min`, `silence`, `maqam_fit`, phrase plan) **hard**.
+  Without the flag they stay warnings, as in 0.3.0. This is how the brief
+  becomes an acceptance test without changing the corpus sanity gate.
 - `maqam`: **required when the prompt names a maqam**; `null` only when no
   maqam was given. `degrees` is the pitch set the vocal may use; `resting` is
   the set intermediate phrases may end on; `tonic` must match `K:`. When
@@ -273,17 +296,21 @@ the bars, not in prose.
   derives from one. Write each with the transformation you will use.
 - **Register.** From a bare render; offline, the `references/reference.md` §7 prior,
   labelled unmeasured. The corpus verse mean is **71.7–75.1 MIDI** (median 73.5)
-  and the top is **81–86** (median 84). Use 74 mean and 84 top; 82 is P25, not a
-  target, and 88 is a stretch. Put the chorus inside the same ceiling and do not
-  write the verse an octave below it.
+  and the top is **81–86** (median 84). For a full song use 74 mean, 84 top, and
+  a `max_top` of 86; 82 is P25 and 88 is a stretch. The 16-bar fixture uses
+  70/80 because it is a miniature, not a register target. Put the chorus inside
+  the same ceiling and do not write the verse an octave below it. One planned
+  peak per section, not a high tessitura throughout:
+  `tessitura_share_ge_c5_max 0.80` is the target.
 - **Phrase and breath.** **One lyric line is one phrase.** `syllabify.py` prints
-  the bars per line; use that budget and put a rest at the end of every line.
-  At 74 BPM one beat is 0.81 s (`z4`), two beats 1.62 s (`z8`); a breath is at
-  least 0.5 s. Do not chain a bayt (two hemistichs) into one 5-bar phrase: a
-  14-syllable line at 74 BPM is about 8 s, and the ceiling is 10 s unbroken.
-  If a line runs longer, split it at the caesura. The silence floor is 22% of
-  the sung span (corpus median 30%); rests are added by allocating bars, not by
-  removing syllables.
+  the bars per line and can write a `phrases.json` sidecar (`--phrases`). Copy
+  the line table, set the absolute `bar_start`/`bar_end` after the section
+  layout, and pass it to the checker. At 80 BPM one beat is 0.75 s (`z4`), two
+  beats 1.5 s (`z8`); a breath is at least 0.5 s. Do not chain a bayt (two
+  hemistichs) into one 5-bar phrase: a 14-syllable line at 80 BPM is about
+  7.5 s, and the ceiling is 10 s unbroken. If a line runs longer, split it at
+  the caesura. The silence floor is 22% of the sung span (corpus median 30%);
+  rests are added by allocating bars, not by removing syllables.
 - **Cadence note.** The **final** vocal note is the tonic. Intermediate phrases
   end on the maqam's resting tones, and the score uses **at least three
   different phrase-ending pitches**. Do not end every phrase on the tonic: that
@@ -316,16 +343,19 @@ X:1
 T:
 M:4/4
 L:1/16
-Q:1/4=73
+Q:1/4=80
 V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
 V: Ins clef=treble name="Ins Melody" snm="Inst."
-K:Dm
+K:Am
 % intro
 V: Vocal
-Z4|
+Z|
 V: Ins
-z8 D2 E2 F2 E2|D8-D4 z4|z4 G2 F2 E2 D2 z4|D2 E2 F2 G2 A4 G4|
+A,4 C4 E4 A4|
 ```
+
+The tempo and key come from your plan, not from this example. The example is
+a dialect fixture; do not copy its register, proportions, or section lengths.
 
 Rules that save a repair pass:
 
@@ -364,19 +394,23 @@ Rules that save a repair pass:
 ### 3.5 Check
 
 ```bash
-python3 <skill>/scripts/checker.py score.abc --plan plan.json --json report.json --require-final-rest
+python3 <skill>/scripts/checker.py score.abc --plan plan.json \
+  --phrases phrases.json --json report.json --require-final-rest
 ```
 
 Exit 0 means no **hard** check failed; `WARN` lines are style diagnostics and
-do not fail. Add `--strict-style` only if you want style targets to fail too.
-The checker runs the vendored runtime parser first; if it prints
-`FAIL runtime parse`, the renderer cannot read the file at all — fix the dialect
-(usually a blank line, a header line, or a tie), not the checker.
+do not fail unless `strict_shape` is in the plan or you pass `--strict-style`.
+The default check is a validity check. **Release quality is
+`--strict-style` with zero WARNs.** The checker runs the vendored runtime parser
+first; if it prints `FAIL runtime parse`, the renderer cannot read the file at
+all — fix the dialect (usually a blank line, a header line, or a tie), not the
+checker.
 
 On a sanity `FAIL`, fix **only** the bars named, then run it once more. No other
-edits. If a style warning matters for the brief, write the missing music or
-declare the deviation; do not lower a sanity threshold. If a check can only be
-satisfied by changing the plan, change the plan and say so; never fake a number.
+edits. If a shape target misses, write the missing music; do not lower a
+threshold. If a check can only be satisfied by changing the plan, change the
+plan and say so; never fake a number. A declared arrangement deviation is not a
+waiver for breath, tessitura, duration mix, endings, or silence.
 
 ### 3.5.1 Error → fix
 
@@ -389,6 +423,9 @@ satisfied by changing the plan, change the plan and say so; never fake a number.
 | `repeated notes` FAIL | Repeat a pitch or a 3-note cell; do not transpose the scale. |
 | `phrase endings` FAIL | End intermediate phrases on different resting tones; only the final phrase is tonic. |
 | `silence` WARN | Add rests at line ends. The vocal needs 22% rest; the guitar is not the cause. |
+| `tessitura share` WARN/FAIL | Remove sustained notes at/above C5; keep one planned peak per section. Do not raise the target. |
+| `chorus lift median` WARN/FAIL | Move the verse down or the chorus median up; the chorus lifts the median, not only the top note. |
+| `phrase plan` WARN/FAIL | Add the missing line-end rest or fix the bar range; use the `syllabify.py --phrases` table. |
 | melisma target WARN after a "less melisma" request | Lower `melisma_min` to 1.00, keep `melisma_max`, say so; do not add notes. |
 
 One check per change. If a check passes, stop checking; do not re-run after a
@@ -411,6 +448,10 @@ When the user gives feedback on a finished score:
    target.
 5. **Stop after one pass.** If the user is still unhappy, ask which section
    (chorus, verse, outro) and work there.
+6. **A quality WARN is not an arrangement deviation.** If the final check has a
+   shape WARN (breath, tessitura, duration, endings, silence), fix it or report
+   it with the user's explicit approval. Do not file it under `deviations` to
+   make the report look clean.
 
 A revision is not a second composition. One scoped edit and one check are the
 whole budget.
@@ -444,15 +485,21 @@ These catch an octave error, a monotone rhythm, a missing second voice, a
 one-breath scale, or a score that is not in the corpus universe. They do **not**
 prescribe a style.
 
+**Structure — declared shape targets (hard under `strict_shape`):**
+
+- `max_unbroken_seconds`, `max_top_duration_share`, `tessitura_share_ge_c5_max`,
+  `register` (mean/top/max_top), `chorus_lift_min`, `silence`, `maqam_fit`,
+  `min_phrase_endings`, and the optional `phrases.json` line plan;
+- `cadence: "tonic"` is always a self-imposed hard target.
+
+These are the brief, not a corpus gate. A plan without `strict_shape` falls back
+to the 0.3.0 warnings; a plan with it makes the declared values FAIL.
+
 **Style — WARN by default; `--strict-style` makes them FAIL:**
 
-- the plan's melisma band, register mean/top, duration spread, duration
-  variety, ties, answer fill, Ins activity, chords, and sections;
-- **phrase shape**: longest unbroken (plan `max_unbroken_seconds`), distinct
-  endings (plan `min_phrase_endings`), and maqam fit (`maqam_fit_min`);
-- cadence: a warning unless the plan declares `"cadence": "tonic"`; that one is
-  a self-imposed hard target;
-- silence, answer mutation, chorus lift, deviations.
+- the plan's melisma band, duration variety, ties, answer fill, Ins activity,
+  chords, sections;
+- answer mutation, chorus max lift, deviations, final rest.
 
 **Listening is the only aesthetic gate, and it needs audio.** The sanity guards
 ask "is this a score in the same universe?"; the style warnings ask "is it the
@@ -461,15 +508,26 @@ brief you declared?" Neither is a verdict on beauty. Offline, say so.
 ## 5. Report
 
 `CHANGES.txt` = the plan's deviation list plus the checker's `MEASURED` block,
-copied verbatim. `report.json` is the `--json` output. Never retype a number.
-The measured block includes `register_mean`, `register_top`, `register_range`,
-`top_duration_share`, `distinct_durations`, `ties`, `fill_lengths`,
-`ins_active_share`, `chords`, `unbroken_seconds_max`, `phrase_seconds_median`,
-`repeated_share`, `distinct_phrase_endings`, `phrase_endings`,
-`tessitura_share_ge_c5`, `chromatic_basis`, `maqam_fit_share`, and a
-`percentiles` line that places each value in the 177-track distribution. Quote
-them; do not restate them from memory. Every check also carries its `class`
-(`contract`, `sanity`, `style`).
+copied verbatim, plus a `WARNINGS` section. `report.json` is the `--json`
+output. Never retype a number. The measured block includes `register_mean`,
+`register_top`, `register_range`, `top_duration_share`,
+`distinct_durations`, `ties`, `fill_lengths`, `ins_active_share`, `chords`,
+`unbroken_seconds_max`, `phrase_seconds_median`, `repeated_share`,
+`distinct_phrase_endings`, `phrase_endings`, `tessitura_share_ge_c5`,
+`verse_chorus_semitones`, `phrases_checked`, `phrase_violations`,
+`chromatic_basis`, `maqam_fit_share`, and a `percentiles` line that places each
+value in the 177-track distribution. Quote them; do not restate them from
+memory. Every check also carries its `class` (`contract`, `sanity`, `structure`,
+`style`).
+
+```
+WARNINGS
+- <check>: <measured vs target> -> FIXED <bars/change>
+- <check>: <measured vs target> -> DECLARED <reason + user approval>
+```
+
+A release-quality score has no open `WARNINGS` rows. A shape WARN is a miss,
+not a style preference; a declared arrangement deviation is not a waiver.
 
 `chromatic_per_100` is measured against `plan.maqam.degrees` when a maqam block
 is present, and against `K:` when it is not. A Kurd score written as `K:Dm`
@@ -492,16 +550,20 @@ chords at all. See `references/reference.md` §9 for the boundary.
   guitar on whole-bar rests, two-note answers, no ties, no chords: every bar can
   add up and the result is not a score. The sanity guards and style warnings
   exist for this.
-- **Copying the example as a template.** It is a 16-bar shape, not a melody.
-  Copy the shape (intro/verse/chorus/outro, answers in the rests, a tied
-  cadence), never the pitches.
+- **Copying the example or the §3.2 plan as a template.** Both are 16-bar
+  dialect fixtures, not a melody or a song frame. Derive bars, syllables,
+  tempo, key, sections, and register from `syllabify.py` and the prompt; never
+  copy 16/80/Am or the example's three deviations onto another lyric.
 - **Writing a scale.** `D2 F2 G2 A2 B2 A2 G2 F2` in every bar is a finger
   exercise. Start from a 3–6 note motif, repeat notes, hold a long note, and
   mutate the cell. The corpus repeats a pitch on 25–43% of intervals; a line
   with almost none is a scale.
-- **One breath per bayt.** A 5-bar phrase at 74 BPM is 16 s without a breath.
-  One lyric line is one phrase; put a rest at each line end and use the
-  `syllabify.py` bars-per-line table.
+- **One breath per bayt.** A 5-bar phrase at 80 BPM is about 15 s without a
+  breath. One lyric line is one phrase; put a rest at each line end, use the
+  `syllabify.py --phrases` sidecar, and pass it to `checker.py --phrases`.
+- **Sitting above C5 throughout.** The chorus lifts the median; it does not
+  move the whole line into the top register. Keep `tessitura_share_ge_c5` at
+  or below 0.80 and plan one peak per section.
 - **Ending every phrase on the tonic.** Only the final phrase ends on the tonic.
   Intermediate phrases end on the maqam's resting tones; use at least three
   different endings.
@@ -526,11 +588,13 @@ chords at all. See `references/reference.md` §9 for the boundary.
 
 ## 7. Cost
 
-Composition: one `syllabify` run, one plan, one score, one check, at most one
-repair. If you are past that, the plan was wrong — go back to 3.2, not to the
-parser. Revision: one scoped edit and one check per feedback. If a revision
-needs a second repair, the plan and the request disagree; change the plan, not
-the music.
+Composition: one `syllabify` run (with `--phrases`), one plan, one score, one
+check, at most one repair. The first pass must meet the declared shape targets;
+if you are past that, the plan was wrong — go back to 3.2, not to the parser.
+Before delivering a release-quality score, run `--strict-style`; a shape WARN
+is a miss, not a free pass. Revision: one scoped edit and one check per
+feedback. If a revision needs a second repair, the plan and the request
+disagree; change the plan, not the music.
 
 ## 8. Corpus tools (bundled)
 
@@ -550,8 +614,10 @@ scripts/ostris_cli.py check    score.abc --plan plans/song/skill_plan.json --rep
 
 - `plan` writes `brief.json` and `skill_plan.json`. `skill_plan.json` carries the
   15 targets `checker.py` requires plus the shape targets
-  (`max_unbroken_seconds`, `min_phrase_endings`); pass it to `check`, never
-  `brief.json`.
+  (`max_unbroken_seconds`, `min_phrase_endings`, `tessitura_share_ge_c5_max`,
+  `chorus_lift_min`, `register.max_top`); `strict_shape` is false in the
+  objective generated plan. Set it true for a composer release brief. Pass
+  `skill_plan.json` to `check`, never `brief.json`.
 - `exemplar` returns 2–4 bar structural phrases. They are unreviewed. Do not
   call them maqam examples.
 - `check` runs `checker.py`, adds a prior percentile and an interval-similarity

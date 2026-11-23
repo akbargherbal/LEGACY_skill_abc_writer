@@ -30,6 +30,8 @@ PRIOR_METRICS = (
     "notes_per_syllable",
     "register_mean",
     "distinct_durations",
+    "tessitura_share_ge_c5",
+    "verse_chorus_semitones",
 )
 
 

@@ -17,6 +17,7 @@ import checker  # noqa: E402
 
 EXAMPLE = SKILL / "example" / "score.abc"
 PLAN = SKILL / "example" / "plan.json"
+PHRASES = SKILL / "example" / "phrases.json"
 
 MULTI_METER = """X:1
 T:
@@ -93,6 +94,80 @@ class CheckerTests(unittest.TestCase):
         self.assertTrue([r for r in results if r[0] == "FAIL"
                          and r[1] == "final rest"], results)
 
+    def test_example_passes_strict_shape_and_style(self):
+        score = checker.parse(EXAMPLE.read_text(encoding="utf-8"))
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        phrases = json.loads(PHRASES.read_text(encoding="utf-8"))
+        results, measured = checker.check(
+            score, plan, strict_style=True, strict_shape=True,
+            phrase_plan=phrases, require_final_rest=True, calibration=self.cal)
+        self.assertFalse([r for r in results if r[0] in ("FAIL", "WARN")], results)
+        self.assertTrue(measured["phrases_checked"])
+
+    def test_strict_shape_is_backward_compatible(self):
+        score = checker.parse(EXAMPLE.read_text(encoding="utf-8"))
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        plan["max_unbroken_seconds"] = 0.1
+        plan.pop("strict_shape", None)
+        results, _ = checker.check(score, plan, calibration=self.cal)
+        self.assertTrue([r for r in results if r[0] == "WARN"
+                         and r[1] == "unbroken target"], results)
+        plan["strict_shape"] = True
+        results, _ = checker.check(score, plan, calibration=self.cal)
+        self.assertTrue([r for r in results if r[0] == "FAIL"
+                         and r[1] == "unbroken target"], results)
+
+    def test_strict_shape_fails_a_long_phrase(self):
+        score = checker.parse(ONE_BREATH_SCALE)
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        plan.update({
+            "bars": 16, "tempo": 74, "sections": ["verse"], "syllables": 120,
+            "max_unbroken_seconds": 10, "min_phrase_endings": 3,
+            "strict_shape": True,
+        })
+        results, _ = checker.check(score, plan, calibration=self.cal)
+        self.assertTrue([r for r in results if r[0] == "FAIL"
+                         and r[1] == "unbroken target"], results)
+
+    def test_tessitura_and_register_ceilings(self):
+        score = checker.parse(EXAMPLE.read_text(encoding="utf-8"))
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        plan["strict_shape"] = True
+        plan["tessitura_share_ge_c5_max"] = 0.2
+        results, _ = checker.check(score, plan, calibration=self.cal)
+        self.assertTrue([r for r in results if r[0] == "FAIL"
+                         and r[1] == "tessitura share"], results)
+        plan["tessitura_share_ge_c5_max"] = 0.8
+        plan["register"]["max_top"] = 80
+        results, _ = checker.check(score, plan, calibration=self.cal)
+        self.assertTrue([r for r in results if r[0] == "FAIL"
+                         and r[1] == "register max top"], results)
+
+    def test_chorus_median_lift(self):
+        score = checker.parse(EXAMPLE.read_text(encoding="utf-8"))
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        plan["strict_shape"] = True
+        plan["chorus_lift_min"] = 20
+        results, _ = checker.check(score, plan, calibration=self.cal)
+        self.assertTrue([r for r in results if r[0] == "FAIL"
+                         and r[1] == "chorus lift median"], results)
+
+    def test_phrase_plan_checks_the_line_end_pause(self):
+        score = checker.parse(EXAMPLE.read_text(encoding="utf-8"))
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        phrases = json.loads(PHRASES.read_text(encoding="utf-8"))
+        results, _ = checker.check(
+            score, plan, strict_shape=True, phrase_plan=phrases,
+            calibration=self.cal)
+        self.assertTrue([r for r in results if r[0] == "PASS"
+                         and r[1] == "phrase plan"], results)
+        phrases["lines"][0]["pause_after_s"] = 99
+        results, _ = checker.check(
+            score, plan, strict_shape=True, phrase_plan=phrases,
+            calibration=self.cal)
+        self.assertTrue([r for r in results if r[0] == "FAIL"
+                         and r[1] == "phrase plan"], results)
+
     def test_sanity_set_passes_the_example(self):
         score = checker.parse(EXAMPLE.read_text(encoding="utf-8"))
         plan = json.loads(PLAN.read_text(encoding="utf-8"))
@@ -132,12 +207,18 @@ class CheckerTests(unittest.TestCase):
         self.assertLess(measured["distinct_phrase_endings"], 3)
 
     def test_maqam_measures_against_declared_degrees(self):
-        """D Kurd written as K:Dm must not be called 100th-percentile chromatic."""
+        """A defining flat must be measured against the maqam, not the key."""
         import re
         lines = []
         for line in EXAMPLE.read_text(encoding="utf-8").splitlines():
             if not line.startswith(("X:", "T:", "M:", "L:", "Q:", "V:", "K:", "%")):
-                line = re.sub(r"(?<![_^=])([Ee])(?=[0-9,])", r"_\1", line)
+                # Am has F natural; Kurd has Eb. Re-spell F/f as Eb/eb so the
+                # same note is chromatic against the key but inside the maqam.
+                line = re.sub(
+                    r"(?<![_^=])([EeFf])(?=[0-9,])",
+                    lambda m: "_E" if m.group(1).isupper() else "_e",
+                    line,
+                )
             lines.append(line)
         score = checker.parse("\n".join(lines) + "\n")
         plan = json.loads(PLAN.read_text(encoding="utf-8"))

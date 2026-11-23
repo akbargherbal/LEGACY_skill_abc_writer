@@ -1,11 +1,12 @@
 # OSTRIS plan — implementation checklist
 
-**Snapshot:** 2026-11-23 · **Repo:** `skill_abc_writer` · **Skill:** v0.2.0
-**Tools:** 0.3.0 · **Overall:** M0–M5 implemented; M6 objective half implemented;
+**Snapshot:** 2026-11-23 · **Repo:** `skill_abc_writer` · **Skill:** v0.4.0
+**Tools:** 0.4.0 · **Overall:** M0–M5 implemented; M6 objective half implemented;
 M7 documented and in CI. Named-maqam work stays deferred.
 Implementation commit `ecde347`, pushed to `origin/main`; earlier `7ffae22`,
 `3115daa`.
-**Last verified:** 38 tests pass, `make selftest` and `make offline-check` pass,
+**Last verified:** 51 tests pass, `make selftest`, `make acceptance` and
+`make offline-check` pass,
 contract pins match, `dist/abc_score_writer.zip` rebuilt with the bundled data.
 
 Legend: ✅ done · 🟡 partial · ⏳ not started · ⏸️ deferred/blocked.

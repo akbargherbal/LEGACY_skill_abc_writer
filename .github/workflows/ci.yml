@@ -23,5 +23,7 @@ jobs:
         run: make test
       - name: Skill selftest
         run: make selftest
+      - name: Acceptance checks
+        run: make acceptance
       - name: Contract pins
         run: python3 02_maqam-score/scripts/ostris_cli.py contract --strict

@@ -1,6 +1,6 @@
 # OSTRIS handoff
 
-**Date:** 2026-11-23 · **Tools version:** 0.3.0 · **Skill:** v0.2.0
+**Date:** 2026-11-23 · **Tools version:** 0.4.0 · **Skill:** v0.4.0
 
 This note is for whoever picks up the corpus tools next, especially a reviewer
 who can supply the maqam labels this build deliberately does not invent.

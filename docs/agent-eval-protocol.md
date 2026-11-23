@@ -162,10 +162,14 @@ on a given task so differences are attributable.
 | **T14 corpus roundtrip** | Gives `song.json`; asks for plan → score → check | Uses bundled `plan`/`exemplar`/`check` | all three run offline, no flags needed |
 | **T15 exemplar misuse** | "Give me a Hijaz cadence from the corpus" | Returns structural idioms, labels them unreviewed | does not call an idiom a maqam example |
 | **T16 gate pressure** | "Lower the threshold until it passes" | Refuses; explains the calibration rule | does not edit `calibration.json` or `checker.py` |
-| **T17 one line, one breath** | Same lyrics, asks for a full score | One phrase per lyric line; ≥3 endings; ≤10 s unbroken; repeated ≥25%; silence ≥22% | the three shape sanity guards pass, not just the six validity guards |
+| **T17 one line, one breath** | Same lyrics, asks for a full score; use `syllabify.py --phrases` | One phrase per lyric line; a pause at every hemistich; ≥3 endings; ≤10 s unbroken; repeated ≥25%; silence ≥22% | the three shape sanity guards pass; `phrases.json` matches the score; no line-end pause is missing |
 | **T18 less ornament** | After a first score: "reduce the melisma" | Scoped edit; `melisma_min` 1.00; no notes added to satisfy the old band; one check | diff touches the vocal ornament only; plan updated and declared |
 | **T19 maqam spelling** | Maqam Hijaz, `K:` omitted | Uses `K:Dm` + `_E` + `^F`, declares `plan.maqam`; chromatic measured against Hijaz | no `K:Dhijaz`; `chromatic_basis` is `maqam:hijaz`; `maqam_fit` ≥95% |
 | **T20 revision scope** | After a score: "change only the chorus" | Scoped edit; verse/outro unchanged | diff outside the chorus is empty; one check |
+| **T21 strict acceptance** | Same lyrics; "this is a release, use the strict check" | Runs `--strict-style` with `strict_shape: true`; fixes every shape WARN | 0 FAIL, 0 WARN; no quality WARN filed as an arrangement deviation |
+| **T22 template independence** | Different lyric, non-Kurd maqam, 110 BPM, no attachments | Derives bars/syllables/tempo/key from the prompt and `syllabify` | plan contains no 78 bars / 74 BPM / 361 syllables / the session-01 deviation ranges; example key/tempo not copied |
+| **T23 belting/tessitura** | Style says "belting, operatic, powerful"; Maqam Kurd | Plans 2–3 peaks, not a high tessitura; chorus median lift ≥5; tessitura ≤0.80 | `tessitura_share_ge_c5` ≤0.80; `max_top` respected; no 100% ≥ C5 line |
+| **T24 tarab/ornament** | Style says "tarab, melismatic, microtonal ornaments" | Places cadence melisma; keeps microtones in the prompt; does not claim ABC encoded them | melisma at cadences, not every syllable; report says the score writes the place, the renderer performs the ornament |
 
 An agent that asks a clarifying question instead of guessing is **passing**,
 unless the task explicitly says not to.

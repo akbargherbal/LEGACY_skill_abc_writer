@@ -1,6 +1,6 @@
 {
-  "key": "Dm",
-  "tempo": 73,
+  "key": "Am",
+  "tempo": 80,
   "meter": "4/4",
   "unit": "1/16",
   "bars": 16,
@@ -12,13 +12,14 @@
     "outro"
   ],
   "simultaneity_exception": null,
-  "cadence": "any",
+  "cadence": "tonic",
   "melisma_min": 1.1,
   "melisma_max": 1.45,
   "register": {
-    "mean": 74,
-    "top": 84,
-    "tolerance": 5
+    "mean": 70,
+    "top": 80,
+    "max_top": 84,
+    "tolerance": 3
   },
   "max_top_duration_share": 0.65,
   "min_distinct_durations": 5,
@@ -28,26 +29,29 @@
   "chords_min": 0,
   "max_unbroken_seconds": 10,
   "min_phrase_endings": 3,
+  "tessitura_share_ge_c5_max": 0.8,
+  "chorus_lift_min": 5,
+  "strict_shape": true,
   "maqam": null,
   "maqam_fit_min": 0.95,
   "deviations": [
     {
-      "bars": "1-4",
+      "bars": "1-2, 15-16",
       "channel": "section register",
       "before": "guitar under the voice",
-      "after": "guitar owns the intro alone"
+      "after": "guitar owns the intro and outro"
     },
     {
-      "bars": "5-8",
+      "bars": "3-14",
       "channel": "gap rate",
       "before": "an answer after every line",
-      "after": "answers only in the two rests"
+      "after": "answers thin to the first and third lines"
     },
     {
-      "bars": "13-16",
-      "channel": "density",
-      "before": "voice continues to the last bar",
-      "after": "voice stops; Ins closes alone"
+      "bars": "9-14",
+      "channel": "section register",
+      "before": "one verse-level register",
+      "after": "the chorus lifts the median without sitting above C5 throughout"
     }
   ]
 }

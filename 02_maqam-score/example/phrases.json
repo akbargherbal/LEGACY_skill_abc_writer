@@ -1,0 +1,40 @@
+{
+  "tempo": 80,
+  "meter": "4/4",
+  "unit": "1/16",
+  "body_bars": 6,
+  "lines": [
+    {
+      "line": 1,
+      "section": "verse",
+      "syllables": 4,
+      "bar_start": 2,
+      "bar_end": 2,
+      "pause_after_s": 0.5
+    },
+    {
+      "line": 2,
+      "section": "verse",
+      "syllables": 4,
+      "bar_start": 4,
+      "bar_end": 4,
+      "pause_after_s": 1.0
+    },
+    {
+      "line": 3,
+      "section": "chorus",
+      "syllables": 4,
+      "bar_start": 8,
+      "bar_end": 8,
+      "pause_after_s": 0.5
+    },
+    {
+      "line": 4,
+      "section": "chorus",
+      "syllables": 4,
+      "bar_start": 10,
+      "bar_end": 10,
+      "pause_after_s": 1.0
+    }
+  ]
+}

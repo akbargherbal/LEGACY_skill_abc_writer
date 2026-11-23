@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-23b",
+  "version": "2026-11-23c",
   "corpus": {
     "name": "five_stars/177",
     "n": 177,
@@ -217,6 +217,17 @@
       "max": 0.91,
       "basis": "analysis/measure_phrasing.py over five_stars/177 (2026-11-23)"
     },
+    "verse_chorus_semitones": {
+      "n": 177,
+      "min": -4.0,
+      "p5": 0.0,
+      "p25": 1.0,
+      "median": 2.0,
+      "p75": 4.0,
+      "p95": 7.0,
+      "max": 10.0,
+      "basis": "analysis/measure_phrasing.py over five_stars/177 (2026-11-23)"
+    },
     "breaths_per_bar": {
       "n": 177,
       "min": 0.136,
@@ -297,7 +308,10 @@
     "melisma_max": 1.45,
     "register_mean": 74,
     "register_top": 84,
-    "register_tolerance": 5,
+    "register_max_top": 86,
+    "register_tolerance": 3,
+    "tessitura_share_ge_c5_max": 0.8,
+    "chorus_lift_min": 4,
     "max_top_duration_share": 0.65,
     "min_distinct_durations": 5,
     "ties_per_10_bars": 0.4,
@@ -305,21 +319,24 @@
     "ins_active_share_min": 0.2,
     "chords_min_per_bar": 0.0,
     "silence_share_min": 0.22,
+    "phrase_pause_s": 0.5,
+    "bayt_pause_s": 1.0,
     "pace": 2.8,
     "case_ratio": 0.884,
     "tempo_default": 80,
     "max_unbroken_seconds": 10,
     "min_phrase_endings": 3,
-    "maqam_fit_min": 0.95
+    "maqam_fit_min": 0.95,
+    "strict_shape_default": false
   },
   "rules": {
     "hard": "contract + sanity (9: 6 validity + 3 shape)",
     "style": "warn by default; FAIL only with --strict-style",
-    "plan_style_targets": "warn by default; a declared cadence=tonic is the only self-imposed hard style target",
+    "plan_style_targets": "warn by default; strict_shape makes declared shape targets hard; cadence=tonic is always hard",
     "final_rest": "warn by default; --require-final-rest makes it a render contract",
     "sections": "normalized subsequence, warn by default"
   },
-  "skill_version": "0.3.0",
+  "skill_version": "0.4.0",
   "registry": "references/numbers.md",
   "analysis": "analysis/calibrate_177.py",
   "summary": "analysis/out/summary.json",

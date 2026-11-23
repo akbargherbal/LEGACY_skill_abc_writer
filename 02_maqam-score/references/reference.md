@@ -76,8 +76,9 @@ transliterate.** The job is a bar budget, not a recitation.
 ## 4. The ABC dialect (the parser contract)
 
 The runtime parser is `plumbing/yue2_instrumental/abc_tools.py`. It fails closed,
-and so does `checker.py`. `example/score.abc` is a passing 16-bar file; copy its
-shape.
+and so does `checker.py`. `example/score.abc` is a 16-bar syntax fixture; use it
+for the dialect, not as a song shape. Derive bars, syllables, tempo, key, and
+register from `syllabify.py` and the prompt.
 
 Header — exactly eight lines, no extras:
 
@@ -86,14 +87,15 @@ X:1
 T:
 M:4/4
 L:1/16
-Q:1/4=73
+Q:1/4=80
 V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
 V: Ins clef=treble name="Ins Melody" snm="Inst."
-K:Dm
+K:Am
 ```
 
-Body: `% section`, then `V: Vocal` + 1–4 bars, then `V: Ins` + the same number
-of bars. Repeat.
+Tempo and key come from the plan; the header above is a dialect example, not a
+default. Body: `% section`, then `V: Vocal` + 1–4 bars, then `V: Ins` + the
+same number of bars. Repeat.
 
 **A blank line ends the tune** for the runtime parser. Never put a blank line in
 the body; `checker.py` runs the vendored `abc_tools.parse` first and rejects it
@@ -251,7 +253,8 @@ outside it is a different animal.
 | phrase median (s) | 2.7 | 3.6 | 5.3 | max 5.8 |
 | repeated-pitch share | 27.2% | 32.4% | 38.9% | min 25.2%; a line below 20% is a scale |
 | distinct phrase endings | 5 | 7 | 8 | min 4; gate ≥3 |
-| tessitura ≥ C5 | 55.3% | 71.2% | 84.5% | max 91%; a high-register warning, not a gate |
+| tessitura ≥ C5 | 55.3% | 71.2% | 84.5% | max 91%; style/structure target ≤ 0.80, not a sanity gate |
+| verse→chorus median | −4 | +2 | +7 | semitones; release target +5, not a sanity gate |
 | breaths per bar | 0.18 | 0.24 | 0.41 | min 0.14 |
 
 Source: `analysis/measure_phrasing.py` over the same 177 transcripts
@@ -328,8 +331,13 @@ sixteenths; the answer fits inside it and leaves the bar at 16.
 The reference case's chorus top equalled the highest note the singer reached
 anywhere else: a lift *within* the voice, not beyond it. Offline, use §7.2 as a
 prior and say the range is unmeasured: mean **71.7–75.1** (median 73.5), top
-**81–86** (median 84). A plan of `mean 74, top 84` is the corpus median;
-`top 82` is P25 and `top 88` is a stretch, not a default.
+**81–86** (median 84). A plan of `mean 74, top 84, max_top 86` is the corpus
+median; `top 82` is P25 and `top 88` is a stretch, not a default.
+
+`top` is the note the take must reach; `max_top` is the ceiling. A high note is
+not a style. The chorus lifts the median by about five semitones; it does not
+move the whole line above C5. Keep `tessitura_share_ge_c5` at or below 0.80
+(corpus P95 0.845) and write one planned peak per section.
 
 ## 9. What the ABC cannot measure
 
@@ -337,7 +345,7 @@ prior and say the range is unmeasured: mean **71.7–75.1** (median 73.5), top
 |---|---|---|
 | chord symbols | **0 of 177** ABC scores carry them | the `chord.lab` sidecar / render |
 | motifs | no annotation in ABC | manual or corpus analysis |
-| per-line bar allocation | no `w:` alignment | forced alignment |
+| per-line bar allocation | `phrases.json` carries the line bar range/pause; syllable-to-note still needs `w:` | phrase sidecar + forced alignment |
 | timbre, mix, balance | not in ABC | prompt + LoRA + render |
 | microtonal ornament | not in the dialect | renderer |
 | audio quality | not in ABC | listening |

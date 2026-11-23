@@ -16,6 +16,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .contract import SKILL_ROOT
 from .sources import SourceError
 from .stats import band, clip, confidence, distribution
 
@@ -427,6 +428,16 @@ def _markdown(priors: dict) -> str:
     return "\n".join(lines)
 
 
+def _style_defaults() -> dict:
+    """Read the skill's calibrated style defaults (the registry is the JSON)."""
+    try:
+        return json.loads(
+            (SKILL_ROOT / "scripts" / "calibration.json").read_text(encoding="utf-8")
+        ).get("style_defaults", {})
+    except (OSError, json.JSONDecodeError, AttributeError):
+        return {}
+
+
 def plan_targets(priors: dict, *, bars: int, meter: str, tempo: float,
                  mode: str | None = None) -> dict:
     """Build the numeric targets a plan needs from one prior stratum.
@@ -450,6 +461,12 @@ def plan_targets(priors: dict, *, bars: int, meter: str, tempo: float,
     scale = bars / prior_bars if prior_bars else 1.0
     vocal_notes = median("vocal_notes", bars * 3.0) * scale
     melisma = 1.30
+    style = _style_defaults()
+    register_top = max(80, int(math.ceil(quantile("median_midi", "p90", 82.0))))
+    register_max = max(
+        register_top + 2,
+        int(style.get("register_max_top", register_top + 2)),
+    )
 
     return {
         "selection": selected,
@@ -458,9 +475,14 @@ def plan_targets(priors: dict, *, bars: int, meter: str, tempo: float,
         "melisma_max": 1.45,
         "register": {
             "mean": int(round(median("median_midi", 74.0))),
-            "top": max(80, int(math.ceil(quantile("median_midi", "p90", 82.0)))),
-            "tolerance": 5,
+            "top": register_top,
+            "max_top": register_max,
+            "tolerance": float(style.get("register_tolerance", 3)),
         },
+        "tessitura_share_ge_c5_max": float(
+            style.get("tessitura_share_ge_c5_max", 0.80)
+        ),
+        "chorus_lift_min": float(style.get("chorus_lift_min", 4)),
         "max_top_duration_share": round(
             clip(quantile("top_duration_share", "p75", 0.35), 0.20, 0.60), 2
         ),

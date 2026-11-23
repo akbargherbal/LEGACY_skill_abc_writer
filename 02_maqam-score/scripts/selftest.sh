@@ -5,17 +5,18 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "== syllabify: example"
-out=$(python3 scripts/syllabify.py example/lyrics.txt --tempo 73)
+out=$(python3 scripts/syllabify.py example/lyrics.txt --tempo 80)
 echo "$out" | head -12
 grep -q "syllables        16" <<<"$out" || { echo "FAIL: example syllables != 16"; exit 1; }
 
-echo "== checker: example must pass"
-python3 scripts/checker.py example/score.abc --plan example/plan.json
+echo "== checker: example must pass strict shape and strict style"
+python3 scripts/checker.py example/score.abc --plan example/plan.json \
+  --phrases example/phrases.json --require-final-rest --strict-style
 
 echo "== checker: a short bar must fail"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-sed 's/d2 d2 d4 e4 d4|/d2 d2 d4 e4|/' example/score.abc > "$tmp/broken.abc"
+sed 's/F2 F2 A8 G2 F2|/F2 F2 A8 G2|/' example/score.abc > "$tmp/broken.abc"
 if python3 scripts/checker.py "$tmp/broken.abc" > "$tmp/out" 2>&1; then
   echo "FAIL: the checker accepted an incomplete bar"; cat "$tmp/out"; exit 1
 fi
@@ -44,13 +45,14 @@ echo "correctly warned then rejected: $(grep -m1 'final rest' "$tmp/out")"
 
 echo "== checker: a blank line must fail the runtime parser"
 python3 - <<'PY' > "$tmp/blank.abc"
-import sys
 lines = open("example/score.abc", encoding="utf-8").read().splitlines()
 out = []
+inserted = False
 for line in lines:
     out.append(line)
-    if line == "Z4|" and not any(x.startswith("% verse") for x in out):
+    if not inserted and line == "A,4 C4 E4 A4|":
         out.append("")
+        inserted = True
 print("\n".join(out))
 PY
 if python3 scripts/checker.py "$tmp/blank.abc" > "$tmp/out" 2>&1; then
@@ -61,7 +63,7 @@ grep -q 'runtime parse' "$tmp/out" || {
 echo "correctly rejected: $(grep -m1 'runtime parse' "$tmp/out")"
 
 echo "== checker: a two-note answer warns by default, fails with --strict-style"
-sed 's/|z12 F E D C|/|z8 z6 F E|/' example/score.abc > "$tmp/shortfill.abc"
+sed 's/A,4 C4 E4 A4|/A,4 C4 z8|/' example/score.abc > "$tmp/shortfill.abc"
 if ! python3 scripts/checker.py "$tmp/shortfill.abc" --plan example/plan.json > "$tmp/out" 2>&1; then
   echo "FAIL: the default checker rejected a two-note answer"; cat "$tmp/out"; exit 1
 fi

@@ -110,6 +110,22 @@ class BundledDataTest(unittest.TestCase):
         for path in files:
             self.assertEqual(path.name, _zip_safe_name(path.name))
 
+    def test_example_plan_and_phrases_match_schemas(self):
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema is not installed")
+        schemas = SKILL / "schemas"
+        pairs = [
+            (SKILL / "example" / "plan.json", schemas / "plan.schema.json"),
+            (SKILL / "example" / "phrases.json", schemas / "phrases.schema.json"),
+        ]
+        for instance_path, schema_path in pairs:
+            with self.subTest(instance=instance_path.name):
+                instance = json.loads(instance_path.read_text(encoding="utf-8"))
+                schema = json.loads(schema_path.read_text(encoding="utf-8"))
+                jsonschema.validate(instance, schema)
+
     def test_record_source_paths_resolve(self):
         records = [
             json.loads(line)

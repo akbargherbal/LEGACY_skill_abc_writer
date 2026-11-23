@@ -18,8 +18,9 @@
 | `ostris-implementation-checklist.md` | Phase-by-phase progress: what is done, partial, deferred, and next |
 | `ostris-licensing.md` | Data/source inventory; licence status unknown, no clearance claimed |
 | `ostris-handoff.md` | Handoff: frozen contracts, how to add reviewed labels, reproduce commands |
-| `ostris-release-notes.md` | Tools v0.3.0: included commands, verified numbers, upgrade notes |
+| `ostris-release-notes.md` | Tools v0.4.0: included commands, verified numbers, upgrade notes |
 | `agent-eval-protocol.md` | Drop-folder agent evaluation: intake, task battery, rubric, confusion & token-waste audit, post-mortem → skill change |
+| `0.4.0-remaining-fixes-plan.md` | 0.4.0 implementation plan (applied): anti-anchoring, strict shape, tessitura, style tags, phrase sidecar |
 
 ## Baseline / input
 
