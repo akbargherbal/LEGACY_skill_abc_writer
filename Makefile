@@ -20,7 +20,8 @@ selftest:
 zip:
 	mkdir -p $(DIST)
 	rm -f $(ZIP)
-	zip -r $(ZIP) 02_maqam-score -x '*.pyc' -x '*__pycache__*'
+	zip -r $(ZIP) 02_maqam-score -x '*.pyc' -x '*__pycache__*' \
+		-x '02_maqam-score/data/README.md'
 
 # Public variant: skill code only, no bundled corpus artifacts (licensing, see
 # docs/ostris-licensing.md). Reader commands then need explicit --out/--priors.

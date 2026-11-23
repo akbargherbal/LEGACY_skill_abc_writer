@@ -11,11 +11,15 @@ of the generated artifacts, copied from `analysis/out/ostris/` by
 |---|---|---|
 | `source/` | `sync` (copy from the project data root) | `audit`, `build`, `features`, `eval --build-split` |
 | `records.jsonl`, `held_out.jsonl`, `manifest_links.csv` | `audit` | `features`, `priors`, `idioms`, `eval` |
-| `audit.*`, `canonical.*`, `features.*` | `audit`, `build`, `features` | humans, schemas |
+| `audit.json`, `canonical.json`, `features.json`, `idioms.json`, `similarity/similarity.json` | `audit`, `build`, `features`, `idioms`, `similarity` | humans, schemas |
 | `priors/` | `priors` | `plan`, `check` |
 | `idioms.jsonl`, `idioms.json` | `idioms` | `exemplar`, `similarity --build` |
 | `similarity/index.json` | `similarity --build` | `similarity --score`, `check` |
 | `eval/split.json` | `eval --build-split` | `eval --runs` |
+
+Generated Markdown reports (`audit.md`, `canonical.md`, `features.md`,
+`idioms.md`, `priors/priors.md`) are developer documentation and are **not**
+copied into the bundle.
 
 Every reader command defaults to this directory (`cli.py` resolves it from
 `__file__`), so no `--out`/`--priors`/`--cache` flag is needed from any working

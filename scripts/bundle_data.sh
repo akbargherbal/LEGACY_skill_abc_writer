@@ -21,15 +21,11 @@ files=(
   records.jsonl
   held_out.jsonl
   audit.json
-  audit.md
   canonical.json
-  canonical.md
   features.json
-  features.md
   manifest_links.csv
   idioms.json
   idioms.jsonl
-  idioms.md
 )
 dirs=(
   source
@@ -59,5 +55,8 @@ for name in "${dirs[@]}"; do
 done
 cp -a "$SRC/similarity/index.json" "$DST/similarity/index.json"
 cp -a "$SRC/similarity/similarity.json" "$DST/similarity/similarity.json"
+
+# Generated Markdown reports are developer documentation, not skill output.
+rm -f "$DST/priors/priors.md"
 
 echo "bundled $(du -sh "$DST" | cut -f1) into ${DST#$ROOT/}"
