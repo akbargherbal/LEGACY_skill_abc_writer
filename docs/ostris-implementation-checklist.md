@@ -3,7 +3,8 @@
 **Snapshot:** 2026-11-23 · **Repo:** `skill_abc_writer` · **Skill:** v0.2.0
 **Tools:** 0.3.0 · **Overall:** M0–M5 implemented; M6 objective half implemented;
 M7 documented and in CI. Named-maqam work stays deferred.
-Latest commit `ecde347`, pushed to `origin/main`; earlier `7ffae22`, `3115daa`.
+Implementation commit `ecde347`, pushed to `origin/main`; earlier `7ffae22`,
+`3115daa`.
 **Last verified:** 30 tests pass, `make selftest` passes, contract pins match,
 `dist/02_maqam-score.zip` rebuilt.
 
