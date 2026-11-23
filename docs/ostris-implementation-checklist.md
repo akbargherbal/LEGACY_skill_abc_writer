@@ -5,8 +5,8 @@
 M7 documented and in CI. Named-maqam work stays deferred.
 Implementation commit `ecde347`, pushed to `origin/main`; earlier `7ffae22`,
 `3115daa`.
-**Last verified:** 30 tests pass, `make selftest` passes, contract pins match,
-`dist/02_maqam-score.zip` rebuilt.
+**Last verified:** 38 tests pass, `make selftest` and `make offline-check` pass,
+contract pins match, `dist/02_maqam-score.zip` rebuilt with the bundled data.
 
 Legend: ✅ done · 🟡 partial · ⏳ not started · ⏸️ deferred/blocked.
 The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
@@ -196,10 +196,13 @@ The source plan is `docs/ostris-score-tools-plan.md`; decisions are in
 | `state` | ⏳ not implemented |
 | `search` | ⏳ optional, not implemented |
 
-Entry point: `scripts/ostris <command>` or
-`python3 02_maqam-score/scripts/ostris_cli.py <command>`.
+Entry point: `python3 02_maqam-score/scripts/ostris_cli.py <command>`.
 
 ## Artifacts
+
+The shippable artifacts are bundled under `02_maqam-score/data/ostris/` and
+included in `dist/02_maqam-score.zip`; `analysis/out/ostris/` is the
+regeneration workspace. The reader commands default to the bundle.
 
 | Artifact | Status |
 |---|---|
@@ -232,7 +235,8 @@ Entry point: `scripts/ostris <command>` or
 - [x] 1,304 idioms; 3,714 interval grams
 - [x] 0 named-maqam claims; 0 maqam-conditioned priors
 - [x] 8 schemas parse; generated artifacts validate against them
-- [x] 30 tests pass; `make selftest` passes; contract pins match; zip rebuilt
+- [x] 38 tests pass; `make selftest` and `make offline-check` pass; contract pins
+  match; zip rebuilt with `data/ostris/`
 
 ## Deviations from the plan
 
@@ -249,22 +253,31 @@ Entry point: `scripts/ostris <command>` or
 
 ## Reproduce and verify
 
+With the bundled package (no bucket, no flags):
+
+```bash
+make offline-check          # plan + exemplar + similarity + check on the bundle
+make test                   # unit tests
+make selftest               # dialect + checker sanity
+python3 02_maqam-score/scripts/ostris_cli.py contract --strict
+```
+
+Refreshing the corpus from the project data root:
+
 ```bash
 DATA_ROOT=gs://<bucket> make ostris-sync
 make ostris-audit
 make ostris-build
 make ostris-features
 make ostris-online          # priors + idioms + similarity + eval split
-make test                   # 30 tests
-make selftest               # dialect + checker sanity
-python3 02_maqam-score/scripts/ostris_cli.py contract --strict
+make ostris-bundle          # snapshot analysis/out into 02_maqam-score/data
 ```
 
 Per song:
 
 ```bash
-scripts/ostris plan  --manifest song.json --out plans/song
-scripts/ostris check score.abc --plan plans/song/skill_plan.json --report report.json
+python3 02_maqam-score/scripts/ostris_cli.py plan  --manifest song.json --out plans/song
+python3 02_maqam-score/scripts/ostris_cli.py check score.abc --plan plans/song/skill_plan.json --report report.json
 ```
 
 ## Next

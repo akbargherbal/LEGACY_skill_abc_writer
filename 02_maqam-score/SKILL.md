@@ -3,7 +3,8 @@ name: maqam-score
 description: >-
   Compose a NEW ABC score from Arabic lyrics and an arabmaqamrock style prompt:
   a small, declared set of deviations from the LoRA's own default arrangement.
-  Ships its own syllabifier and checker, so it runs offline in two commands.
+  Ships its own syllabifier and checker plus a corpus snapshot, so it runs
+  offline in two commands.
   Use when asked to write, compose, generate or design a score, melody, or ABC
   file from lyrics and a style. Do NOT use for editing an existing SheetSage2
   transcription — that is `maqam-edit`.
@@ -410,17 +411,21 @@ chords at all. See `references/reference.md` §9 for the boundary.
 One `syllabify` run, one plan, one score, one check, at most one repair. If you
 are past that, the plan was wrong — go back to 3.2, not to the parser.
 
-## 8. Corpus tools (optional)
+## 8. Corpus tools (bundled)
 
-When the project has generated OSTRIS priors, three commands use the corpus
-without putting it in context. They are optional: the skill still runs with the
-bundled checker alone.
+The corpus artifacts — source cache, records, priors, idiom bank, similarity
+index and evaluation split — ship with the skill under `<skill>/data/ostris/`.
+The three commands below work offline with no flags and no bucket access:
 
 ```bash
-scripts/ostris plan     --manifest song.json --out plans/song
-scripts/ostris exemplar --function cadence --bars 2
-scripts/ostris check    score.abc --plan plans/song/skill_plan.json --report report.json
+scripts/ostris_cli.py plan     --manifest song.json --out plans/song
+scripts/ostris_cli.py exemplar --function cadence --bars 2
+scripts/ostris_cli.py check    score.abc --plan plans/song/skill_plan.json --report report.json
 ```
+
+`plan` defaults to the bundled `priors/priors.json`; `exemplar` to the bundled
+`idioms.jsonl`; `check` to the bundled `priors/` and `similarity/`. Pass
+`--out`/`--priors` only to point at a different snapshot.
 
 - `plan` writes `brief.json` and `skill_plan.json`. `skill_plan.json` carries the
   15 targets `checker.py` requires; pass it to `check`, never `brief.json`.

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copy the lightweight OSTRIS inputs into the local analysis cache.
+# Refresh the lightweight OSTRIS inputs in the analysis cache.
+# Refresh-only: the skill ships a snapshot under 02_maqam-score/data/ostris/.
 # The 2.95 GiB audio bundle is never downloaded.
 #
 #   DATA_ROOT=gs://<bucket> scripts/sync_ostris.sh

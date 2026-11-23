@@ -15,8 +15,22 @@ standard library only (tests optionally use `jsonschema`)
 | M4 | `idioms` | `idioms.jsonl` (1,304 structural phrases) |
 | M4 | `similarity` | `similarity/index.json`, query on a score |
 | M4 | `check` | `report.json` with nested `skill_report`, prior percentile, similarity |
-| M5 | wrapper | `scripts/ostris`, `SKILL.md` §8 |
+| M5 | wrapper | `scripts/ostris_cli.py`, `SKILL.md` §8 |
 | M6 | `eval` | `eval/split.json` (14 generation + 17 retrieval); `eval/report.json` when runs are supplied |
+
+## Offline bundle (this build)
+
+- The corpus artifacts ship inside the skill at `02_maqam-score/data/ostris/`
+  (~13 MB raw, ~1.9 MB compressed) and are included in the zip.
+- `plan`, `exemplar`, `similarity --score`, and `check` default to that directory:
+  no flags, no bucket, no network.
+- The regeneration commands (`audit`, `build`, `features`, `priors`, `idioms`,
+  `eval --build-split`) also default to the bundled `source/`, so the corpus can
+  be rebuilt offline.
+- `sync` is refresh-only; `make ostris-bundle` snapshots `analysis/out/ostris/`
+  back into the skill after a refresh.
+- Not bundled: the 2.95 GiB audio (never read) and `work/canonical/`
+  (reproducible with `make ostris-build`).
 
 ## Verified
 
@@ -26,7 +40,8 @@ standard library only (tests optionally use `jsonschema`)
 - 1,304 idioms across 481 tracks; one track has no vocal notes.
 - 1,304 indexed idioms, 3,714 interval grams.
 - Held-out split: 31 usable, 4 without ABC, 14 generation + 17 retrieval.
-- **30 unit tests pass**; `make selftest` passes; contract pins match.
+- **38 unit tests pass**; `make selftest` passes; `make offline-check` passes;
+  contract pins match.
 - End-to-end on a real canonical track: contract+sanity pass, 5 style warnings,
   similarity run 11.
 

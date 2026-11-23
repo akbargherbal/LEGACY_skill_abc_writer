@@ -1,16 +1,21 @@
 """Command line for the OSTRIS corpus tools.
 
-Offline::
+The corpus artifacts ship with the skill under ``<skill>/data/ostris/``, so the
+reader commands below work offline with no flags::
 
-    python3 scripts/ostris_cli.py sync     --data-root gs://... --cache ...
-    python3 scripts/ostris_cli.py audit    --cache ... --out ...
-    python3 scripts/ostris_cli.py build    --cache ... --out ...
-    python3 scripts/ostris_cli.py features --cache ... --out ...
-    python3 scripts/ostris_cli.py priors   --out ...
-    python3 scripts/ostris_cli.py idioms   --out ...
-    python3 scripts/ostris_cli.py similarity --out ... --build
-    python3 scripts/ostris_cli.py eval     --cache ... --out ... --build-split
+    python3 scripts/ostris_cli.py audit    [--cache ...] [--out ...]
+    python3 scripts/ostris_cli.py build    [--cache ...] [--out ...]
+    python3 scripts/ostris_cli.py features [--cache ...] [--out ...]
+    python3 scripts/ostris_cli.py priors   [--out ...]
+    python3 scripts/ostris_cli.py idioms   [--out ...]
+    python3 scripts/ostris_cli.py similarity [--out ...] --build
+    python3 scripts/ostris_cli.py eval     [--cache ...] [--out ...] --build-split
     python3 scripts/ostris_cli.py contract
+
+``sync`` is only needed to refresh the bundle from the project data root; it is
+never required to read or compose::
+
+    python3 scripts/ostris_cli.py sync --data-root gs://... [--cache ...]
 
 Online::
 
@@ -43,12 +48,20 @@ from .similarity import build_index, query_file
 from .sync import sync
 
 
+# ``cli.py`` lives at ``<skill>/scripts/ostris/cli.py``; the corpus artifacts
+# ship next to the skill under ``<skill>/data/ostris/``.  Resolving from
+# ``__file__`` makes the defaults work from any working directory, so the
+# reader commands need no flags and no network.
+SKILL_ROOT = Path(__file__).resolve().parents[2]
+BUNDLED_DATA = SKILL_ROOT / "data" / "ostris"
+
+
 def _default_cache() -> Path:
-    return Path("data/ostris/source")
+    return BUNDLED_DATA / "source"
 
 
 def _default_out() -> Path:
-    return Path("data/ostris")
+    return BUNDLED_DATA
 
 
 def _print_json(data) -> None:

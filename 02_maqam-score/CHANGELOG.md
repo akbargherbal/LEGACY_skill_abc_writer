@@ -1,5 +1,33 @@
 # Changelog
 
+## Offline bundle — 2026-11-23
+
+### Packaged corpus artifacts
+- The OSTRIS artifacts now ship **inside the skill** at
+  `02_maqam-score/data/ostris/` and are included in
+  `dist/02_maqam-score.zip`, so the bucket is no longer a runtime dependency.
+- Bundle contents: `source/` (manifests, YT500 ABC shards, FADL album JSONs and
+  reference ABCs), `records.jsonl`, `held_out.jsonl`, `audit.*`,
+  `canonical.*`, `features.*`, `manifest_links.csv`, `priors/` (30 files),
+  `idioms.*`, `similarity/`, `eval/split.json`. ~13 MB raw / ~1.9 MB compressed.
+- The 2.95 GiB audio bundle and the derived `work/canonical/` copy are **not**
+  bundled; audio is never read, and `work/` is reproducible with
+  `make ostris-build`.
+- `cli.py` defaults now resolve from `__file__`:
+  `plan` reads the bundled `priors/priors.json`, `exemplar` the bundled
+  `idioms.jsonl`, `check` the bundled `priors/` + `similarity/`, and the
+  regeneration commands the bundled `source/`. No flags and no network needed.
+- New `scripts/bundle_data.sh` + `make ostris-bundle` snapshot
+  `analysis/out/ostris/` into the skill after a corpus refresh.
+- New `make offline-check`: exercises `exemplar`, `plan`, `similarity --score`
+  and `check` against the bundle from a temporary directory.
+- `sync` is unchanged but is now documented as refresh-only.
+- Skill contract stays **v0.2.0**: `checker.py`, `calibration.json` and
+  `abc_tools.py` are untouched, so the pinned hashes still match.
+- Licensing: `docs/ostris-licensing.md` now records that the bundle is
+  **internal-use only** and must be dropped from any public release until the
+  upstream terms are cleared.
+
 ## 0.3.0-dev — 2026-11-23
 
 ### OSTRIS corpus tools (M0)

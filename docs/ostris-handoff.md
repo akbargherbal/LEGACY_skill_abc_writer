@@ -48,18 +48,28 @@ removing or renaming the current ones is a breaking change.
 
 ## Reproduce
 
+With the bundled package (no bucket, no flags):
+
+```bash
+make offline-check       # plan + exemplar + similarity + check on the bundle
+make test
+make selftest
+```
+
+Refreshing the corpus from the project data root:
+
 ```bash
 DATA_ROOT=gs://<bucket> make ostris-sync
 make ostris-audit
 make ostris-build
 make ostris-features
 make ostris-online      # priors, idioms, similarity index, eval split
-make test               # 30 tests
-make selftest
+make ostris-bundle      # snapshot analysis/out into the skill
 ```
 
-Generated evidence lives in `analysis/out/ostris/`. The cache and canonical work
-directory are gitignored; `records.jsonl` is reproducible from the data root.
+Generated evidence lives in `analysis/out/ostris/`; the shippable snapshot lives
+in `02_maqam-score/data/ostris/` and is what `make zip` packages. The source
+cache and canonical work directory are regeneration scratch.
 
 ## Known limits
 

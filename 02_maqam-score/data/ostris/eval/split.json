@@ -1,0 +1,286 @@
+{
+ "stage": "M6-split",
+ "version": "m6-v1",
+ "generated_at": "2026-11-23T09:25:48+00:00",
+ "held_out": 35,
+ "usable": 31,
+ "no_abc": [
+  {
+   "track_id": "YT500/shard-03/0006_INJSYLVA_fg",
+   "video_id": "INJSYLVA_fg",
+   "title": "Akhedni Maak",
+   "source_rank": 6,
+   "duration_s": 345.118186
+  },
+  {
+   "track_id": "YT500/shard-20/0176_h9BH8M5ot2c",
+   "video_id": "h9BH8M5ot2c",
+   "title": "Khaleek Folazy",
+   "source_rank": 176,
+   "duration_s": 360.582676
+  },
+  {
+   "track_id": "YT500/shard-24/0552_AsE0VyQX1B0",
+   "video_id": "AsE0VyQX1B0",
+   "title": "Mustakeel",
+   "source_rank": 552,
+   "duration_s": 341.728073
+  },
+  {
+   "track_id": "YT500/shard-01/0655_dcxCOzupe00",
+   "video_id": "dcxCOzupe00",
+   "title": "Amat Meat",
+   "source_rank": 655,
+   "duration_s": 305.156644
+  }
+ ],
+ "generation": [
+  {
+   "track_id": "YT500/shard-03/0018_dWahuREerq0",
+   "video_id": "dWahuREerq0",
+   "title": "Asaad Wahda",
+   "source_rank": 18,
+   "duration_s": 332.78839
+  },
+  {
+   "track_id": "YT500/shard-11/0021_7Rx6wDS286s",
+   "video_id": "7Rx6wDS286s",
+   "title": "Aa Baly Habibi",
+   "source_rank": 21,
+   "duration_s": 393.578231
+  },
+  {
+   "track_id": "YT500/shard-22/0034_kyxGsD-eP1I",
+   "video_id": "kyxGsD-eP1I",
+   "title": "Andou Zine",
+   "source_rank": 34,
+   "duration_s": 329.375057
+  },
+  {
+   "track_id": "YT500/shard-10/0040_j9eZtAjA1oE",
+   "video_id": "j9eZtAjA1oE",
+   "title": "Hattan",
+   "source_rank": 40,
+   "duration_s": 394.01941
+  },
+  {
+   "track_id": "YT500/shard-02/0103_58APpZMC2Yw",
+   "video_id": "58APpZMC2Yw",
+   "title": "Law Tearafou",
+   "source_rank": 103,
+   "duration_s": 344.537687
+  },
+  {
+   "track_id": "YT500/shard-05/0111_Rh9M8EBs6bw",
+   "video_id": "Rh9M8EBs6bw",
+   "title": "Mabrouk",
+   "source_rank": 111,
+   "duration_s": 325.706304
+  },
+  {
+   "track_id": "YT500/shard-07/0118_hIPoRdfbsYs",
+   "video_id": "hIPoRdfbsYs",
+   "title": "Ykhalili Albak",
+   "source_rank": 118,
+   "duration_s": 398.663401
+  },
+  {
+   "track_id": "YT500/shard-23/0130_r99RZ4ViteM",
+   "video_id": "r99RZ4ViteM",
+   "title": "Hask Wejudi",
+   "source_rank": 130,
+   "duration_s": 291.062132
+  },
+  {
+   "track_id": "YT500/shard-25/0165_4ehTSqSPvgk",
+   "video_id": "4ehTSqSPvgk",
+   "title": "Ben Idayya",
+   "source_rank": 165,
+   "duration_s": 340.172336
+  },
+  {
+   "track_id": "YT500/shard-11/0202_pAFV9RT-yrA",
+   "video_id": "pAFV9RT-yrA",
+   "title": "40",
+   "source_rank": 202,
+   "duration_s": 209.74585
+  },
+  {
+   "track_id": "YT500/shard-05/0259_UeL9kJ4uGyY",
+   "video_id": "UeL9kJ4uGyY",
+   "title": "Ana Ana",
+   "source_rank": 259,
+   "duration_s": 401.449796
+  },
+  {
+   "track_id": "YT500/shard-21/0261_byK0dlhokOA",
+   "video_id": "byK0dlhokOA",
+   "title": "Lealy Nahary",
+   "source_rank": 261,
+   "duration_s": 271.812789
+  },
+  {
+   "track_id": "YT500/shard-11/0279_wYk-JyifeRE",
+   "video_id": "wYk-JyifeRE",
+   "title": "Entebeh",
+   "source_rank": 279,
+   "duration_s": 273.902585
+  },
+  {
+   "track_id": "YT500/shard-02/0290_tf2PD_IxjmM",
+   "video_id": "tf2PD_IxjmM",
+   "title": "Olay Jaya",
+   "source_rank": 290,
+   "duration_s": 321.758912
+  }
+ ],
+ "retrieval": [
+  {
+   "track_id": "YT500/shard-20/0295_AE9BTVpyuuQ",
+   "video_id": "AE9BTVpyuuQ",
+   "title": "Taaref Sheno Ahebak",
+   "source_rank": 295,
+   "duration_s": 252.540227
+  },
+  {
+   "track_id": "YT500/shard-25/0302_uTTsZSjIMxI",
+   "video_id": "uTTsZSjIMxI",
+   "title": "Khalow",
+   "source_rank": 302,
+   "duration_s": 365.853605
+  },
+  {
+   "track_id": "YT500/shard-21/0308_bNuW5JWv-Bg",
+   "video_id": "bNuW5JWv-Bg",
+   "title": "Ehsen Eldhan",
+   "source_rank": 308,
+   "duration_s": 328.864218
+  },
+  {
+   "track_id": "YT500/shard-11/0330_zQ9Bq4yU9k8",
+   "video_id": "zQ9Bq4yU9k8",
+   "title": "Sabiya",
+   "source_rank": 330,
+   "duration_s": 250.612971
+  },
+  {
+   "track_id": "YT500/shard-16/0355_3Uei9m0RpJQ",
+   "video_id": "3Uei9m0RpJQ",
+   "title": "DeeJay",
+   "source_rank": 355,
+   "duration_s": 275.086803
+  },
+  {
+   "track_id": "YT500/shard-14/0390_faLLKMdiEHs",
+   "video_id": "faLLKMdiEHs",
+   "title": "Shou Hal Hala",
+   "source_rank": 390,
+   "duration_s": 318.809977
+  },
+  {
+   "track_id": "YT500/shard-20/0433_Atx7biRfhzU",
+   "video_id": "Atx7biRfhzU",
+   "title": "Baasha Tafasilak",
+   "source_rank": 433,
+   "duration_s": 313.051429
+  },
+  {
+   "track_id": "YT500/shard-14/0452_FqltwFT25fM",
+   "video_id": "FqltwFT25fM",
+   "title": "Tabaan",
+   "source_rank": 452,
+   "duration_s": 241.185669
+  },
+  {
+   "track_id": "YT500/shard-15/0460_WYMdfrp_sGs",
+   "video_id": "WYMdfrp_sGs",
+   "title": "Aashaangy",
+   "source_rank": 460,
+   "duration_s": 380.737596
+  },
+  {
+   "track_id": "YT500/shard-02/0495_DXJhlamah70",
+   "video_id": "DXJhlamah70",
+   "title": "Omr Gedid",
+   "source_rank": 495,
+   "duration_s": 232.153107
+  },
+  {
+   "track_id": "YT500/shard-15/0611_2Jr_2H652Vc",
+   "video_id": "2Jr_2H652Vc",
+   "title": "Ma A'd Tesa'l",
+   "source_rank": 611,
+   "duration_s": 355.102766
+  },
+  {
+   "track_id": "YT500/shard-04/0623_pbWDY8LbVVk",
+   "video_id": "pbWDY8LbVVk",
+   "title": "Alawah",
+   "source_rank": 623,
+   "duration_s": 308.128798
+  },
+  {
+   "track_id": "YT500/shard-05/0640_VnYiVwJhG0Q",
+   "video_id": "VnYiVwJhG0Q",
+   "title": "Ya Layem El Mshtag",
+   "source_rank": 640,
+   "duration_s": 295.543583
+  },
+  {
+   "track_id": "YT500/shard-02/0642_iMAe5sh1u7k",
+   "video_id": "iMAe5sh1u7k",
+   "title": "Majnouni",
+   "source_rank": 642,
+   "duration_s": 279.846893
+  },
+  {
+   "track_id": "YT500/shard-17/0652_ItMVUZ3RGhM",
+   "video_id": "ItMVUZ3RGhM",
+   "title": "Kabad Bad",
+   "source_rank": 652,
+   "duration_s": 377.742222
+  },
+  {
+   "track_id": "YT500/shard-17/0657_l5ldxD5llBU",
+   "video_id": "l5ldxD5llBU",
+   "title": "Law Bass Ta3ref",
+   "source_rank": 657,
+   "duration_s": 328.214059
+  },
+  {
+   "track_id": "YT500/shard-15/0685_MVLg42W7b18",
+   "video_id": "MVLg42W7b18",
+   "title": "Maaad Tesaal",
+   "source_rank": 685,
+   "duration_s": 292.153469
+  }
+ ],
+ "rule": "first 14 usable held-out tracks by source rank",
+ "maqam_conditioned": false,
+ "limitations": [
+  "The split is deterministic and unlabelled; no maqam stratification is possible.",
+  "Four held-out tracks have no ABC and cannot enter either side.",
+  "Quality is not evaluated by this stage."
+ ],
+ "checks": [
+  {
+   "name": "usable_held_out",
+   "required": true,
+   "ok": true,
+   "detail": "31 usable + 4 without ABC = 35"
+  },
+  {
+   "name": "generation_size",
+   "required": true,
+   "ok": true,
+   "detail": "14 tracks reserved for generation (target 12-16; small corpora keep every usable track)"
+  },
+  {
+   "name": "disjoint",
+   "required": true,
+   "ok": true,
+   "detail": "generation and retrieval lists do not overlap"
+  }
+ ],
+ "gate_pass": true
+}

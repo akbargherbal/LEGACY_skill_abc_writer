@@ -1,0 +1,114 @@
+{
+  "stage": "M1",
+  "generated_at": "2026-11-23T06:52:13+00:00",
+  "cache": "/content/skill_abc_writer/analysis/out/ostris/source",
+  "out": "/content/skill_abc_writer/analysis/out/ostris",
+  "skill_version": "0.2.0",
+  "records": 482,
+  "canonical_ok": 482,
+  "canonical_bytes": 1844899,
+  "failures": [],
+  "warnings": {},
+  "voice_shapes": {
+    "Vocal+Ins": 482
+  },
+  "meter_shapes": {
+    "4/4": 174,
+    "2/4": 165,
+    "4/4;2/4": 29,
+    "2/4;1/4": 23,
+    "4/4;1/4": 14,
+    "4/4;3/4": 12,
+    "2/4;1/8": 9,
+    "4/4;3/8": 6,
+    "4/4;1/4;3/4": 6,
+    "6/8": 5,
+    "4/4;3/4;1/4": 5,
+    "4/4;1/8": 3,
+    "4/4;5/8": 3,
+    "3/4": 3,
+    "2/4;3/8": 2,
+    "4/4;1/4;2/4": 2,
+    "4/4;9/8;1/4": 1,
+    "5/8;2/4": 1,
+    "4/4;3/4;3/8;1/4": 1,
+    "4/4;1/4;1/8": 1,
+    "2/4;1/8;3/8": 1,
+    "4/4;3/8;1/4;2/4": 1,
+    "4/4;3/8;2/4": 1,
+    "2/4;5/8": 1,
+    "4/4;7/8": 1,
+    "4/4;1/4;3/8": 1,
+    "2/8;1/8;6/8": 1,
+    "4/4;3/4;2/4;1/4": 1,
+    "4/4;2/4;3/4;5/8": 1,
+    "4/4;2/4;3/4": 1,
+    "4/4;9/8": 1,
+    "2/4;4/4": 1,
+    "4/4;3/4;7/8": 1,
+    "4/4;2/4;3/8": 1,
+    "4/4;2/4;1/4": 1,
+    "4/4;1/8;3/4;2/4": 1,
+    "3/4;4/4": 1
+  },
+  "duplicate_hashes": [],
+  "contract": {
+    "version": "0.2.0",
+    "checks": [
+      {
+        "artifact": "scripts/checker.py",
+        "expected": "bd364578417a8b407fa0b5953bbfb2b358a44eaf1bc9dccf332a5501e4bf30b4",
+        "actual": "bd364578417a8b407fa0b5953bbfb2b358a44eaf1bc9dccf332a5501e4bf30b4",
+        "ok": true,
+        "detail": "ok"
+      },
+      {
+        "artifact": "scripts/calibration.json",
+        "expected": "c5cd513c83936d1f847eb93f9f8aed1f0a5c23f0249a0217498ce0ddd21333a1",
+        "actual": "c5cd513c83936d1f847eb93f9f8aed1f0a5c23f0249a0217498ce0ddd21333a1",
+        "ok": true,
+        "detail": "ok"
+      },
+      {
+        "artifact": "scripts/abc_tools.py",
+        "expected": "e99e5cf9dff4647f48322e3319065ba793e7dbc808222e1848bab7aa8c4bd11c",
+        "actual": "e99e5cf9dff4647f48322e3319065ba793e7dbc808222e1848bab7aa8c4bd11c",
+        "ok": true,
+        "detail": "ok"
+      }
+    ],
+    "ok": true
+  },
+  "checks": [
+    {
+      "name": "canonical_coverage",
+      "required": true,
+      "ok": true,
+      "detail": "482/482 canonical and re-parsed"
+    },
+    {
+      "name": "two_voice_shape",
+      "required": true,
+      "ok": true,
+      "detail": "Vocal+Ins: 482"
+    },
+    {
+      "name": "contract_pin",
+      "required": true,
+      "ok": true,
+      "detail": "skill 0.2.0 pins match: scripts/checker.py=ok, scripts/calibration.json=ok, scripts/abc_tools.py=ok"
+    },
+    {
+      "name": "unique_canonical_hashes",
+      "required": false,
+      "ok": true,
+      "detail": "all canonical hashes unique"
+    }
+  ],
+  "gate_pass": true,
+  "records_file": "analysis/out/ostris/records.jsonl",
+  "files": {
+    "canonical": "analysis/out/ostris/canonical.json",
+    "canonical_md": "analysis/out/ostris/canonical.md"
+  }
+}

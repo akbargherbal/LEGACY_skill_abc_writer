@@ -40,3 +40,12 @@
 
 The canonical number registry is **`02_maqam-score/references/numbers.md`**;
 the machine-readable copy is **`02_maqam-score/scripts/calibration.json`**.
+
+## Offline bundle
+
+The corpus artifacts ship inside the skill under
+`02_maqam-score/data/ostris/`, so `plan`, `exemplar`, `similarity --score` and
+`check` run with no bucket and no flags (`make offline-check`). Phase reports
+below keep their original `DATA_ROOT=gs://…` commands as a record of how the
+evidence was produced; refreshing the bundle is the only remaining bucket step
+(`make ostris-sync … && make ostris-bundle`).

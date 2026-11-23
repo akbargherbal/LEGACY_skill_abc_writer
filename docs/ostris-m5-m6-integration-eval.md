@@ -7,9 +7,9 @@
 The skill surface is now three commands plus a wrapper:
 
 ```bash
-scripts/ostris plan     --manifest song.json --out plans/song
-scripts/ostris exemplar --function cadence --bars 2
-scripts/ostris check    score.abc --plan plans/song/skill_plan.json --report report.json
+scripts/ostris_cli.py plan     --manifest song.json --out plans/song
+scripts/ostris_cli.py exemplar --function cadence --bars 2
+scripts/ostris_cli.py check    score.abc --plan plans/song/skill_plan.json --report report.json
 ```
 
 - `scripts/ostris` resolves the repository root and runs

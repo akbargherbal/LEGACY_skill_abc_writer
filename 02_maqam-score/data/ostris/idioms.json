@@ -1,0 +1,53 @@
+{
+ "stage": "M4-idioms",
+ "version": "m4-v1",
+ "generated_at": "2026-11-23T09:25:47+00:00",
+ "out": "/content/skill_abc_writer/analysis/out/ostris",
+ "records": 482,
+ "tracks_with_idioms": 481,
+ "tracks_without_vocal": 1,
+ "idioms": 1304,
+ "failures": [],
+ "functions": {
+  "opening": 481,
+  "cadence": 476,
+  "phrase": 347
+ },
+ "bars": {
+  "2": 18,
+  "3": 37,
+  "4": 1249
+ },
+ "maqam_conditioned": false,
+ "reviewed": false,
+ "limitations": [
+  "Phrase function is structural (first/middle/last), not semantic.",
+  "The bank is unreviewed and must not be presented as maqam examples.",
+  "No audio or lyric alignment is used."
+ ],
+ "files": {
+  "idioms": "analysis/out/ostris/idioms.jsonl",
+  "idioms_md": "analysis/out/ostris/idioms.md"
+ },
+ "checks": [
+  {
+   "name": "idiom_coverage",
+   "required": true,
+   "ok": true,
+   "detail": "481 with idioms + 1 without vocal + 0 failures = 482"
+  },
+  {
+   "name": "no_maqam_claim",
+   "required": true,
+   "ok": true,
+   "detail": "every idiom is marked unreviewed"
+  },
+  {
+   "name": "phrase_shape",
+   "required": true,
+   "ok": true,
+   "detail": "every idiom is 2-4 bars"
+  }
+ ],
+ "gate_pass": true
+}

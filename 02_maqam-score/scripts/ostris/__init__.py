@@ -9,6 +9,12 @@ The package has two halves:
 * online composition helpers (``plan``, ``exemplar``, ``similarity --score``,
   ``check``) that the skill calls while writing a score.
 
+The offline results ship with the skill under ``<skill>/data/ostris/``: the
+source cache, feature records, priors, the idiom bank, the similarity index, and
+the evaluation split.  The reader commands default to that directory, so the
+skill runs with no network access.  ``sync`` exists only to refresh the bundle
+from the project data root.
+
 No module emits a maqam label.  ``mode_hypothesis`` is unreviewed, every prior
 records ``maqam_conditioned: false``, and ``check`` reports
 ``maqam_fit.available: false``.

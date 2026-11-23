@@ -1,6 +1,5 @@
 __pycache__/
 *.pyc
 dist/*.tmp
-02_maqam-score/data/
 analysis/out/ostris/source/
 analysis/out/ostris/work/
