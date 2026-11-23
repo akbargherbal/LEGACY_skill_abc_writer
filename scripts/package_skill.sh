@@ -55,4 +55,11 @@ rsync -a "${EXCLUDES[@]}" "$SRC"/ "$STAGE/$NAME"/
 rm -f "$ZIP"
 (cd "$STAGE" && zip -qr "$ZIP" "$NAME")
 
+# The skill package is a runtime artifact. Development material (docs/, the
+# evaluation protocol, post-mortems, analysis/) must never leak into it.
+if zipinfo -1 "$ZIP" | grep -Eq '(^|/)(docs|analysis)/|agent-eval|postmortem'; then
+  echo "package: development files leaked into $ZIP" >&2
+  exit 1
+fi
+
 echo "wrote ${ZIP#"$ROOT"/} ($(du -h "$ZIP" | cut -f1), $(zipinfo -1 "$ZIP" | wc -l) entries)"

@@ -1,0 +1,106 @@
+{
+  "run_id": "2026-11-24-agent-T01",
+  "date": "2026-11-24",
+  "analyst": "",
+  "intake": {
+    "source_folder": "analysis/eval/inbox/2026-11-24-batch/session-01-agent",
+    "normalised_by": "analyst",
+    "notes": ""
+  },
+  "skill": {
+    "name": "abc_score_writer",
+    "contract_version": "0.2.0",
+    "zip_sha256": "",
+    "delivery": "unpacked",
+    "notes": "unpacked | pasted SKILL.md only | other"
+  },
+  "agent": {
+    "product": "",
+    "model": "",
+    "version": "",
+    "harness": "",
+    "tools": [],
+    "context_notes": ""
+  },
+  "environment": {
+    "os": "",
+    "python": "",
+    "working_directory": "",
+    "network": false,
+    "read_only_paths": [],
+    "notes": ""
+  },
+  "task": {
+    "id": "T01",
+    "name": "happy path",
+    "mode": "offline",
+    "prompt_file": "task.md",
+    "inputs_visible": ["input/lyrics.txt", "input/request.md"],
+    "inputs_hidden": [],
+    "repeat_of": null,
+    "seed_or_run": 1
+  },
+  "outcome": {
+    "completed": false,
+    "gate": "unknown",
+    "contract_failures": null,
+    "sanity_failures": null,
+    "style_warnings": null,
+    "honesty_ok": null,
+    "claimed_audition": null,
+    "invented_maqam": null,
+    "edited_checker_or_calibration": null,
+    "turns": null,
+    "tool_calls": null,
+    "wall_clock_s": null,
+    "score_s": {
+      "gate": null,
+      "inputs": null,
+      "tooling": null,
+      "honesty": null,
+      "repair": null,
+      "reporting": null,
+      "verdict": "unknown"
+    }
+  },
+  "efficiency": {
+    "tokens_reported": null,
+    "tokens_estimated": null,
+    "tool_output_bytes": null,
+    "distinct_files_read": null,
+    "read_events": null,
+    "re_read_ratio": null,
+    "repeated_commands": null,
+    "score_versions": null,
+    "checker_runs": null,
+    "repairs": null,
+    "final_answer_chars": null,
+    "waste": [
+      {
+        "id": "W1",
+        "where": "",
+        "estimated_tokens": 0,
+        "note": ""
+      }
+    ]
+  },
+  "artifacts": [],
+  "what_went_right": [],
+  "findings": [
+    {
+      "id": "F1",
+      "class": "instruction_gap",
+      "severity": "S2",
+      "where": "SKILL.md §?",
+      "evidence": "",
+      "proposed_fix": "",
+      "regression": ""
+    }
+  ],
+  "disposition": {
+    "action": "no action",
+    "owner": "",
+    "target": "",
+    "notes": ""
+  }
+}

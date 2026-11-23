@@ -19,6 +19,7 @@
 | `ostris-licensing.md` | Data/source inventory; licence status unknown, no clearance claimed |
 | `ostris-handoff.md` | Handoff: frozen contracts, how to add reviewed labels, reproduce commands |
 | `ostris-release-notes.md` | Tools v0.3.0: included commands, verified numbers, upgrade notes |
+| `agent-eval-protocol.md` | Drop-folder agent evaluation: intake, task battery, rubric, confusion & token-waste audit, post-mortem → skill change |
 
 ## Baseline / input
 
