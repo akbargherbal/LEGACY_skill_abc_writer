@@ -1,0 +1,49 @@
+{
+  "key": "Dm",
+  "tempo": 73,
+  "meter": "4/4",
+  "unit": "1/16",
+  "bars": 16,
+  "syllables": 16,
+  "sections": [
+    "intro",
+    "verse",
+    "chorus",
+    "outro"
+  ],
+  "simultaneity_exception": null,
+  "cadence": "any",
+  "melisma_min": 1.1,
+  "melisma_max": 1.45,
+  "register": {
+    "mean": 74,
+    "top": 80,
+    "tolerance": 5
+  },
+  "max_top_duration_share": 0.85,
+  "min_distinct_durations": 4,
+  "ties_min": 1,
+  "min_fill_notes": 3,
+  "ins_active_share_min": 0.05,
+  "chords_min": 0,
+  "deviations": [
+    {
+      "bars": "1-4",
+      "channel": "section register",
+      "before": "guitar under the voice",
+      "after": "guitar owns the intro alone"
+    },
+    {
+      "bars": "5-8",
+      "channel": "gap rate",
+      "before": "an answer after every line",
+      "after": "answers only in the two rests"
+    },
+    {
+      "bars": "13-16",
+      "channel": "density",
+      "before": "voice continues to the last bar",
+      "after": "voice stops; Ins closes alone"
+    }
+  ]
+}

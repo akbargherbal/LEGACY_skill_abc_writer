@@ -1,0 +1,232 @@
+{
+  "version": "2026-11-23",
+  "corpus": {
+    "name": "five_stars/177",
+    "n": 177,
+    "note": "SheetSage2 transcripts of Suno renders; maqam tags are prompts, not measured",
+    "sha256": "46e5125d80810f10e624a703fce97e3b097d9c254ebc9f3071faf654bdf8be17",
+    "lyrics_sha256": "5bce6a3ce837e4e5b29e53d2cb2a96ecc0028355af920fd588f3a334757b95a6",
+    "manifest_sha256": "648f5dcbd4ee8b84827bda47d0609aa146bdab41351cd0e3437b7249ce683401"
+  },
+  "metrics": {
+    "notes_per_syllable": {
+      "n": 177,
+      "min": 1.0337301587301588,
+      "p5": 1.1260504201680672,
+      "p25": 1.206043956043956,
+      "median": 1.2835164835164836,
+      "p75": 1.3436018957345972,
+      "p95": 1.441095890410959,
+      "max": 1.5166666666666666
+    },
+    "register_mean": {
+      "n": 177,
+      "min": 69.6103896103896,
+      "p5": 71.67726161369193,
+      "p25": 72.51157894736842,
+      "median": 73.51231527093596,
+      "p75": 74.36294896030246,
+      "p95": 75.13373253493015,
+      "max": 75.90310077519379
+    },
+    "register_top": {
+      "n": 177,
+      "min": 80,
+      "p5": 81,
+      "p25": 82,
+      "median": 84,
+      "p75": 84,
+      "p95": 86,
+      "max": 89
+    },
+    "top_duration_share": {
+      "n": 177,
+      "min": 0.427536231884058,
+      "p5": 0.5051546391752577,
+      "p25": 0.5568862275449101,
+      "median": 0.6144329896907217,
+      "p75": 0.6910420475319927,
+      "p95": 0.7557894736842106,
+      "max": 0.8596837944664032
+    },
+    "distinct_durations": {
+      "n": 177,
+      "min": 4,
+      "p5": 5,
+      "p25": 6,
+      "median": 7,
+      "p75": 8,
+      "p95": 9,
+      "max": 11
+    },
+    "ties_per_10_bars": {
+      "n": 177,
+      "min": 0.0,
+      "p5": 0.22556390977443608,
+      "p25": 0.5882352941176471,
+      "median": 1.0714285714285714,
+      "p75": 1.5827338129496402,
+      "p95": 2.3076923076923075,
+      "max": 2.706766917293233
+    },
+    "ins_active_share": {
+      "n": 177,
+      "min": 0.07971014492753623,
+      "p5": 0.140625,
+      "p25": 0.20134228187919462,
+      "median": 0.25308641975308643,
+      "p75": 0.3185840707964602,
+      "p95": 0.4122137404580153,
+      "max": 0.45185185185185184
+    },
+    "silence_share": {
+      "n": 177,
+      "min": 0.19600431965442763,
+      "p5": 0.22186147186147187,
+      "p25": 0.27242044358727097,
+      "median": 0.30366847826086957,
+      "p75": 0.3423344947735192,
+      "p95": 0.39325842696629215,
+      "max": 0.4426840633737186
+    },
+    "chromatic_per_100": {
+      "n": 177,
+      "min": 0.0,
+      "p5": 0.0,
+      "p25": 0.0,
+      "median": 0.0,
+      "p75": 0.8042895442359249,
+      "p95": 3.617021276595745,
+      "max": 11.44578313253012
+    },
+    "chords_per_bar": {
+      "n": 177,
+      "min": 0.0,
+      "p5": 0.0,
+      "p25": 0.0,
+      "median": 0.0,
+      "p75": 0.0,
+      "p95": 0.0,
+      "max": 0.0,
+      "note": "no chord symbols in any of the 177 ABC scores"
+    },
+    "bars": {
+      "n": 177,
+      "min": 57,
+      "p5": 75,
+      "p25": 113,
+      "median": 131,
+      "p75": 145,
+      "p95": 173,
+      "max": 203
+    },
+    "audio_over_cap": {
+      "n": 177,
+      "min": 0.7080330333089541,
+      "p5": 0.7850673402957572,
+      "p25": 0.845902842294258,
+      "median": 0.8836594861219876,
+      "p75": 0.9360777399647382,
+      "p95": 1.0034852782857882,
+      "max": 1.0975528993176167
+    },
+    "units16_per_syllable_vocal_bars": {
+      "n": 177,
+      "min": 1.9383033419023137,
+      "p5": 2.2369668246445498,
+      "p25": 2.3956043956043955,
+      "median": 2.8433734939759034,
+      "p75": 4.337595907928389,
+      "p95": 4.885714285714286,
+      "max": 5.546134663341646
+    },
+    "tempo": {
+      "n": 177,
+      "min": 58,
+      "p5": 61,
+      "p25": 68,
+      "median": 80,
+      "p75": 109,
+      "p95": 119,
+      "max": 130,
+      "note": "bimodal: slow cluster ~58-75, fast cluster ~105-130"
+    }
+  },
+  "sanity": {
+    "simultaneity_le4": {
+      "max": 4,
+      "basis": "corpus max 8; 99.4% <= 4"
+    },
+    "register_mean_74_5": {
+      "mean": 74,
+      "tolerance": 5,
+      "basis": "corpus 69.6-75.9"
+    },
+    "top_duration_share_le_0.85": {
+      "max": 0.85,
+      "basis": "corpus max 0.86"
+    },
+    "distinct_durations_ge4": {
+      "min": 4,
+      "basis": "corpus min 4"
+    },
+    "notes_per_syllable_1.0_1.55": {
+      "min": 1.0,
+      "max": 1.55,
+      "basis": "corpus 1.03-1.52"
+    },
+    "ins_active_share_ge0.05": {
+      "min": 0.05,
+      "basis": "corpus min 0.08"
+    },
+    "joint": {
+      "pass": 175,
+      "n": 177,
+      "rate": 0.9887
+    }
+  },
+  "sanity_optional": {
+    "register_top_ge80": {
+      "min": 80,
+      "basis": "corpus min 80; no track fails"
+    },
+    "ties_ge1": {
+      "min": 1,
+      "basis": "1/177 has none; 0 is valid for a syllabic style"
+    },
+    "joint_with_core": {
+      "pass": 174,
+      "n": 177,
+      "rate": 0.9831
+    }
+  },
+  "style_defaults": {
+    "melisma_min": 1.1,
+    "melisma_max": 1.45,
+    "register_mean": 74,
+    "register_top": 82,
+    "register_tolerance": 5,
+    "max_top_duration_share": 0.78,
+    "min_distinct_durations": 5,
+    "ties_per_10_bars": 0.4,
+    "min_fill_notes": 3,
+    "ins_active_share_min": 0.15,
+    "chords_min_per_bar": 0.0,
+    "silence_share_min": 0.22,
+    "pace": 2.8,
+    "case_ratio": 0.884,
+    "tempo_default": 80
+  },
+  "rules": {
+    "hard": "contract + sanity (6)",
+    "style": "warn by default; FAIL only with --strict-style",
+    "plan_style_targets": "warn by default; a declared cadence=tonic is the only self-imposed hard style target",
+    "final_rest": "warn by default; --require-final-rest makes it a render contract",
+    "sections": "normalized subsequence, warn by default"
+  },
+  "skill_version": "0.2.0",
+  "registry": "references/numbers.md",
+  "analysis": "analysis/calibrate_177.py",
+  "summary": "analysis/out/summary.json",
+  "report": "docs/constraints-calibration.md"
+}
