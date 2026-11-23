@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/maqam-score/canonical.schema.json",
+  "title": "OSTRIS M1 canonical build",
+  "description": "Machine-readable result of `ostris_cli.py build`: canonical coverage, contract pins, failures, and corpus shapes.",
+  "type": "object",
+  "required": [
+    "stage",
+    "generated_at",
+    "records",
+    "canonical_ok",
+    "contract",
+    "checks",
+    "gate_pass",
+    "files"
+  ],
+  "properties": {
+    "stage": { "type": "string", "const": "M1" },
+    "generated_at": { "type": "string" },
+    "cache": { "type": "string" },
+    "out": { "type": "string" },
+    "skill_version": { "type": "string" },
+    "records": { "type": "integer", "minimum": 0 },
+    "canonical_ok": { "type": "integer", "minimum": 0 },
+    "canonical_bytes": { "type": "integer", "minimum": 0 },
+    "failures": { "type": "array", "items": { "type": "object" } },
+    "warnings": { "type": "object" },
+    "voice_shapes": { "type": "object" },
+    "meter_shapes": { "type": "object" },
+    "duplicate_hashes": { "type": "array", "items": { "type": "object" } },
+    "contract": {
+      "type": "object",
+      "required": ["version", "checks", "ok"],
+      "properties": {
+        "version": { "type": "string" },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["artifact", "expected", "actual", "ok", "detail"],
+            "properties": {
+              "artifact": { "type": "string" },
+              "expected": { "type": "string" },
+              "actual": { "type": ["string", "null"] },
+              "ok": { "type": "boolean" },
+              "detail": { "type": "string" }
+            }
+          }
+        },
+        "ok": { "type": "boolean" }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "required", "ok", "detail"],
+        "properties": {
+          "name": { "type": "string" },
+          "required": { "type": "boolean" },
+          "ok": { "type": "boolean" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "gate_pass": { "type": "boolean" },
+    "records_file": { "type": "string" },
+    "files": { "type": "object" }
+  },
+  "additionalProperties": true
+}

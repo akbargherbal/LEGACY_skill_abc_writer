@@ -3,7 +3,16 @@
 > **Provenance:** نُقل هذا الملف من `arabmaqamrock/docs/plans/` إلى مستودع المهارة في 2026-11-23.
 > المسارات `arabmaqamrock/...` تخص المستودع الخارجي؛ مستودع المهارة هو `skill_abc_writer`.
 
-**Status:** proposal — **قرارات ما قبل التنفيذ مطلوبة (§13)**
+> **Implementation note (2026-11-23, English):** The separate-repository scope is
+> dropped. The tools live in the skill: offline code in
+> `02_maqam-score/scripts/ostris/`, contracts in `02_maqam-score/schemas/`, and
+> generated evidence in `analysis/out/ostris/`. M0 (audit + links + parse +
+> records), M1 (canonical ABC + contract pins), and the label-free M2 (features
+> + unreviewed mode hypothesis) are implemented and pass on the real corpus.
+> M3+ remains gated on the decisions in §13. No maqam labels are claimed.
+> Progress checklist: `docs/ostris-implementation-checklist.md`.
+
+**Status:** proposal — **M0–M2 implemented; M3+ blocked by §13 decisions**
 **Date:** 2026-11-22
 **Last updated:** 2026-11-23 — سجل القرارات + تكامل مهارة v0.2.0
 **Scope:** مستودع جديد مستقل عن `arabmaqamrock`
@@ -55,6 +64,14 @@
 - **460** من الـ495 مستخدمة في المكتبة؛ **35 غير مستخدمة** → مرشحة كـ **held-out** طبيعي (ليست في تدريب اللورا ولا في الـ482).
 - **22** من Fadhl Shaker موجودة في manifest الـ482، وترانسكريبتها في `FADL_SHAKER` (15 ألبومًا، كل JSON يضم عدة tracks). الربط بالعنوان/الألبوم.
 - **438** تسمية maqam هي audio+caption (ليست ABC)؛ **مستثناة من priors/eval** لأنها من بيانات تدريب v3.
+
+> **M0 finding (2026-11-23, English):** The exact 22-track FADL link is
+> `DATASET/fadhl_shaker_instrumental_18_shortlist/shortlist.json` →
+> `TRANSCRIPTS/fadhl_shaker_selected_scores` (24 tracks, 23 with ABC) plus the
+> reference conditioner ABCs in `DATASET/fadhl_shaker_instrumental_18/abc/`.
+> `TRANSCRIPTS/FADL_SHAKER` is a broader 15-album set (140 tracks, 132 with ABC),
+> not the 22-track shortlist. One shortlist track (`al_qissa_wama_fiha`) has no
+> selected-scores ABC; M0 falls back to its reference conditioner and flags it.
 
 **محتوى tar واحد (مثال `0044_ZLhWlUFmGMA`):**
 
@@ -429,6 +446,12 @@ ostris eval     --suite v1 --out results/
 **Gate:** ≥90% من 460 لها `maqam` مع confidence **بما فيها `other/unknown`**؛
 تقرير دقة على **عينة مراجعة من 482**، وفحص سلوك على 177 — لا «دقة على 177».
 
+> **Amended 2026-11-23 (English):** no expert maqam review is available. M2
+> implements the objective feature layer and an unreviewed coarse
+> `mode_hypothesis`; `maqam` stays `null`. The replacement gate is 482/482
+> feature rows, 482/482 mode-hypothesis rows, and zero named-maqam claims.
+> The original maqam coverage/accuracy gate is deferred with D3 and D12.
+
 ### M3 — Priors & plan (أسبوع)
 - quantiles لكل stratum، مع `n` و`confidence`.
 - backoff للطبقات الصغيرة.
@@ -601,25 +624,37 @@ Rules:
 |---:|---|---|---|---|---|
 | **D1** | هدف الجودة النهائي | ABC quality / rendered audio / كلاهما | **ABC أولًا**؛ audio في M6 إن توفر رندر | M6 | ⏳ |
 | **D2** | وظيفة الـ35 held-out | توليد / استرجاع / كلاهما | **كلاهما**؛ 12–16 للتوليد والباقي للاسترجاع | M6 | ⏳ |
-| **D3** | مراجعة maqam | 482 كاملة / عينة 100–150 / مرحلتان | **مرحلتان:** 120 عينة + كل low-confidence | M2 | ⏳ |
-| **D4** | 438 v3 | تُترك / cross-check / تدريب | **cross-check فقط**؛ لا تدريب ولا priors/eval | M2 | ⏳ |
-| **D5** | مخطط `plan.json` | `brief.json`+`skill_plan.json` / ملف واحد / `check` يبني | **`brief.json` + `skill_plan.json`** | M1/M3/M5 | ⏳ |
-| **D6** | الوضع instrumental | إضافة `--voices ins` الآن / `Vocal+Ins` فقط / checker منفصل | **`Vocal+Ins` في v1**؛ instrumental لاحقًا | M1/M5 | ⏳ |
-| **D7** | عقد المهارة | تثبيت v0.2.0 + flags / تجميد v1 | **v0.2.0** + hash + `--require-final-rest` | M1/M5 | 🔶 |
+| **D3** | مراجعة maqam | 482 كاملة / عينة 100–150 / مرحلتان | **مرحلتان:** 120 عينة + كل low-confidence | M2 | ⏸️ deferred — no reviewer |
+| **D4** | 438 v3 | تُترك / cross-check / تدريب | **cross-check فقط**؛ لا تدريب ولا priors/eval | M2 | ✅ 2026-11-23 |
+| **D5** | مخطط `plan.json` | `brief.json`+`skill_plan.json` / ملف واحد / `check` يبني | **`brief.json` + `skill_plan.json`** | M1/M3/M5 | ✅ 2026-11-23 |
+| **D6** | الوضع instrumental | إضافة `--voices ins` الآن / `Vocal+Ins` فقط / checker منفصل | **`Vocal+Ins` في v1**؛ instrumental لاحقًا | M1/M5 | ✅ 2026-11-23 |
+| **D7** | عقد المهارة | تثبيت v0.2.0 + flags / تجميد v1 | **v0.2.0** + hash + `--require-final-rest` | M1/M5 | ✅ 2026-11-23 |
 | **D8** | سياسة البوابات | contract+sanity / +style / درجة مركبة | **contract+sanity فقط hard**؛ style WARN | M4/M5/M6 | ⏳ |
-| **D9** | المتر المتغير | حفظ `M:` / توحيد 4/4 / رفض | **حفظ `M:` و`[K:...]`** | M1 | 🔶 |
+| **D9** | المتر المتغير | حفظ `M:` / توحيد 4/4 / رفض | **حفظ `M:` و`[K:...]`** | M1 | ✅ 2026-11-23 |
 | **D10** | دمج `report.json` | `skill_report` nested / دمج مسطح / ملفان | **nested + `class`** | M4/M5 | ⏳ |
-| **D11** | دور 177 | calibration only / priors/eval / تجاهل | **calibration only** | M2/M6 | 🔶 |
-| **D12** | تعريف maqam coverage | labelled incl. other / accuracy / كلاهما | **coverage + accuracy منفصلان** | M2/M6 | ⏳ |
+| **D11** | دور 177 | calibration only / priors/eval / تجاهل | **calibration only** | M2/M6 | ✅ 2026-11-23 |
+| **D12** | تعريف maqam coverage | labelled incl. other / accuracy / كلاهما | **coverage + accuracy منفصلان** | M2/M6 | ⏸️ N/A until D3 |
 | **D13** | مصدر held-out | 35 / 177 / خارجي | **35 YT500 غير المستخدمة** | M6 | 🔶 |
-| **D14** | parser | vendor `abc_tools` / جديد / pin hash | **vendor أو pin hash** | M1 | 🔶 |
+| **D14** | parser | vendor `abc_tools` / جديد / pin hash | **vendor أو pin hash** | M1 | ✅ 2026-11-23 |
 | **D15** | السكتة الأخيرة | عقد دائم / WARN + flag / تجاهل | **WARN + `--require-final-rest`** | M5 | 🔶 |
-| **D16** | sanity على 482 | تطبيقها / فقط على السكور المولّد / لا | **فقط على السكور المولّد**، لا priors الـ482 | M2/M4 | ⏳ |
+| **D16** | sanity على 482 | تطبيقها / فقط على السكور المولّد / لا | **فقط على السكور المولّد**، لا priors الـ482 | M2/M4 | ✅ 2026-11-23 |
+
+> **M2 amendment (2026-11-23):** no expert maqam review is available. D3 and
+> D12 are **deferred**, not satisfied. D4 (cross-check only), D11 (calibration
+> only), and D16 (generated scores only) are recorded. M2 builds deterministic
+> features plus an explicitly unreviewed `mode_hypothesis`; `maqam` remains
+> `null`. No maqam coverage or accuracy is claimed. See
+> `docs/ostris-decisions.md` and `docs/ostris-m2-features.md`.
 
 ### 13.3 بوابة البدء
 
-- **قبل M1:** D5, D6, D7, D9, D14.
-- **قبل M2:** D3, D4, D11, D12, D16.
+> **M1 gate resolved (2026-11-23):** D5, D6, D7, D9, D14 are recorded with
+> concrete pins in `docs/ostris-decisions.md`. M1 (`ostris build`) is
+> implemented and passes on 482/482 tracks. M2+ remains gated below.
+
+- **قبل M1:** D5, D6, D7, D9, D14. ✅
+- **قبل M2:** D3, D4, D11, D12, D16. — D4/D11/D16 ✅ 2026-11-23; D3/D12
+  ⏸️ deferred because no expert maqam review is available.
 - **قبل M4/M5:** D8, D10, D15.
 - **قبل M6:** D1, D2, D13.
 - **M0 audit** يمكن أن يبدأ الآن؛ لا يبنى priors/plan/check قبله.
@@ -631,7 +666,8 @@ Rules:
 | البُعد | الهدف |
 |---|---|
 | تغطية البيانات | ≥95% من 482 مرتبطة ومحللة (بعد M0 audit) |
-| maqam coverage | ≥90% **مع confidence بما فيها `other/unknown`**؛ الدقة تُقاس على عينة مراجعة منفصلة (D12) |
+| maqam coverage | **not claimed**: no reviewed labels; deferred with D3/D12 |
+| feature coverage (M2) | 482/482 deterministic feature rows; 482/482 unreviewed mode hypotheses |
 | plan validity | 100% من المانيفستات تُنتج `skill_plan.json` صالحًا (D5) |
 | check | 100% **contract + sanity**؛ `style` warnings معروضة وقابلة للتنفيذ (D8) |
 | quotation | 100% من الاقتباسات المتعمدة موثّقة (`source_id`, `bar_range`) |

@@ -7,7 +7,12 @@
 | `constraints-calibration.md` | Full evidence report: 177 tracks, every number, verdicts, what is unverified |
 | `numbers-provenance.md` | Short entry point to the in-skill registry |
 | `implementation-plan-constraints.md` | Execution plan M0–M7 + implementation status |
-| `ostris-score-tools-plan.md` | The separate OSTRIS score-tools plan (482 instrumental corpus) |
+| `ostris-score-tools-plan.md` | OSTRIS score-tools plan (482 instrumental corpus); M0–M2 are implemented in the skill |
+| `ostris-decisions.md` | Resolved M1 decisions D5/D6/D7/D9/D14 with pinned hashes |
+| `ostris-m0-audit.md` | M0 result: verified inventory, link/parse coverage, FADL finding, corpus shape, remaining decisions |
+| `ostris-m1-ingest.md` | M1 result: canonical ABC build, preservation of `M:`/`[K:...]`, contract checks |
+| `ostris-m2-features.md` | M2 result: deterministic features and an unreviewed mode hypothesis; no maqam labels |
+| `ostris-implementation-checklist.md` | Phase-by-phase progress: what is done, partial, deferred, and next |
 
 ## Baseline / input
 

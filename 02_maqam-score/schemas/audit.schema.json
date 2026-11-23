@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/maqam-score/audit.schema.json",
+  "title": "OSTRIS M0 audit",
+  "description": "Machine-readable result of `ostris_cli.py audit`: inventory, links, parse failures, quality flags, held-out list, and gate checks.",
+  "type": "object",
+  "required": [
+    "stage",
+    "generated_at",
+    "cache",
+    "inventory",
+    "distributions",
+    "checks",
+    "gate_pass",
+    "files"
+  ],
+  "properties": {
+    "stage": { "type": "string", "const": "M0" },
+    "generated_at": { "type": "string" },
+    "cache": { "type": "string" },
+    "gate_pass": { "type": "boolean" },
+    "inventory": {
+      "type": "object",
+      "required": ["instrumental", "yt500", "fadl", "v3_labels", "links", "parse"],
+      "properties": {
+        "instrumental": { "type": "object" },
+        "yt500": { "type": "object" },
+        "fadl": { "type": "object" },
+        "v3_labels": { "type": "object" },
+        "links": {
+          "type": "object",
+          "required": ["total", "matched", "unmatched", "abc_missing"],
+          "properties": {
+            "total": { "type": "integer", "minimum": 0 },
+            "matched": { "type": "integer", "minimum": 0 },
+            "unmatched": { "type": "integer", "minimum": 0 },
+            "abc_missing": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "parse": {
+          "type": "object",
+          "required": ["ok", "failed", "ok_rate"],
+          "properties": {
+            "ok": { "type": "integer", "minimum": 0 },
+            "failed": { "type": "integer", "minimum": 0 },
+            "ok_rate": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "distributions": { "type": "object" },
+    "parse_failures": { "type": "array", "items": { "type": "object" } },
+    "duplicates": { "type": "array", "items": { "type": "object" } },
+    "held_out": { "type": "array", "items": { "type": "object" } },
+    "fadl_mapping": { "type": "array", "items": { "type": "object" } },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "required", "ok", "detail"],
+        "properties": {
+          "name": { "type": "string" },
+          "required": { "type": "boolean" },
+          "ok": { "type": "boolean" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "files": { "type": "object" }
+  },
+  "additionalProperties": true
+}

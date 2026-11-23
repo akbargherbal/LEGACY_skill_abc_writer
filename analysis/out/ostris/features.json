@@ -1,0 +1,121 @@
+{
+  "stage": "M2",
+  "generated_at": "2026-11-23T08:19:26+00:00",
+  "cache": "/content/skill_abc_writer/analysis/out/ostris/source",
+  "out": "/content/skill_abc_writer/analysis/out/ostris",
+  "skill_version": "0.2.0",
+  "feature_version": "m2-v1",
+  "records": 482,
+  "feature_ok": 482,
+  "failures": [],
+  "families": {
+    "minor_like": 401,
+    "phrygian_like": 55,
+    "major_like": 25,
+    "hijaz_like": 1
+  },
+  "thirds": {
+    "minor": 454,
+    "major": 26,
+    "neutral": 2
+  },
+  "tempo_bands": {
+    "medium": 220,
+    "slow": 139,
+    "fast": 123
+  },
+  "meter_families": {
+    "4/4": 174,
+    "2/4": 165,
+    "mixed": 135,
+    "6/8": 5,
+    "3/4": 3
+  },
+  "bars": {
+    "n": 482,
+    "min": 57.0,
+    "median": 150.0,
+    "max": 296.0
+  },
+  "vocal_notes": {
+    "n": 482,
+    "min": 0.0,
+    "median": 525.0,
+    "max": 1064.0
+  },
+  "chords": {
+    "n": 482,
+    "min": 73.0,
+    "median": 170.0,
+    "max": 360.0
+  },
+  "maqam_conditioned": false,
+  "maqam_reviewed": false,
+  "limitations": [
+    "No expert maqam review is available for the 482-track corpus.",
+    "mode_hypothesis is a coarse, unreviewed 12-TET template fit; it is not a maqam label.",
+    "Mode families are anchored to the ABC key tonic; this is not a corpus maqam distribution.",
+    "Ajam/Rast and Nahawand/Bayati are not separable in this ABC dialect.",
+    "The 438 v3 labels are a separate corpus and are only a weak cross-check, never priors or eval.",
+    "The 177 five_stars labels are prompts/calibration, not ground truth."
+  ],
+  "contract": {
+    "version": "0.2.0",
+    "checks": [
+      {
+        "artifact": "scripts/checker.py",
+        "expected": "bd364578417a8b407fa0b5953bbfb2b358a44eaf1bc9dccf332a5501e4bf30b4",
+        "actual": "bd364578417a8b407fa0b5953bbfb2b358a44eaf1bc9dccf332a5501e4bf30b4",
+        "ok": true,
+        "detail": "ok"
+      },
+      {
+        "artifact": "scripts/calibration.json",
+        "expected": "c5cd513c83936d1f847eb93f9f8aed1f0a5c23f0249a0217498ce0ddd21333a1",
+        "actual": "c5cd513c83936d1f847eb93f9f8aed1f0a5c23f0249a0217498ce0ddd21333a1",
+        "ok": true,
+        "detail": "ok"
+      },
+      {
+        "artifact": "scripts/abc_tools.py",
+        "expected": "e99e5cf9dff4647f48322e3319065ba793e7dbc808222e1848bab7aa8c4bd11c",
+        "actual": "e99e5cf9dff4647f48322e3319065ba793e7dbc808222e1848bab7aa8c4bd11c",
+        "ok": true,
+        "detail": "ok"
+      }
+    ],
+    "ok": true
+  },
+  "checks": [
+    {
+      "name": "feature_coverage",
+      "required": true,
+      "ok": true,
+      "detail": "482/482 feature rows"
+    },
+    {
+      "name": "mode_hypothesis_coverage",
+      "required": true,
+      "ok": true,
+      "detail": "482/482 mode rows"
+    },
+    {
+      "name": "no_maqam_claim",
+      "required": true,
+      "ok": true,
+      "detail": "0 records carry a maqam label (must be 0)"
+    },
+    {
+      "name": "contract_pin",
+      "required": true,
+      "ok": true,
+      "detail": "skill 0.2.0 pins match: scripts/checker.py=ok, scripts/calibration.json=ok, scripts/abc_tools.py=ok"
+    }
+  ],
+  "gate_pass": true,
+  "records_file": "analysis/out/ostris/records.jsonl",
+  "files": {
+    "features": "analysis/out/ostris/features.json",
+    "features_md": "analysis/out/ostris/features.md"
+  }
+}

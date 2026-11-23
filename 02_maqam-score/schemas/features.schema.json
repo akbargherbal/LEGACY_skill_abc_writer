@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/maqam-score/features.schema.json",
+  "title": "OSTRIS M2 features",
+  "description": "Machine-readable result of `ostris_cli.py features`: deterministic feature coverage plus an explicitly unreviewed mode hypothesis. No named maqam labels.",
+  "type": "object",
+  "required": [
+    "stage",
+    "generated_at",
+    "records",
+    "feature_ok",
+    "maqam_conditioned",
+    "maqam_reviewed",
+    "checks",
+    "gate_pass",
+    "files"
+  ],
+  "properties": {
+    "stage": { "type": "string", "const": "M2" },
+    "generated_at": { "type": "string" },
+    "cache": { "type": "string" },
+    "out": { "type": "string" },
+    "skill_version": { "type": "string" },
+    "feature_version": { "type": "string" },
+    "records": { "type": "integer", "minimum": 0 },
+    "feature_ok": { "type": "integer", "minimum": 0 },
+    "failures": { "type": "array", "items": { "type": "object" } },
+    "families": { "type": "object" },
+    "thirds": { "type": "object" },
+    "tempo_bands": { "type": "object" },
+    "meter_families": { "type": "object" },
+    "bars": { "type": "object" },
+    "vocal_notes": { "type": "object" },
+    "chords": { "type": "object" },
+    "maqam_conditioned": { "type": "boolean", "const": false },
+    "maqam_reviewed": { "type": "boolean", "const": false },
+    "limitations": { "type": "array", "items": { "type": "string" } },
+    "contract": {
+      "type": "object",
+      "required": ["version", "checks", "ok"],
+      "properties": {
+        "version": { "type": "string" },
+        "checks": { "type": "array", "items": { "type": "object" } },
+        "ok": { "type": "boolean" }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "required", "ok", "detail"],
+        "properties": {
+          "name": { "type": "string" },
+          "required": { "type": "boolean" },
+          "ok": { "type": "boolean" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "gate_pass": { "type": "boolean" },
+    "records_file": { "type": "string" },
+    "files": { "type": "object" }
+  },
+  "additionalProperties": true
+}

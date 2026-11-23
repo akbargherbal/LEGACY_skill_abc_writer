@@ -10,9 +10,11 @@ justifies its numbers.
 | Path | What it is | Status |
 |---|---|---|
 | `02_maqam-score/` | Skill source: `SKILL.md`, scripts, references, example, tests | **active source** |
+| `02_maqam-score/scripts/ostris/` | OSTRIS corpus tools (`sync`, `audit`; later `plan`/`check`) | **active** |
+| `02_maqam-score/schemas/` | JSON contracts for `track_record` and the M0 audit | **active** |
 | `dist/02_maqam-score.zip` | Built skill package | **build artifact** |
 | `analysis/` | Calibration scripts (`calibrate_177.py`, `test_checker_corpus.py`) | **active** |
-| `analysis/out/` | Generated evidence: `summary.json`, `tracks.jsonl` | **generated, reproducible** |
+| `analysis/out/` | Generated evidence: `summary.json`, `tracks.jsonl`, `ostris/` | **generated, reproducible** |
 | `docs/` | Reports, plans, baseline inventory | **active docs** |
 | `docs/archive/` | Inputs that served their purpose | **frozen** |
 
@@ -23,10 +25,38 @@ The skill source is the truth; `dist/02_maqam-score.zip` is rebuilt with
 
 ```bash
 make selftest        # the example passes; the dialect is enforced
-make test            # 6 unit tests
+make test            # 19 unit tests
 make check-corpus    # 177/177 parse, 175/177 hard (98.9%)
 make zip             # build dist/02_maqam-score.zip
 ```
+
+## OSTRIS corpus tools
+
+The 482-track instrumental corpus is processed from the project data root. The
+separate-repo proposal was dropped: the tools live in the skill, and the
+offline cache is generated under `analysis/out/ostris/`.
+
+```bash
+DATA_ROOT=gs://<bucket> make ostris-sync
+make ostris-audit     # M0: inventory, links, parse, records
+make ostris-build     # M1: canonical ABC, contract pin check
+make ostris-features  # M2: objective features + unreviewed mode hypothesis
+```
+
+Outputs: `analysis/out/ostris/audit.json`, `audit.md`, `manifest_links.csv`,
+`records.jsonl`, `held_out.jsonl`, `canonical.json`, `canonical.md`,
+`features.json`, `features.md`, and the gitignored `work/canonical/abc/` set.
+The cache is gitignored. Only the lightweight manifests, YT500 ABC shards, FADL
+album JSONs, and reference ABCs are downloaded; the 2.95 GiB audio bundle is
+not.
+
+M1 decisions D5/D6/D7/D9/D14 are recorded in `docs/ostris-decisions.md`; the
+result is `docs/ostris-m1-ingest.md`. No expert maqam review is available, so
+M2 is label-free: `maqam` stays `null` and the coarse `mode_hypothesis` is
+unreviewed. See `docs/ostris-m2-features.md`.
+
+The phase-by-phase status, including what is partial or deferred, is
+`docs/ostris-implementation-checklist.md`.
 
 ## Where the numbers come from
 

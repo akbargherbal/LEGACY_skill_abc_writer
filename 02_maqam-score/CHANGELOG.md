@@ -1,5 +1,64 @@
 # Changelog
 
+## 0.3.0-dev — 2026-11-23
+
+### OSTRIS corpus tools (M0)
+- New `scripts/ostris_cli.py` + `scripts/ostris/` package. Commands:
+  `sync` (lightweight GCS/local cache) and `audit` (M0 inventory/link/parse).
+- `sync` copies manifests, 25 YT500 ABC shards, 15 FADL album JSONs, the
+  22-track FADL shortlist, and reference ABCs; never the 2.95 GiB audio bundle.
+- `audit` links all 482 library tracks (460 YT500 + 22 FADL), parses them with
+  the vendored `abc_tools.py`, writes `records.jsonl`, `manifest_links.csv`,
+  `audit.json`, `audit.md`, and `held_out.jsonl`.
+- New schemas: `schemas/track_record.schema.json`, `schemas/audit.schema.json`.
+- New tests: `tests/test_ostris.py` (parse, links, duplicate exclusion, schema).
+- M0 result: 482/482 matched and parsed; 35 YT500 held-out (4 without ABC);
+  5 duplicate groups / 10 tracks; 10 excluded from priors; 472 prior candidates.
+- The separate-repository proposal is dropped. Offline code lives in the skill;
+  generated evidence lives in `analysis/out/ostris/`.
+
+### OSTRIS M1 ingest & canonicalization
+- M1 decisions resolved and pinned in `docs/ostris-decisions.md`:
+  D5 (`brief.json` + `skill_plan.json`), D6 (`Vocal+Ins` only),
+  D7 (skill v0.2.0 + hashes + `--require-final-rest`), D9 (preserve `M:`/`[K:]`),
+  D14 (vendored `abc_tools.py` + hash).
+- New `scripts/ostris/canonical.py`: structural canonicalization. It normalizes
+  line endings/trailing whitespace, validates headers and both voices, and
+  preserves music lines, per-bar `M:`, and inline `[K:...]`.
+- New `scripts/ostris/build.py` + `ostris build`: writes
+  `analysis/out/ostris/work/canonical/abc/` (gitignored), re-parses every
+  canonical file, adds a `canonical` object to `records.jsonl`, and writes
+  `canonical.json` / `canonical.md`.
+- New `scripts/ostris/contract.py` + `ostris contract`: verifies pinned hashes
+  for `checker.py`, `calibration.json`, and `abc_tools.py`.
+- M1 result: 482/482 canonical and re-parsed; 1.84 MB; 482 unique hashes;
+  135 tracks with declared meter changes; 3 with inline `[K:...]`; 0 failures.
+- `make ostris-build` runs with `--require-contract`.
+- No priors, plan, exemplar, or check command yet: M3+ remains gated on
+  the decisions in `docs/ostris-score-tools-plan.md` §13.
+
+### OSTRIS M2 features (label-free)
+- No expert maqam review is available, so D3 and D12 are **deferred** and
+  `maqam` stays `null`; no maqam coverage or accuracy is claimed.
+- D4 (v3 cross-check only), D11 (177 calibration only), and D16 (sanity on
+  generated scores only) are recorded in `docs/ostris-decisions.md`.
+- New `scripts/ostris/features.py` + `ostris features`: extracts bars, key,
+  tempo band, meter timeline, section comments, per-voice density/range/
+  intervals/durations/phrases, and harmony statistics.
+- New `scripts/ostris/mode.py`: coarse, **unreviewed** 12-TET mode hypothesis
+  (`major_like`, `minor_like`, `phrygian_like`, `hijaz_like`, `unknown`)
+  anchored to the key tonic. Every row carries `reviewed: false` and is
+  excluded from gates and priors.
+- New `make ostris-features`; new `schemas/features.schema.json`; the track
+  schema documents `features` and `mode_hypothesis`.
+- M2 result: 482/482 feature rows, 482/482 mode rows, 0 named-maqam claims,
+  0 failures. Key-relative families: minor_like 401, phrygian_like 55,
+  major_like 25, hijaz_like 1.
+- M3 may build priors by objective strata, but every prior must record
+  `maqam_conditioned: false`.
+- Added `docs/ostris-implementation-checklist.md`: phase-by-phase status,
+  decisions, CLI/artifact coverage, deviations, and next work.
+
 ## 0.2.0 — 2026-11-23
 
 Calibrated against the 177-track `five_stars` ABC corpus.

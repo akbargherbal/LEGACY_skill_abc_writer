@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/maqam-score/track_record.schema.json",
+  "title": "OSTRIS track record (M0)",
+  "description": "One row of records.jsonl: a library track linked to its source transcript and measured with the vendored ABC parser.",
+  "type": "object",
+  "required": [
+    "id",
+    "source",
+    "title",
+    "artist",
+    "duration_s",
+    "audio_uri",
+    "abc_uri",
+    "key",
+    "tempo",
+    "meter",
+    "bars",
+    "voices",
+    "range",
+    "notes",
+    "chords",
+    "quality_score",
+    "flags",
+    "exclude_from_priors",
+    "maqam",
+    "maqam_confidence",
+    "maqam_source",
+    "provenance"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "enum": ["yt500", "fadhl_shaker_shortlist"] },
+    "source_rank": { "type": ["integer", "null"], "minimum": 1 },
+    "video_id": { "type": ["string", "null"] },
+    "out_name": { "type": ["string", "null"] },
+    "title": { "type": ["string", "null"] },
+    "artist": { "type": ["string", "null"] },
+    "duration_s": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+    "audio_uri": { "type": ["string", "null"] },
+    "abc_uri": { "type": ["string", "null"] },
+    "abc_kind": {
+      "type": ["string", "null"],
+      "enum": ["source_transcript", "selected_source_transcript", "reference_conditioner", null]
+    },
+    "abc_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "reference_abc_uri": { "type": ["string", "null"] },
+    "selected_transcript_uri": { "type": ["string", "null"] },
+    "key": { "type": ["string", "null"] },
+    "tempo": { "type": ["integer", "null"], "minimum": 1 },
+    "meter": { "type": ["string", "null"] },
+    "meters": { "type": "array", "items": { "type": "string" } },
+    "keys": { "type": "array", "items": { "type": "string" } },
+    "bars": { "type": "integer", "minimum": 0 },
+    "section_count": { "type": ["integer", "null"], "minimum": 0 },
+    "voices": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "string", "enum": ["Vocal", "Ins"] }
+    },
+    "range": {
+      "type": "object",
+      "required": ["vocal", "ins"],
+      "properties": {
+        "vocal": {
+          "type": ["array", "null"],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 0, "maximum": 127 }
+        },
+        "ins": {
+          "type": ["array", "null"],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 0, "maximum": 127 }
+        }
+      }
+    },
+    "notes": {
+      "type": "object",
+      "required": ["vocal", "ins"],
+      "properties": {
+        "vocal": { "type": "integer", "minimum": 0 },
+        "ins": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "chords": { "type": "integer", "minimum": 0 },
+    "density": { "type": ["number", "null"], "minimum": 0 },
+    "silence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "sounding_seconds": { "type": ["number", "null"], "minimum": 0 },
+    "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "flags": { "type": "array", "items": { "type": "string" } },
+    "exclude_from_priors": { "type": "boolean" },
+    "duplicate_of": { "type": ["string", "null"] },
+    "duplicate_group": { "type": ["string", "null"] },
+    "maqam": { "type": ["string", "null"] },
+    "maqam_confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "maqam_source": { "type": "string" },
+    "provenance": {
+      "type": "object",
+      "required": ["abc", "audio", "link_method"],
+      "properties": {
+        "abc": { "type": ["string", "null"] },
+        "abc_kind": { "type": ["string", "null"] },
+        "abc_sha256": { "type": ["string", "null"] },
+        "audio": { "type": ["string", "null"] },
+        "audio_duration_s": { "type": ["number", "null"] },
+        "link_method": { "type": ["string", "null"] },
+        "transcript_id": { "type": ["string", "null"] },
+        "source_qc": { "type": "object" }
+      }
+    },
+    "qc": {
+      "type": "object",
+      "properties": {
+        "duration_mismatch": { "type": ["number", "null"] },
+        "parse_ok": { "type": "boolean" },
+        "parse_error": { "type": ["string", "null"] },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "canonical": {
+      "type": ["object", "null"],
+      "description": "M1 canonical ABC: structure normalized, M:/[K:...] preserved.",
+      "required": ["ok", "sha256", "voices", "errors", "warnings", "parse_ok"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "uri": { "type": ["string", "null"] },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "voices": { "type": "array", "items": { "type": "string" } },
+        "header": { "type": "object" },
+        "meters_declared": { "type": "array", "items": { "type": "string" } },
+        "keys_declared": { "type": "array", "items": { "type": "string" } },
+        "inline_meter_changes": { "type": "integer", "minimum": 0 },
+        "inline_key_changes": { "type": "integer", "minimum": 0 },
+        "errors": { "type": "array", "items": { "type": "string" } },
+        "warnings": { "type": "array", "items": { "type": "string" } },
+        "parse_ok": { "type": "boolean" },
+        "parse_error": { "type": ["string", "null"] }
+      }
+    },
+    "features": {
+      "type": ["object", "null"],
+      "description": "M2 deterministic features; no reviewed maqam label.",
+      "properties": {
+        "version": { "type": "string" },
+        "bars": { "type": "integer", "minimum": 0 },
+        "duration_quarters": { "type": ["number", "null"] },
+        "sounding_seconds": { "type": ["number", "null"] },
+        "key": { "type": "object" },
+        "tempo": { "type": "object" },
+        "meter": { "type": "object" },
+        "sections": { "type": "object" },
+        "vocal": { "type": "object" },
+        "ins": { "type": "object" },
+        "harmony": { "type": "object" },
+        "maqam": { "type": ["string", "null"] },
+        "maqam_source": { "type": "string" },
+        "maqam_reviewed": { "type": "boolean" }
+      }
+    },
+    "mode_hypothesis": {
+      "type": ["object", "null"],
+      "description": "Unreviewed coarse mode descriptor; not a maqam label and never a gate.",
+      "required": ["family", "reviewed", "warning"],
+      "properties": {
+        "tonic": { "type": ["string", "null"] },
+        "tonic_pc": { "type": ["integer", "null"], "minimum": 0, "maximum": 11 },
+        "family": {
+          "type": "string",
+          "enum": ["major_like", "minor_like", "phrygian_like", "hijaz_like", "unknown"]
+        },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "degree_shares": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 12,
+          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "third": { "type": "string", "enum": ["major", "minor", "neutral", "unknown"] },
+        "augmented_second": { "type": "boolean" },
+        "alternatives": { "type": "array", "items": { "type": "object" } },
+        "reviewed": { "type": "boolean", "const": false },
+        "method": { "type": "string" },
+        "anchored_to": { "type": "string" },
+        "warning": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": true
+}
