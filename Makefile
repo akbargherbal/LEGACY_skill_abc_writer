@@ -1,8 +1,9 @@
-.PHONY: test selftest zip zip-public check-corpus offline-check ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval clean
+.PHONY: test selftest zip zip-public release check-corpus offline-check ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval clean
 
 CORPUS ?= $(HOME)/Jupyter_Notebooks/OpenCode/arabmaqamrock/datasets/five_stars
 DIST := dist
 SKILL_NAME := abc_score_writer
+VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '02_maqam-score/scripts'); from ostris.contract import SKILL_VERSION; print(SKILL_VERSION)")
 ZIP := $(DIST)/$(SKILL_NAME).zip
 OSTRIS_CACHE ?= analysis/out/ostris/source
 OSTRIS_OUT ?= analysis/out/ostris
@@ -25,6 +26,17 @@ zip:
 # docs/ostris-licensing.md). Reader commands then need explicit --out/--priors.
 zip-public:
 	scripts/package_skill.sh --public "$(DIST)"
+
+# Build, verify, and archive a versioned release. The unversioned zips stay as
+# the "current" aliases; dist/releases/ keeps every version, including 0.2.0.
+release: test selftest offline-check zip zip-public
+	@test -n "$(VERSION)" || { echo "release: cannot read SKILL_VERSION"; exit 1; }
+	@mkdir -p "$(DIST)/releases"
+	@cp "$(DIST)/$(SKILL_NAME).zip" "$(DIST)/releases/$(SKILL_NAME)-$(VERSION).zip"
+	@cp "$(DIST)/$(SKILL_NAME)-public.zip" "$(DIST)/releases/$(SKILL_NAME)-$(VERSION)-public.zip"
+	@cd "$(DIST)/releases" && sha256sum "$(SKILL_NAME)-$(VERSION)"*.zip > "SHA256SUMS-$(VERSION).txt"
+	@echo "release $(VERSION):"
+	@cat "$(DIST)/releases/SHA256SUMS-$(VERSION).txt"
 
 check-corpus:
 	python3 analysis/test_checker_corpus.py --corpus "$(CORPUS)"

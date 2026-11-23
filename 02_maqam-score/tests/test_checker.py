@@ -98,8 +98,112 @@ class CheckerTests(unittest.TestCase):
         plan = json.loads(PLAN.read_text(encoding="utf-8"))
         results, _ = checker.check(score, plan, calibration=self.cal)
         sanity = [r for r in results if r[4] == "sanity"]
-        self.assertEqual(len(sanity), 6)
+        self.assertGreaterEqual(len(sanity), 6)
         self.assertFalse([r for r in sanity if r[0] == "FAIL"], sanity)
+
+    def test_shape_guards_reject_a_one_breath_scale(self):
+        """A continuous scale with one phrase ending is a degeneracy, not taste.
+
+        The 2026-11-23 Claude run was 34 s unbroken, 6% repeated and 2 endings;
+        the corpus is 5.5-22.9 s, 25-43% and 4-8. These three guards make that
+        run fail without touching the six validity guards.
+        """
+        score = checker.parse(ONE_BREATH_SCALE)
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        plan.update({
+            "bars": 16, "tempo": 74, "sections": ["verse"], "syllables": 120,
+            "max_unbroken_seconds": 10, "min_phrase_endings": 3,
+            "max_top_duration_share": 0.95, "min_distinct_durations": 4,
+            "ties_min": 0, "melisma_min": 1.0, "melisma_max": 1.55,
+            "register": {"mean": 70, "top": 74, "tolerance": 5},
+            "deviations": [
+                {"bars": "1-4", "channel": "gap rate", "before": "a", "after": "b"},
+                {"bars": "5-8", "channel": "density", "before": "a", "after": "b"},
+                {"bars": "9-12", "channel": "section register", "before": "a", "after": "b"},
+            ],
+        })
+        results, measured = checker.check(score, plan, calibration=self.cal)
+        failed = {name for tag, name, _ok, _detail, _cls in results if tag == "FAIL"}
+        self.assertIn("unbroken singing", failed)
+        self.assertIn("repeated notes", failed)
+        self.assertIn("phrase endings", failed)
+        self.assertGreater(measured["unbroken_seconds_max"], 23)
+        self.assertLess(measured["repeated_share"], 0.20)
+        self.assertLess(measured["distinct_phrase_endings"], 3)
+
+    def test_maqam_measures_against_declared_degrees(self):
+        """D Kurd written as K:Dm must not be called 100th-percentile chromatic."""
+        import re
+        lines = []
+        for line in EXAMPLE.read_text(encoding="utf-8").splitlines():
+            if not line.startswith(("X:", "T:", "M:", "L:", "Q:", "V:", "K:", "%")):
+                line = re.sub(r"(?<![_^=])([Ee])(?=[0-9,])", r"_\1", line)
+            lines.append(line)
+        score = checker.parse("\n".join(lines) + "\n")
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        key_chromatic = checker.check(score, plan, calibration=self.cal)[1]["chromatic_per_100"]
+        self.assertGreater(key_chromatic, 0)
+
+        plan["maqam"] = {
+            "name": "kurd", "tonic": "D",
+            "degrees": ["D", "Eb", "F", "G", "A", "Bb", "C"],
+            "resting": ["D", "F", "A", "Bb", "C"],
+        }
+        _results, measured = checker.check(score, plan, calibration=self.cal)
+        self.assertEqual(measured["chromatic_basis"], "maqam:kurd")
+        self.assertEqual(measured["chromatic_per_100"], 0.0)
+        self.assertEqual(measured["maqam_fit_share"], 1.0)
+
+
+ONE_BREATH_SCALE = """X:1
+T:
+M:4/4
+L:1/16
+Q:1/4=74
+V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
+V: Ins clef=treble name="Ins Melody" snm="Inst."
+K:Dm
+% verse
+V: Vocal
+D2 E2 F2 G2 A2 B2 c2 d2|c2 B2 A2 G2 F2 E2 D4|
+V: Ins
+z8z6 D2|Z|
+% chorus
+V: Vocal
+D2 E2 F2 G2 A2 B2 c2 d2|c2 B2 A2 G2 F2 E2 D4|
+V: Ins
+Z|Z|
+% verse
+V: Vocal
+D2 E2 F2 G2 A2 B2 c2 d2|c2 B2 A2 G2 F2 E2 D4|
+V: Ins
+Z|Z|
+% chorus
+V: Vocal
+D2 E2 F2 G2 A2 B2 c2 d2|c2 B2 A2 G2 F2 E2 D4|
+V: Ins
+Z|Z|
+% verse
+V: Vocal
+D2 E2 F2 G2 A2 B2 c2 d2|c2 B2 A2 G2 F2 E2 D4|
+V: Ins
+Z|Z|
+% chorus
+V: Vocal
+D2 E2 F2 G2 A2 B2 c2 d2|c2 B2 A2 G2 F2 E2 D4|
+V: Ins
+Z|Z|
+% verse
+V: Vocal
+D2 E2 F2 G2 A2 B2 c2 d2|c2 B2 A2 G2 F2 E2 D4|
+V: Ins
+Z|Z|
+% chorus
+V: Vocal
+D2 E2 F2 G2 A2 B2 c2 d2|c2 B2 A2 G2 F2 E2 D4|
+V: Ins
+Z|Z|
+"""
 
 
 if __name__ == "__main__":

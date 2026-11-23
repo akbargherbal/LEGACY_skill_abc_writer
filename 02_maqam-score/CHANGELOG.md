@@ -1,5 +1,64 @@
 # Changelog
 
+## 0.3.0 — shape gate after eval run `2026-11-23-claude-session-01`
+
+**Evidence:** `analysis/eval/runs/2026-11-23-claude-session-01/postmortem.md`.
+A Claude session passed the 0.2.0 gate (0 hard, 1 warning) with a score the
+expert and the user called mediocre. Re-measured against the 177-track corpus,
+the score was outside it on three shape metrics: 34.05 s unbroken singing
+(corpus max 22.89), 6.1% repeated-pitch share (corpus min 25.2), and 2 distinct
+phrase endings (corpus min 4). The skill had no target for any of them.
+
+### Gate
+- Add three calibrated **sanity** guards, all 177/177:
+  `unbroken_seconds_max <= 23`, `repeated_share >= 0.20`,
+  `distinct_phrase_endings >= 3` (when the score has ≥6 phrases).
+  Hard gate set is now 6 validity + 3 shape = 9; joint pass stays 175/177.
+- Add plan **style** targets `max_unbroken_seconds` (default 10) and
+  `min_phrase_endings` (default 3), and report `unbroken_seconds_max`,
+  `phrase_seconds_median`, `breaths_per_bar`, `repeated_share`,
+  `stepwise_share`, `distinct_phrase_endings`, `phrase_endings`,
+  `tessitura_share_ge_c5`.
+- Add optional `plan.maqam` (`name`, `tonic`, `degrees`, `resting`);
+  `chromatic_per_100` is measured against the maqam when declared, and the
+  report says `chromatic_basis`. D Kurd as `K:Dm` now reports 0 chromatic /
+  `maqam_fit_share 1.0` instead of 18.86 (100th percentile).
+- Add `maqam_fit` and `maqam tonic` style checks.
+
+### Instructions
+- §1: tempo and tonic are not gate items; use the corpus/prompt defaults and
+  declare them. The gate still stops for a missing lyric, style or maqam.
+- §3.2: plan template now uses style targets (0.65 top duration, top 84, Ins
+  0.20, endings 3, unbroken 10) instead of sanity ceilings; adds the maqam
+  block and the "less ornament → melisma_min 1.00" rule.
+- §3.3: **one lyric line = one phrase**; breath and phrase budget; the final
+  note is the tonic but intermediate phrases end on the maqam's resting tones;
+  at least three endings; repeated-note share is named.
+- §3.5.1: error→fix table, including "do not split notes for duration spread"
+  (the 0.2.0 repair added melisma, and the user then asked to remove it).
+- §3.6: revision is one channel, one plan change, one edit, one check; a full
+  rewrite is not the default.
+- §6 traps: one breath per bayt, all-tonic cadences, copying 0.85/top 82.
+- `references/reference.md`: §4.1 `K:`/maqam spelling (no `K:Dphr`, no
+  quarter tones), §5.1 maqam table, §7.2 shape distributions, §7.3 nine guards.
+- `references/numbers.md`: register the new numbers with class, n, pass rate.
+- `example/plan.json` uses the style targets; `example/score.abc` no longer
+  carries chord symbols (the plan says 0, the corpus has 0).
+- `ostris plan` no longer asks for chords (`chords_min 0`) or a 2-note fill
+  (`min_fill_notes 3`); it emits the two shape targets.
+
+### Tests
+- `test_shape_guards_reject_a_one_breath_scale` (a synthetic scale fails all
+  three shape guards).
+- `test_maqam_measures_against_declared_degrees` (Kurd as `K:Dm` reports 0
+  chromatic when the maqam is declared).
+- `test_sanity_set_passes_the_example` counts ≥6 sanity results; the example
+  passes all nine guards that apply.
+- Contract pins re-pinned; `SKILL_VERSION 0.3.0`.
+- Release archives: `dist/releases/abc_score_writer-0.3.0.zip` (sha256
+  `e792743e…78ac34`) and `-public.zip` (`e2e9a895…b06e0f`); 0.2.0 kept at
+  `dist/releases/abc_score_writer-0.2.0.zip`. See `dist/RELEASE-0.3.0.md`.
+
 ## Claude-compatible package — 2026-11-23
 
 ### Portable bundle and skill name

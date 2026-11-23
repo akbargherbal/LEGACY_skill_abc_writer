@@ -52,8 +52,12 @@ else
 fi
 
 rsync -a "${EXCLUDES[@]}" "$SRC"/ "$STAGE/$NAME"/
+# Reproducible archive: fixed mtimes and no host-specific extra attributes.
+# Two builds of the same source produce the same sha256.
+EPOCH="${SOURCE_DATE_EPOCH:-0}"
+find "$STAGE/$NAME" -exec touch -h -d "@$EPOCH" {} +
 rm -f "$ZIP"
-(cd "$STAGE" && zip -qr "$ZIP" "$NAME")
+(cd "$STAGE" && zip -X -qr "$ZIP" "$NAME")
 
 # The skill package is a runtime artifact. Development material (docs/, the
 # evaluation protocol, post-mortems, analysis/) must never leak into it.

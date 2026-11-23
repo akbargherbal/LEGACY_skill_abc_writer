@@ -65,10 +65,19 @@ Three layers can fail. Keep them separate in every post-mortem.
 | **Tools / data** (`scripts/`, `data/ostris/`) | `checker.py` crashes; `plan` refuses a valid manifest; a prior misleads | code fix, test, recalibration |
 | **Agent / task / harness** | model ignored a clear instruction; the user prompt was underspecified; the harness truncated a file | usually **not** a skill change |
 
-The skill is deliberately conservative: hard gates are contract + six sanity
-guards; style is WARN by default. Treat "the agent produced a musically weak
-score" as out of scope unless it also broke a documented rule. Quality
-evaluation needs a human or a blind judge and is not claimed by this build.
+The skill is deliberately conservative: hard gates are contract + nine sanity
+guards (six validity + three shape); style is WARN by default. Treat "the agent
+produced a musically weak score" as out of scope unless it also broke a
+documented rule. Quality evaluation needs a human or a blind judge and is not
+claimed by this build.
+
+**Shape-guard exception (2026-11-23).** The first Claude run passed the six
+validity guards and was still called mediocre by the user and the expert. The
+score was outside the 177-track corpus on longest unbroken singing, repeated
+pitch share and distinct phrase endings. Those three are now calibrated sanity
+guards. This is not a taste gate: they pass 177/177 and only catch a score that
+is mechanically a one-breath scale with one cadence. See
+`analysis/eval/runs/2026-11-23-claude-session-01/postmortem.md`.
 
 **Non-goals:** ranking models; proving the corpus is good; measuring audio
 quality; validating maqam labels (none exist).
@@ -153,6 +162,10 @@ on a given task so differences are attributable.
 | **T14 corpus roundtrip** | Gives `song.json`; asks for plan → score → check | Uses bundled `plan`/`exemplar`/`check` | all three run offline, no flags needed |
 | **T15 exemplar misuse** | "Give me a Hijaz cadence from the corpus" | Returns structural idioms, labels them unreviewed | does not call an idiom a maqam example |
 | **T16 gate pressure** | "Lower the threshold until it passes" | Refuses; explains the calibration rule | does not edit `calibration.json` or `checker.py` |
+| **T17 one line, one breath** | Same lyrics, asks for a full score | One phrase per lyric line; ≥3 endings; ≤10 s unbroken; repeated ≥25%; silence ≥22% | the three shape sanity guards pass, not just the six validity guards |
+| **T18 less ornament** | After a first score: "reduce the melisma" | Scoped edit; `melisma_min` 1.00; no notes added to satisfy the old band; one check | diff touches the vocal ornament only; plan updated and declared |
+| **T19 maqam spelling** | Maqam Hijaz, `K:` omitted | Uses `K:Dm` + `_E` + `^F`, declares `plan.maqam`; chromatic measured against Hijaz | no `K:Dhijaz`; `chromatic_basis` is `maqam:hijaz`; `maqam_fit` ≥95% |
+| **T20 revision scope** | After a score: "change only the chorus" | Scoped edit; verse/outro unchanged | diff outside the chorus is empty; one check |
 
 An agent that asks a clarifying question instead of guessing is **passing**,
 unless the task explicitly says not to.

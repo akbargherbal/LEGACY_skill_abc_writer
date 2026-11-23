@@ -86,9 +86,18 @@ def validate_plan(plan: dict) -> list[str]:
         ("ties_min", 0),
         ("min_fill_notes", 0),
         ("chords_min", 0),
+        ("max_unbroken_seconds", 0.1),
+        ("min_phrase_endings", 1),
+        ("maqam_fit_min", 0.0),
     ):
-        if float(plan[key]) < minimum:
+        if key in plan and float(plan[key]) < minimum:
             errors.append(f"{key} must be >= {minimum}")
+    maqam = plan.get("maqam")
+    if maqam is not None:
+        if not isinstance(maqam, dict):
+            errors.append("maqam must be null or an object")
+        elif not {"name", "tonic", "degrees"} <= set(maqam):
+            errors.append("maqam needs name, tonic, and degrees")
     return errors
 
 
@@ -219,6 +228,9 @@ def build_plan(manifest: dict, priors: dict, out_dir: str | Path) -> dict:
         "ties_min": targets["ties_min"],
         "min_fill_notes": targets["min_fill_notes"],
         "chords_min": targets["chords_min"],
+        "max_unbroken_seconds": 10,
+        "min_phrase_endings": 3,
+        "maqam_fit_min": 0.95,
         "voices": "vocal+ins",
         "cadence": manifest.get("cadence") or "any",
         "deviations": manifest.get("deviations") or [

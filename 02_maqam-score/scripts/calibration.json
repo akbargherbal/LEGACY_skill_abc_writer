@@ -1,9 +1,9 @@
 {
-  "version": "2026-11-23",
+  "version": "2026-11-23b",
   "corpus": {
     "name": "five_stars/177",
     "n": 177,
-    "note": "SheetSage2 transcripts of Suno renders; maqam tags are prompts, not measured",
+    "note": "SheetSage2 transcripts of Suno renders; maqam tags are prompts, not measured. Shape metrics (unbroken, repeated, endings) added 2026-11-23 from the same 177.",
     "sha256": "46e5125d80810f10e624a703fce97e3b097d9c254ebc9f3071faf654bdf8be17",
     "lyrics_sha256": "5bce6a3ce837e4e5b29e53d2cb2a96ecc0028355af920fd588f3a334757b95a6",
     "manifest_sha256": "648f5dcbd4ee8b84827bda47d0609aa146bdab41351cd0e3437b7249ce683401"
@@ -150,6 +150,83 @@
       "p95": 119,
       "max": 130,
       "note": "bimodal: slow cluster ~58-75, fast cluster ~105-130"
+    },
+    "unbroken_seconds_max": {
+      "n": 177,
+      "min": 5.49,
+      "p5": 6.12,
+      "p25": 8.26,
+      "median": 10.42,
+      "p75": 12.75,
+      "p95": 14.86,
+      "max": 22.89,
+      "basis": "analysis/measure_phrasing.py over five_stars/177 (2026-11-23)"
+    },
+    "phrase_seconds_median": {
+      "n": 177,
+      "min": 2.08,
+      "p5": 2.65,
+      "p25": 3.03,
+      "median": 3.61,
+      "p75": 4.7,
+      "p95": 5.31,
+      "max": 5.79,
+      "basis": "analysis/measure_phrasing.py over five_stars/177 (2026-11-23)"
+    },
+    "repeated_share": {
+      "n": 177,
+      "min": 0.252,
+      "p5": 0.272,
+      "p25": 0.302,
+      "median": 0.324,
+      "p75": 0.348,
+      "p95": 0.389,
+      "max": 0.426,
+      "basis": "analysis/measure_phrasing.py over five_stars/177 (2026-11-23)"
+    },
+    "stepwise_share": {
+      "n": 177,
+      "min": 0.77,
+      "p5": 0.804,
+      "p25": 0.838,
+      "median": 0.854,
+      "p75": 0.873,
+      "p95": 0.894,
+      "max": 0.913,
+      "basis": "analysis/measure_phrasing.py over five_stars/177 (2026-11-23)"
+    },
+    "distinct_phrase_endings": {
+      "n": 177,
+      "min": 4,
+      "p5": 5,
+      "p25": 6,
+      "median": 7,
+      "p75": 7,
+      "p95": 8,
+      "max": 8,
+      "basis": "analysis/measure_phrasing.py over five_stars/177 (2026-11-23)"
+    },
+    "tessitura_share_ge_c5": {
+      "n": 177,
+      "min": 0.495,
+      "p5": 0.553,
+      "p25": 0.643,
+      "median": 0.712,
+      "p75": 0.776,
+      "p95": 0.845,
+      "max": 0.91,
+      "basis": "analysis/measure_phrasing.py over five_stars/177 (2026-11-23)"
+    },
+    "breaths_per_bar": {
+      "n": 177,
+      "min": 0.136,
+      "p5": 0.179,
+      "p25": 0.201,
+      "median": 0.24,
+      "p75": 0.286,
+      "p95": 0.405,
+      "max": 0.49,
+      "basis": "analysis/measure_phrasing.py over five_stars/177 (2026-11-23)"
     }
   },
   "sanity": {
@@ -183,6 +260,21 @@
       "pass": 175,
       "n": 177,
       "rate": 0.9887
+    },
+    "unbroken_seconds_le_23": {
+      "max": 23,
+      "basis": "corpus max 22.89 s; 177/177 pass; no singer holds one phrase this long",
+      "pass": 177
+    },
+    "repeated_share_ge_0.20": {
+      "min": 0.2,
+      "basis": "corpus min 0.252; 177/177 pass; a line with almost no repeated pitch is a scale",
+      "pass": 177
+    },
+    "phrase_endings_ge_3": {
+      "min": 3,
+      "basis": "corpus min 4; 177/177 pass; checked when the score has >=6 phrases",
+      "pass": 177
     }
   },
   "sanity_optional": {
@@ -204,27 +296,30 @@
     "melisma_min": 1.1,
     "melisma_max": 1.45,
     "register_mean": 74,
-    "register_top": 82,
+    "register_top": 84,
     "register_tolerance": 5,
-    "max_top_duration_share": 0.78,
+    "max_top_duration_share": 0.65,
     "min_distinct_durations": 5,
     "ties_per_10_bars": 0.4,
     "min_fill_notes": 3,
-    "ins_active_share_min": 0.15,
+    "ins_active_share_min": 0.2,
     "chords_min_per_bar": 0.0,
     "silence_share_min": 0.22,
     "pace": 2.8,
     "case_ratio": 0.884,
-    "tempo_default": 80
+    "tempo_default": 80,
+    "max_unbroken_seconds": 10,
+    "min_phrase_endings": 3,
+    "maqam_fit_min": 0.95
   },
   "rules": {
-    "hard": "contract + sanity (6)",
+    "hard": "contract + sanity (9: 6 validity + 3 shape)",
     "style": "warn by default; FAIL only with --strict-style",
     "plan_style_targets": "warn by default; a declared cadence=tonic is the only self-imposed hard style target",
     "final_rest": "warn by default; --require-final-rest makes it a render contract",
     "sections": "normalized subsequence, warn by default"
   },
-  "skill_version": "0.2.0",
+  "skill_version": "0.3.0",
   "registry": "references/numbers.md",
   "analysis": "analysis/calibrate_177.py",
   "summary": "analysis/out/summary.json",

@@ -53,10 +53,51 @@
     "ties_min": { "type": "integer", "minimum": 0 },
     "min_fill_notes": { "type": "integer", "minimum": 0 },
     "chords_min": { "type": "integer", "minimum": 0 },
+    "max_unbroken_seconds": { "type": "number", "exclusiveMinimum": 0 },
+    "min_phrase_endings": { "type": "integer", "minimum": 1 },
+    "maqam_fit_min": { "type": "number", "minimum": 0, "maximum": 1 },
     "voices": { "type": "string", "const": "vocal+ins" },
     "cadence": { "type": "string" },
-    "deviations": { "type": "array", "items": { "type": "string" } },
-    "maqam": { "type": "null" },
+    "deviations": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "required": ["bars", "channel", "before", "after"],
+            "properties": {
+              "bars": { "type": "string" },
+              "channel": { "type": "string" },
+              "before": { "type": "string" },
+              "after": { "type": "string" }
+            }
+          }
+        ]
+      }
+    },
+    "maqam": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["name", "tonic", "degrees"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "tonic": { "type": "string", "minLength": 1 },
+            "degrees": {
+              "type": "array",
+              "minItems": 5,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "resting": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      ]
+    },
     "maqam_conditioned": { "type": "boolean", "const": false },
     "source": {
       "type": "object",

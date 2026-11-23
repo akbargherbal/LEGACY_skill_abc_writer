@@ -1,0 +1,2 @@
+f691609c8e5465b36a7a90ea76ff48bd32a51ff14f01d26347bac6d9bd22f819  dist/releases/abc_score_writer-0.2.0-public.zip
+1db1938e59ef7e8cb3b4ca24e66df6f45e5a8c23c3c90cb6912e36f59d5c6499  dist/releases/abc_score_writer-0.2.0.zip

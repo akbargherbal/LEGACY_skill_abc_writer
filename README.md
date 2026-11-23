@@ -3,7 +3,7 @@
 Source of the **`maqam-score`** skill and the 177-track calibration that
 justifies its numbers.
 
-**Version:** 0.2.0 (skill contract) · tools 0.3.0 · offline corpus bundle ·
+**Version:** 0.3.0 (skill contract) · tools 0.3.0 · offline corpus bundle ·
 **Date:** 2026-11-23
 
 ## Layout
@@ -14,14 +14,18 @@ justifies its numbers.
 | `02_maqam-score/scripts/ostris/` | OSTRIS corpus tools (M0–M6: sync, audit, build, features, priors, plan, idioms, similarity, check, eval) | **active** |
 | `02_maqam-score/data/ostris/` | Packaged corpus artifacts: source cache, records, priors, idiom bank, similarity index, eval split | **bundled, ships in the zip** |
 | `02_maqam-score/schemas/` | JSON contracts for records, priors, plans, reports, eval | **active** |
-| `dist/abc_score_writer.zip` | Built skill package | **build artifact** |
-| `analysis/` | Calibration scripts (`calibrate_177.py`, `test_checker_corpus.py`) | **active** |
+| `dist/abc_score_writer.zip` | Current built skill package (0.3.0 alias) | **build artifact** |
+| `dist/releases/` | Versioned archives: 0.2.0, 0.3.0 (full + public) and checksums | **release history** |
+| `dist/RELEASE-0.3.0.md` | Release notes, compatibility, hashes | **release notes** |
+| `analysis/` | Calibration scripts (`calibrate_177.py`, `test_checker_corpus.py`, `measure_phrasing.py`) | **active** |
 | `analysis/out/` | Regeneration workspace: `summary.json`, `tracks.jsonl`, `ostris/` | **generated, reproducible** |
 | `docs/` | Reports, plans, baseline inventory | **active docs** |
 | `docs/archive/` | Inputs that served their purpose | **frozen** |
 
 The skill source is the truth; `dist/abc_score_writer.zip` is rebuilt with
-`make zip`. The old v1 zip lives in git history.
+`make zip`. Every released archive is kept in `dist/releases/`; the previous
+0.2.0 package (the one used in the first eval session) is
+`dist/releases/abc_score_writer-0.2.0.zip`.
 
 ## Quick start
 
@@ -31,6 +35,7 @@ make test            # unit tests
 make offline-check   # the corpus tools run on the bundled data, no flags
 make check-corpus    # 177/177 parse, 175/177 hard (98.9%)
 make zip             # build dist/abc_score_writer.zip
+make release         # test + selftest + offline + zip + dist/releases/<version> + checksums
 ```
 
 ## OSTRIS corpus tools
@@ -104,8 +109,10 @@ cleared: `docs/ostris-licensing.md`.
 - Full analysis: `docs/constraints-calibration.md`
 - Raw distributions: `analysis/out/summary.json`
 
-**Rule:** every hard gate passes ≥95% of the 177 good scores. The six sanity
-guards pass **175/177 = 98.9%**; everything else is a warning or a prior.
+**Rule:** every hard gate passes ≥95% of the 177 good scores. The nine sanity
+guards (six validity + three shape) pass **175/177 = 98.9%**; everything else is
+a warning or a prior. The shape guards (unbroken singing, repeated-pitch share,
+distinct phrase endings) were added after the 2026-11-23 eval run.
 
 ## Docs map
 

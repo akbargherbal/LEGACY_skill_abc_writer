@@ -111,6 +111,35 @@ line, and `[K:...]` may appear inside a bar. The corpus uses nine meters
 (1/4, 1/8, 2/4, 3/4, 3/8, 4/4, 5/8, 7/8, 9/8) and 121/177 scores change meter;
 the checker parses per-bar meter instead of rejecting it.
 
+### 4.1 Keys and maqam spelling
+
+`K:` accepts a standard major or minor key only. `K:Dphr`, `K:Dkurd`,
+`K:Dhijaz` and every other mode name are **contract failures**: the runtime
+parser rejects them before the checker measures anything. Write the tonic as
+`K:<tonic>m` (minor) or `K:<tonic>` (major), and spell every degree the key
+signature does not supply with `_`/`^` at each occurrence. An accidental lasts
+to the bar end, so restate it after a barline. D Kurd is `K:Dm` with `_E` for
+E♭; B♭ is already in Dm. D Hijaz is `K:Dm` with `_E` and `^F`. D Ajam is `K:D`.
+
+**No quarter tones.** The dialect has no `^/2`, `_/2` or microtonal accidental.
+Rast, Bayati, Saba and Huzam cannot be encoded; write the nearest diatonic
+skeleton and put the intonation in the prompt. Do not claim the maqam is
+encoded in ABC.
+
+Declare the pitch set in the plan so the checker can measure the maqam instead
+of the key:
+
+```json
+"maqam": {"name": "kurd", "tonic": "D",
+          "degrees": ["D", "Eb", "F", "G", "A", "Bb", "C"],
+          "resting": ["D", "F", "A", "Bb", "C"]}
+```
+
+Without this block, `chromatic_per_100` is measured against `K:Dm` and a
+correct Kurd score reports about 19 chromatic notes per 100 (the defining E♭).
+That number is not a defect; it is the wrong denominator. With the block, the
+same score reports 0 chromatic and `maqam_fit_share 1.0`.
+
 | token | meaning | note |
 |---|---|---|
 | `D4`, `d2`, `C,6` | pitch + L-units | case and `,`/`'` set the octave |
@@ -139,6 +168,34 @@ Source: the `arabmaqamrock` 177-track `five_stars` corpus.
   The maqam tags are provenance, not measured content.
 - Consequence: spend colour at cadences, not decoratively. The checker reports
   chromatic notes per 100; the reference case is 0.0.
+
+### 5.1 Maqam spelling table (design rule, not a corpus measurement)
+
+The corpus has no maqam labels: the four tags are prompts, and 0/177 are
+Hijaz-shaped (M1 report). This table is a **composition convention** for the
+score, not a claim about the audio. Use it to choose a tonic, spell the
+degrees, and vary the phrase endings.
+
+| Maqam | Default tonic | Degrees (relative) | ABC spelling | Typical phrase endings |
+|---|---|---|---|---|
+| **Kurd** | D | 1 ♭2 ♭3 4 5 ♭6 ♭7 | `K:Dm` + `_E` | D, F, A, B♭, C; final D |
+| **Nahawand** | D | 1 2 ♭3 4 5 ♭6 ♭7 | `K:Dm` | D, F, A, C; final D |
+| **Hijaz** | D | 1 ♭2 3 4 5 ♭6 ♭7 | `K:Dm` + `_E` + `^F` | D, F♯, A, B♭; final D |
+| **Ajam** | D | 1 2 3 4 5 6 7 | `K:D` | D, F♯, A, B; final D |
+
+**Why D is the default:** 72/177 corpus scores are in `Dm`, and `Dm` is the
+most common key in every maqam subset (Kurd 23/43, Hijaz 13/49, Ajam 21/43,
+Nahawand 15/42). If the prompt names a tonic, use it. If the maqam is not in
+this table, ask for the tonic; do not invent a scale.
+
+**Phrase endings:** the first column after the scale is the set intermediate
+phrases may end on. The final phrase ends on the tonic. A score that ends every
+phrase on the tonic has one ending, which the checker now counts as a
+degeneracy (corpus min 4, gate min 3).
+
+**Quarter-tone maqams** (Rast, Bayati, Saba, Huzam) are not representable in
+this dialect. Write the nearest diatonic skeleton, label the intonation as a
+prompt/LoRA responsibility, and do not present the ABC as the maqam.
 
 ## 6. Bandwidth — which deviations are audible
 
@@ -190,8 +247,20 @@ outside it is a different animal.
 | Ins active share | 14.1% | 25.3% | 41.2% | the guitar is a part, not the floor |
 | chords per bar | 0 | 0 | 0 | the 177 ABCs carry no chord symbols |
 | final rest | — | 92.1% have one | — | warn; contract with `--require-final-rest` |
+| longest unbroken (s) | 6.1 | 10.4 | 14.9 | max 22.9; one breath, not one bayt |
+| phrase median (s) | 2.7 | 3.6 | 5.3 | max 5.8 |
+| repeated-pitch share | 27.2% | 32.4% | 38.9% | min 25.2%; a line below 20% is a scale |
+| distinct phrase endings | 5 | 7 | 8 | min 4; gate ≥3 |
+| tessitura ≥ C5 | 55.3% | 71.2% | 84.5% | max 91%; a high-register warning, not a gate |
+| breaths per bar | 0.18 | 0.24 | 0.41 | min 0.14 |
 
-### 7.3 The six hard sanity guards
+Source: `analysis/measure_phrasing.py` over the same 177 transcripts
+(2026-11-23). A *phrase* is a contiguous sung run; a *breath* is a gap ≥ 0.3 s.
+These are the shape numbers the original calibration did not measure. The
+median phrase is ~3.6 s, not the 14.6 s of the 2026-11-23 Claude run; the
+longest unbroken is 10.4 s median and 22.9 s max, not 34 s.
+
+### 7.3 The nine hard sanity guards
 
 These are the only corpus thresholds that fail a score. They pass **175/177
 (98.9%)**; each guard passes ≥99% alone. A gate that fails more than 5% is a
@@ -205,6 +274,15 @@ warning/prior, not a guard.
 | distinct durations | ≥ 4 | corpus min 4 |
 | notes per syllable | 1.0–1.55 | corpus 1.03–1.52 |
 | Ins active share | ≥ 0.05 | corpus min 0.08 |
+| unbroken singing | ≤ 23 s | corpus max 22.89; 177/177 |
+| repeated-pitch share | ≥ 0.20 | corpus min 0.252; 177/177 |
+| distinct phrase endings | ≥ 3 | corpus min 4; 177/177, when ≥6 phrases |
+
+The last three are **shape** guards, added after the 2026-11-23 Claude run: that
+score passed the six validity guards while singing 34 s without a breath,
+repeating a pitch on 6% of intervals, and ending 10 of 13 phrases on D. They
+are calibrated on the same 177 and pass all of them; they are not taste. The
+*style targets* are stricter (10 s, 3 endings, 0.65 top duration).
 
 ### 7.4 The p02 take in detail
 
@@ -250,8 +328,8 @@ sixteenths; the answer fits inside it and leaves the bar at 16.
 The reference case's chorus top equalled the highest note the singer reached
 anywhere else: a lift *within* the voice, not beyond it. Offline, use §7.2 as a
 prior and say the range is unmeasured: mean **71.7–75.1** (median 73.5), top
-**81–86** (median 84). A plan of `mean 74, top 82–85` is inside the corpus;
-`top 88` is a stretch, not a default.
+**81–86** (median 84). A plan of `mean 74, top 84` is the corpus median;
+`top 82` is P25 and `top 88` is a stretch, not a default.
 
 ## 9. What the ABC cannot measure
 

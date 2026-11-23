@@ -347,6 +347,82 @@ def phrase_split(notes: list[Note], score: Score) -> list[list[Note]]:
     return [p for p in out if len(p) >= 2]
 
 
+NOTE_PC = {"C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4,
+           "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8, "Ab": 8, "A": 9,
+           "A#": 10, "Bb": 10, "B": 11}
+PC_NAME = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
+
+
+def _pc(name: str) -> int:
+    """Pitch class of a note name such as D, Eb, F#, or Bb."""
+    key = name.strip().replace("♭", "b").replace("♯", "#")
+    if key not in NOTE_PC:
+        raise AbcError(f"cannot read pitch class {name!r}")
+    return NOTE_PC[key]
+
+
+def _phrasing(score: Score) -> dict:
+    """Shape metrics the listener hears: breath, repetition, endings.
+
+    A *rest phrase* is a contiguous run of vocal notes (one breath). A *beat
+    phrase* is the checker's phrase boundary (a rest of at least one beat, or a
+    section change) used for answer rates and endings. Seconds are wall-clock at
+    the score's tempo, so the same rule works for L:1/16 and L:1/32.
+    """
+    vocal = sorted(score.notes_of("Vocal"), key=lambda n: n.onset)
+    if not vocal:
+        return {"intervals": [], "unbroken_seconds_max": None,
+                "phrase_seconds_median": None, "repeated_share": None,
+                "stepwise_share": None, "distinct_phrase_endings": None,
+                "phrase_endings": {}, "breaths_per_bar": None,
+                "tessitura_share_ge_c5": None}
+    unit_seconds = 4.0 / score.unit_den * 60.0 / score.tempo
+
+    runs: list[list[Note]] = []
+    cur: list[Note] = []
+    prev_end = None
+    for note in vocal:
+        if cur and prev_end is not None and note.onset > prev_end:
+            runs.append(cur)
+            cur = []
+        cur.append(note)
+        prev_end = note.onset + note.dur
+    if cur:
+        runs.append(cur)
+
+    def span(run: list[Note]) -> float:
+        return ((run[-1].onset + run[-1].dur - run[0].onset) * unit_seconds)
+
+    gaps = []
+    for a, b in zip(runs, runs[1:]):
+        end = a[-1].onset + a[-1].dur
+        if b[0].onset > end:
+            gaps.append((b[0].onset - end) * unit_seconds)
+    breaths = [g for g in gaps if g >= 0.3]
+
+    intervals = [b.pitch - a.pitch for run in runs for a, b in zip(run, run[1:])]
+    beat = phrase_split(vocal, score)
+    endings = [PC_NAME[p[-1].pitch % 12] for p in beat]
+    counts: dict[str, int] = {}
+    for e in endings:
+        counts[e] = counts.get(e, 0) + 1
+
+    return {
+        "intervals": intervals,
+        "unbroken_seconds_max": round(max(span(r) for r in runs), 2),
+        "phrase_seconds_median": round(statistics.median(span(r) for r in runs), 2),
+        "repeated_share": (round(sum(1 for i in intervals if i == 0) / len(intervals), 3)
+                           if intervals else None),
+        "stepwise_share": (round(sum(1 for i in intervals if abs(i) <= 2) / len(intervals), 3)
+                           if intervals else None),
+        "distinct_phrase_endings": len(counts),
+        "phrase_endings": counts,
+        "breaths_per_bar": round(len(breaths) / score.n_bars, 3) if score.n_bars else None,
+        "tessitura_share_ge_c5": round(
+            sum(1 for n in vocal if n.pitch >= 72) / len(vocal), 3),
+    }
+
+
 def _sections_match(want: list[str], got: list[str]) -> bool:
     """Plan section types must appear in order in the score; extra score
     sections (interludes, instrumental intros) are allowed."""
@@ -615,11 +691,81 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
             f"verse max {max(verse) if verse else '-'}, chorus max {max(chorus) if chorus else '-'}",
             "style")
 
+    # ---- shape: breath, repetition, phrase endings ----------------------
+    shape = _phrasing(score)
+    unbroken = shape["unbroken_seconds_max"]
+    if unbroken is not None:
+        cap = float(sanity.get("unbroken_seconds_le_23", {}).get("max", 23))
+        add("unbroken singing", unbroken <= cap,
+            f"longest unbroken {unbroken:g}s (sanity max {cap:g}s; corpus max 22.9s)",
+            "sanity")
+        if "max_unbroken_seconds" in plan:
+            target = float(plan["max_unbroken_seconds"])
+            add("unbroken target", unbroken <= target,
+                f"{unbroken:g}s (plan max {target:g}s)", "style")
+
+    repeated = shape["repeated_share"]
+    if repeated is not None and len(shape["intervals"]) >= 20:
+        floor = float(sanity.get("repeated_share_ge_0.20", {}).get("min", 0.20))
+        add("repeated notes", repeated >= floor,
+            f"{repeated:.0%} of intervals repeat a pitch (sanity min {floor:.0%}; "
+            f"corpus min 25%)", "sanity")
+
+    endings = shape["distinct_phrase_endings"]
+    beat_phrases = phrase_split(vocal, score)
+    if endings is not None and len(beat_phrases) >= 6:
+        floor_n = int(sanity.get("phrase_endings_ge_3", {}).get("min", 3))
+        add("phrase endings", endings >= floor_n,
+            f"{endings} distinct ending(s) {shape['phrase_endings']} "
+            f"(sanity min {floor_n}; corpus min 4)", "sanity")
+    if endings is not None and "min_phrase_endings" in plan:
+        target_n = int(plan["min_phrase_endings"])
+        add("phrase endings target", endings >= target_n,
+            f"{endings} distinct ending(s) (plan min {target_n})", "style")
+
+    # ---- maqam: measure against the declared pitch set, not the K: key ---
+    maqam = plan.get("maqam")
+    maqam_scale: set[int] | None = None
+    maqam_name = None
+    if isinstance(maqam, dict):
+        maqam_name = str(maqam.get("name") or "maqam")
+        degrees = maqam.get("degrees") or []
+        if degrees:
+            try:
+                maqam_scale = {_pc(str(d)) for d in degrees}
+            except AbcError:
+                maqam_scale = None
+                add("maqam degrees", False,
+                    f"cannot read the declared degrees {degrees!r}; use note names "
+                    f"such as D, Eb, F#", "style")
+        else:
+            add("maqam degrees", False,
+                "maqam block has no degrees; chromatic falls back to K:", "style")
+        if maqam_scale and vocal:
+            chromat = sum(1 for n in vocal if n.pitch % 12 not in maqam_scale)
+            fit = 1 - chromat / len(vocal)
+            floor_fit = float(plan.get("maqam_fit_min", 0.95))
+            add("maqam fit", fit >= floor_fit,
+                f"{fit:.0%} of vocal notes in {maqam_name} (min {floor_fit:.0%})",
+                "style")
+            tonic = maqam.get("tonic")
+            if tonic:
+                add("maqam tonic", _pc(str(tonic)) == tonic_pc(score.key),
+                    f"K:{score.key} tonic {tonic_pc(score.key)}, maqam tonic "
+                    f"{_pc(str(tonic))} ({tonic})", "style")
+
     # ---- measured ------------------------------------------------------
     sec_bars: dict[str, int] = {}
     for sec in score.bar_sections:
         sec_bars[sec] = sec_bars.get(sec, 0) + 1
-    chromatic = sum(1 for n in vocal if n.pitch % 12 not in key_scale(n.key))
+    if maqam_scale is not None:
+        chromatic = sum(1 for n in vocal if n.pitch % 12 not in maqam_scale)
+        chromatic_basis = f"maqam:{maqam_name}"
+    else:
+        chromatic = sum(1 for n in vocal if n.pitch % 12 not in key_scale(n.key))
+        chromatic_basis = f"key:{score.key}"
+    maqam_fit = (round(1 - chromatic / len(vocal), 3)
+                 if maqam_scale is not None and vocal else None)
     register_vocal = {s: (
         f"{min(p)}-{max(p)} mean {statistics.mean(p):.0f}"
         if (p := [n.pitch for n in vocal if n.section == s]) else "-")
@@ -642,6 +788,17 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
         "register_top": top_pitch,
         "register_range": f"{min(vp)}-{max(vp)}" if vp else None,
         "chromatic_per_100": round(100 * chromatic / len(vocal), 2) if vocal else None,
+        "chromatic_basis": chromatic_basis,
+        "maqam": maqam_name,
+        "maqam_fit_share": maqam_fit,
+        "unbroken_seconds_max": unbroken,
+        "phrase_seconds_median": shape["phrase_seconds_median"],
+        "breaths_per_bar": shape["breaths_per_bar"],
+        "repeated_share": shape["repeated_share"],
+        "stepwise_share": shape["stepwise_share"],
+        "distinct_phrase_endings": shape["distinct_phrase_endings"],
+        "phrase_endings": shape["phrase_endings"],
+        "tessitura_share_ge_c5": shape["tessitura_share_ge_c5"],
         "simultaneities": overlap_units,
         "ties": ties,
         "ties_per_10_bars": round(10 * ties / score.n_bars, 2) if score.n_bars else None,
@@ -662,7 +819,9 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
         k: _percentile(measured.get(k), stats.get(k))
         for k in ("notes_per_syllable", "register_mean", "register_top", "top_duration_share",
                   "distinct_durations", "ties_per_10_bars", "ins_active_share",
-                  "silence_share", "chromatic_per_100")
+                  "silence_share", "chromatic_per_100", "unbroken_seconds_max",
+                  "phrase_seconds_median", "repeated_share", "distinct_phrase_endings",
+                  "tessitura_share_ge_c5")
     }
     return results, measured
 

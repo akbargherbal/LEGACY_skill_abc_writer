@@ -1,6 +1,6 @@
 # سجل الأرقام — من أين جاء كل رقم
 
-**النسخة:** 0.2.0 · **التاريخ:** 2026-11-23
+**النسخة:** 0.3.0 · **التاريخ:** 2026-11-23 (تحديث shape)
 **الملف الآلي (المرجع):** `scripts/calibration.json`
 **التحليل:** `analysis/calibrate_177.py` → `analysis/out/summary.json`
 **التقرير الكامل:** `docs/constraints-calibration.md`
@@ -47,6 +47,7 @@
 | **S6** | `scripts/abc_tools.py` | لهجة الرندر (header، مدد، مازورة، أصوات) | vendored |
 | **S7** | قرار تصميمي / renderer | سكتة أخيرة، كادنس اختياري، اكتمال الـ plan | موثّق أدناه |
 | **S8** | OSTRIS 482 | **غير متحقق هنا** | يحتاج GCS manifests |
+| **S9** | `analysis/measure_phrasing.py --corpus …` | shape: unbroken، repeated، endings، phrase median، tessitura | 177/177، 2026-11-23 |
 
 **عيّنة S1:** 177 مقطعًا، 12.7 ساعة، 4 مقامات *مطلوبة* (Ajam 43 · Hijaz 49 ·
 Kurd 43 · Nahawand 42)، prompt 110 BPM، 105 × `L:1/16` و72 × `L:1/32`،
@@ -81,9 +82,9 @@ Kurd 43 · Nahawand 42)، prompt 110 BPM، 105 × `L:1/16` و72 × `L:1/32`،
 
 ---
 
-## 3. حدود الانحطاط (sanity) — 6 بوابات صلبة
+## 3. حدود الانحطاط (sanity) — 9 بوابات صلبة
 
-مصدرها S1. تمرّ **175/177 = 98.9%**. كل بوابة تمرّ ≥99% منفردة.
+مصدرها S1 (البوابات الست الأصلية) وS9 (بوابات الشكل الثلاث). تمرّ **175/177 = 98.9%**. كل بوابة تمرّ ≥99% منفردة.
 
 | البوابة | القيمة | أساس S1 | تمرّ | used_in |
 |---|---|---:|---:|---|
@@ -93,6 +94,9 @@ Kurd 43 · Nahawand 42)، prompt 110 BPM، 105 × `L:1/16` و72 × `L:1/32`،
 | تنوع المدد | ≥ 4 | الأدنى 4 | 177/177 | `checker.py` |
 | نغمات/مقطع | 1.0–1.55 | 1.03–1.52 | 177/177 | `checker.py` |
 | حضور Ins | ≥ 0.05 | الأدنى 0.08 | 177/177 | `checker.py` |
+| أطول غناء متصل | ≤ 23 ثانية | الأقصى 22.89 | 177/177 | `checker.py` |
+| تكرار النغمة | ≥ 0.20 | الأدنى 0.252 | 177/177 | `checker.py` |
+| تنوع القفلات | ≥ 3 | الأدنى 4 (عند ≥6 عبارات) | 177/177 | `checker.py` |
 
 **الحالتان الفاشلتان:** `24c3c03f` (spread 0.86)، `e3f837bc` (تزامن 8).
 هذه حدود «هل هذا سكور أصلًا؟»، لا أهداف أسلوب.
@@ -122,21 +126,24 @@ Kurd 43 · Nahawand 42)، prompt 110 BPM، 105 × `L:1/16` و72 × `L:1/32`،
 | melisma ceiling | 1.45 | P95 = 1.44 | 96.0% | `checker.py` |
 | نطاق melisma معًا | 1.10–1.45 | 93.8% من S1 | 93.8% | `checker.py` |
 | register mean | 74 ± 5 | وسيط 73.5 | 100% | `checker.py` |
-| register top | 82 | P25 = 82؛ الوسيط 84 | 93.8% | `checker.py` |
-| top duration share | 0.78 | P95 = 0.756 | 97.2% | `checker.py` |
+| register top | 84 | الوسيط 84 (P25 = 82) | ~50% | `checker.py` |
+| top duration share | 0.65 | الوسيط 0.614 (P75 0.691) | ~58% | `checker.py` |
 | distinct durations | 5 | P5 = 5 | 97.2% | `checker.py` |
 | ties / 10 bars | 0.40 | P25 = 0.59؛ الوسيط 1.07 | 88.1% | `checker.py` |
 | min fill notes | 3 | P5 = 4 | 96.0% | `checker.py` |
-| Ins active | 0.15 | P10 ≈ 0.15؛ الوسيط 0.253 | 92.1% | `checker.py` |
+| Ins active | 0.20 | P25 = 0.20؛ الوسيط 0.253 | 75% | `checker.py` |
 | chords / bar | 0 | 0/177 فيها كوردات | — | `checker.py` |
 | silence | 0.22 | P5 = 0.222 | 94.9% | `checker.py` |
+| أطول غناء متصل (هدف) | 10 ثوان | الوسيط 10.42 | ~47% | `checker.py` |
+| تنوع القفلات (هدف) | 3 | الأدنى 4 | 100% | `checker.py` |
+| maqam fit | 0.95 | تصميم (لا عيّنة maqam) | — | `checker.py` |
 | cadence | `"any"` افتراضي | 44.1% فقط على التونيك | — | `checker.py` |
 | sections | تطبيع + أقسام آلية | تطابق حرفي 1.1% | — | `checker.py` |
 
 **أرقام أُلغيت كبوابات:** `top 85` (يمر 22.6%)، `Ins 0.30` (31.6%)،
 `melisma_max 1.30` (57.6%)، `ties 5` (87% مطلق، 70.6% لكل 10 مازورات)،
 `chords 37` (0/177)، `cadence` صلب (44.1%)، `sections` حرفي (1.1%).
-كلها صارت `style` أو `prior`.
+كلها صارت `style` أو `prior`. أهداف الشكل (unbroken 10، endings 3) تهدف إلى ما يسمعه المستمع، لا إلى أعلى نسبة اجتياز؛ لذلك تبقى `style` ما لم تكن بوابة انحطاط واسعة.
 
 ---
 
@@ -239,6 +246,7 @@ Kurd 43 · Nahawand 42)، prompt 110 BPM، 105 × `L:1/16` و72 × `L:1/32`،
 |---|---|---|
 | 2026-11-22 | v1 (02_maqam-score) | الأرقام من p01–p05 وحالة امرئ القيس؛ melisma 1.30، top 85، Ins 0.30، chords 37 |
 | 2026-11-23 | v0.2.0 | 177 سكورًا؛ قاعدة 95%؛ 6 sanity؛ style WARN؛ meter متغير؛ percentiles؛ هذا السجل |
+| 2026-11-23 | **v0.3.0** | +3 بوابات شكل (unbroken ≤23s، تكرار ≥20%، قفلات ≥3)؛ plan.maqam؛ chromatic نسبة للمقام؛ أهداف 10s/3 endings؛ eval `2026-11-23-claude-session-01` |
 
 ---
 

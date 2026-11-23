@@ -454,7 +454,7 @@ def plan_targets(priors: dict, *, bars: int, meter: str, tempo: float,
     return {
         "selection": selected,
         "syllables": max(8, int(round(vocal_notes / melisma))),
-        "melisma_min": 1.20,
+        "melisma_min": 1.10,
         "melisma_max": 1.45,
         "register": {
             "mean": int(round(median("median_midi", 74.0))),
@@ -467,9 +467,9 @@ def plan_targets(priors: dict, *, bars: int, meter: str, tempo: float,
         "min_distinct_durations": max(
             4, int(math.floor(quantile("distinct_durations", "p25", 6.0)))
         ),
-        "ties_min": max(4, int(math.floor(quantile("ties", "p25", 8.0)))),
-        "min_fill_notes": 2,
-        "chords_min": max(
-            4, int(math.floor(median("chords_per_bar", 1.2) * bars))
-        ),
+        "ties_min": max(3, int(math.floor(quantile("ties", "p25", 8.0)))),
+        "min_fill_notes": 3,
+        # the 177 ABCs carry no chord symbols; a generated plan must not ask
+        # for chords (it would warn on every correct score)
+        "chords_min": 0,
     }

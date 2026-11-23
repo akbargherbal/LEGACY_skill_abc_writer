@@ -13,12 +13,12 @@ V: Ins
 z8 D2 E2 F2 E2|D8-D4 z4|z4 G2 F2 E2 D2 z4|D2 E2 F2 G2 A4 G4|
 % verse
 V: Vocal
-"Dm"d2 d2 d4 e4 d4|"Gm"c8 z8|"Bb"d4 e4 f6 z2|"Dm"d8-d4 z4|
+d2 d2 d4 e4 d4|c8 z8|d4 e4 f6 z2|d8-d4 z4|
 V: Ins
 Z|z8 A2 G2 F2 E2|Z|z12 F E D C|
 % chorus
 V: Vocal
-"Dm"a2 a2 a4 b4 a4|"C"g8 z8|"Bb"a4 b4 c'6 z2|"Dm"d'8-d'4 z4|
+a2 a2 a4 b4 a4|g8 z8|a4 b4 c'6 z2|d'8-d'4 z4|
 V: Ins
 Z|z8 A2 G2 F2 E2|Z|z12 F E D C|
 % outro
