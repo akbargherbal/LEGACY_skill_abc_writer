@@ -331,8 +331,9 @@ sixteenths; the answer fits inside it and leaves the bar at 16.
 The reference case's chorus top equalled the highest note the singer reached
 anywhere else: a lift *within* the voice, not beyond it. Offline, use §7.2 as a
 prior and say the range is unmeasured: mean **71.7–75.1** (median 73.5), top
-**81–86** (median 84). A plan of `mean 74, top 84, max_top 86` is the corpus
-median; `top 82` is P25 and `top 88` is a stretch, not a default.
+**81–86** (median 84). The corpus median is `mean 74, top 84, max_top 86`;
+the example plan uses `mean 70, top 80, max_top 84` for a lower male lead.
+Use 74 only when the style names a high tenor or a female lead.
 
 `top` is the note the take must reach; `max_top` is the ceiling. A high note is
 not a style. The chorus lifts the median by about five semitones; it does not

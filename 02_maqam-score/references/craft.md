@@ -17,7 +17,7 @@ Every claim here has one of four bases, and is labelled:
 
 | Tag | Meaning |
 |---|---|
-| **corpus** | measured on the 177 `five_stars` transcripts; reproducible with `analysis/measure_craft.py`; distributions, never gates |
+| **corpus** | measured on the 177 `five_stars` transcripts; reproducible with `craft.py`; distributions, never gates |
 | **theory** | Arabic music theory (maqam, sayr, ʿarūḍ, īqāʿ) from the sources in §12 |
 | **expert / ear** | the 2026-11-23 expert brief, or a listening verdict from the user |
 | **design** | a craft rule this skill chooses. It is not measured and does not pretend to be |
@@ -427,9 +427,7 @@ core **before** you encode the full score.
 13. **Find the fill.** Point to a 2-beat hole once per 4 bars. If there is none,
     the drummer has nowhere to answer; add the hole before the drum part.
 
-Run `analysis/measure_craft.py score.abc` for 3–8 if you have the source repo
-(and `analysis/measure_rhythm.py score.abc --seed seed.abc` for 11–13). It is a
-mirror, not a gate.
+Run `craft.py score.abc --json craft.json` for 3–8. It is a mirror, not a gate.
 
 ---
 
@@ -523,9 +521,9 @@ and the varied starts in bars 1 and 3. Write the drum voice in `seed.abc`
 
 ## 12. What the 177 say
 
-Report-only distributions from `analysis/measure_craft.py` over the 177
-`five_stars` transcripts (2026-11-24). The full JSON is
-`analysis/out/craft.json`; the registry entry is `references/numbers.md`.
+Report-only distributions from `craft.py` over the 177 `five_stars`
+transcripts (2026-11-24). The full JSON is `craft.json`; the registry entry is
+`references/numbers.md`.
 
 | Metric | P10 | Median | P90 | Min–max |
 |---|---:|---:|---:|---|
@@ -553,8 +551,8 @@ Ending degrees, pooled: 5th 30.6%, tonic 15.9%, ♭6 16.5%, 2nd 10.8%, ♭7 11.2
 4th 9.5%, ♭3 4.7%, others 1.7%.
 
 These are **two-voice** measurements. The corpus has no drum staff and no
-onset-interaction metric; `rhythm.md` covers that layer, and
-`analysis/measure_rhythm.py` reports it. Do not read the `Ins` voice as drums:
+onset-interaction metric; `rhythm.md` covers that layer, and `verify_package.py` reports it. Do not read
+the `Ins` voice as drums:
 in the corpus it is the melodic instrument, and in a real arrangement the drums
 are the part no gate can see.
 
@@ -571,7 +569,7 @@ the tune.
 ## 13. Sources
 
 - **Corpus:** the 177 `five_stars` SheetSage2 transcripts; measurements in
-  `analysis/measure_craft.py` and `analysis/out/craft.json`. These describe what
+  `craft.py` and `craft.json`. These describe what
   Suno rendered, not a human composition.
 - **Maqam:** MaqamWorld, "Maqam Kurd" (Jins Kurd on the tonic + Jins Nahawand on
   the 4th); Farraj & Abu Shumays, *Inside Arabic Music* (Oxford, 2019); the

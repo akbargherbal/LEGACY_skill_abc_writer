@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Check a composed score against its plan, and print the numbers to report.
 
-This is the skill's only verifier. It runs the vendored runtime parser
+This is the score verifier. For seed/drums/docs use verify_package.py. It runs
+the vendored runtime parser
 (`scripts/abc_tools.py`, a copy of `plumbing/yue2_instrumental/abc_tools.py`)
 first and fails closed: anything the renderer cannot read is an error here, not
 a warning. Then it measures the plan's quality targets.
@@ -632,7 +633,7 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
 
     reg = plan.get("register")
     if reg and mean_pitch is not None:
-        target_mean = float(reg.get("mean", 74))
+        target_mean = float(reg.get("mean", 70))
         tolerance = float(reg.get("tolerance", 4))
         add("register target mean", abs(mean_pitch - target_mean) <= tolerance,
             f"mean {mean_pitch:.1f} vs plan {target_mean:g} +/- {tolerance:g}",

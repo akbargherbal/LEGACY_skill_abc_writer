@@ -12,7 +12,7 @@ from pathlib import Path
 SKILL_VERSION = "0.4.0"
 
 PINNED = {
-    "checker.py": "e322b78b22b0f46b6cc41bd88a452cea7d9aabea1c4bbf79dfd6924e91e02380",
+    "checker.py": "d344a7631d8aaf9f6733353d66d6a628cd3e25aa85a05952253921f4c8f3aee2",
     "calibration.json": "9ef8cf61e0b7db4cc2c67b69f1ab4ef8edfa012f65e163f5b09297f73410cd2d",
     "abc_tools.py": "e99e5cf9dff4647f48322e3319065ba793e7dbc808222e1848bab7aa8c4bd11c",
 }

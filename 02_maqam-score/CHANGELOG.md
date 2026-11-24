@@ -1,5 +1,52 @@
 # Changelog
 
+## 0.6.0 — one contract, one toolchain, one state (source; contract still 0.4.0)
+
+**Evidence:** `analysis/eval/reports/2026-11-24-deepseek-session-08.md`.
+Session 08 reduced generated tokens by 46% but still spent 131,138 tokens for a
+1,891-token score (69.3×): 47,302 before the first score (seed_sheet/plan before
+core), 34,132 on a global `repeated_share` rewrite, and 12,170 after a stale
+compaction summary. Fourteen hand-written scripts verified the seed/drums/docs
+because the checker covers only the score and the parser cannot read the seed.
+
+**Why:** the contract had two sources (task + skill), the seed/docs had no
+verifier, and the craft mirror was outside the shipped zip. The agent followed
+the written order; the order was the bug.
+
+### Instructions
+- **One order.** `task.md` is one page and points to `SKILL.md` §3; it does not
+  repeat the 10-line rules, the checker policy or the tool commands.
+  `syllabify → plan (targets + prosody bars) → core (8–16) → score → seed →
+  seed_sheet/notes`. `seed_sheet.md` is written **after** `score.abc`; the full
+  frame is not a precondition for the core.
+- **One checker policy.** Run after the first score; each later run follows a
+  named fix; stop after a pass. A global sanity failure (e.g. `repeated_share`)
+  allows one full rewrite and one verification; contract errors after that are
+  named fixes. Maximum four runs; no run after a pass.
+- **One register default.** `mean 70, top 80, max_top 84` (the example plan).
+  The corpus median 74 and the sanity band 74 ± 5 stay in the reference/checker;
+  74 is not the composing default.
+- **One craft report.** `craft.py score.abc --json craft.json` is shipped. The
+  "count them by eye" fallback is removed; the seed is structural in
+  `verify_package.py`.
+
+### Tools
+- `scripts/verify_package.py`: verifies score↔seed alignment (chords stripped),
+  V: Drums bars and the silent tail, core prefix, 10-line docs, plan
+  `strict_shape`/register, and `report.json`. It writes `verify.json`; it is
+  structural, not a taste gate.
+- `scripts/craft.py`: report-only tune mirror (rhythm variety, contour,
+  cadence ladder, unique bars, end-long, tessitura); it wraps the tested
+  `_craft_calibrate.py` / `_craft_measure.py` copies. It never enters
+  `checker.py` or `calibration.json`.
+- `scripts/selftest.sh`: runs `verify_package` and `craft` on the example, plus
+  a short-bar negative.
+- `scripts/checker.py`: help line now says "score verifier; for seed/drums/docs
+  use verify_package.py"; the plan-register fallback is 70. No gate logic or
+  `calibration.json` change. The OSTRIS contract pin is updated.
+- `tests/test_verify_package.py`, `tests/test_craft.py`: 11 new tests; the full
+  suite is 65 tests.
+
 ## 0.5.3 — economic contract (source; contract still 0.4.0)
 
 **Evidence:** `analysis/eval/reports/2026-11-24-deepseek-session-07.md` and the

@@ -37,10 +37,12 @@ interface.
 
 ```
 <skill>/scripts/syllabify.py       lyrics -> numbers (letters, syllables, bars)
-<skill>/scripts/checker.py         score + plan -> PASS/WARN/FAIL + the measured block
+<skill>/scripts/checker.py         score verifier: PASS/WARN/FAIL + measured block
+<skill>/scripts/verify_package.py  package verifier: score<->seed, Drums, core, docs
+<skill>/scripts/craft.py           report-only tune mirror (rhythm, cadence, register)
+<skill>/scripts/abc_tools.py       score parser CLI: inspect / strip-chords / compare
 <skill>/scripts/calibration.json   the 177-track thresholds (do not edit)
-<skill>/scripts/abc_tools.py       vendored runtime parser (the renderer's contract)
-<skill>/scripts/selftest.sh        proves both work on example/ (run once if in doubt)
+<skill>/scripts/selftest.sh        proves the tools work on example/
 <skill>/example/                   a 16-bar syntax fixture; derive your own shape
 <skill>/example/groove.abc         the seed.abc drum voice, 8 bars
 <skill>/references/craft.md        the composition method: cell, period, cadence, riff
@@ -362,9 +364,11 @@ extra thinking buys quality — the rest is expansion and local repair.
    how phrases start and end, the 2–4 bar length range, one 2-bar groove per
    section, and three interaction events (unison, stop, fill, drop). Vary the
    start (a pickup on the `&` of 4), the length and the cadence beat; leave one
-   **2-beat hole** per 4 bars. Put the rules in `seed_sheet.md` (exactly 10
-   numbered lines, no title). `phrases.json` owns the per-line table; do not
-   retype it. A drummer cannot answer a grid; see `references/rhythm.md`.
+   **2-beat hole** per 4 bars. Record the rules; write `seed_sheet.md`
+   **after** `score.abc` as exactly 10 numbered lines (no title).
+   `phrases.json` owns the per-line table; do not retype it. Do not write the
+   full frame before the core. A drummer cannot answer a grid; see
+   `references/rhythm.md`.
 10. **Subtract for intensity.** Remove a layer before the chorus; let the voice
     drop out for the solo; let the guitar drop out for the last line. The chorus
     lifts the median about five semitones; it does not add notes.
@@ -378,7 +382,7 @@ music.
 
 | Decision | Target | Basis |
 |---|---|---|
-| register | mean 74, top 84, `max_top` 86 for a full song; one peak per section; `tessitura_share_ge_c5_max` 0.80 | corpus median/P95 |
+| register | mean 70, top 80, `max_top` 84; one peak per section; `tessitura_share_ge_c5_max` 0.80 | example/plan.json |
 | breath | one lyric line = one phrase; ≥0.5 s at the line end; ≤10 s unbroken; silence ≥22% | corpus |
 | cadence | final tonic; intermediate on resting tones; ≥3 distinct endings (aim 5–7); 5th most common, tonic ≤25% | corpus |
 | repeated pitch | 25–43% of intervals | corpus min/max |
@@ -402,13 +406,11 @@ phrase against.
 
 The register, breath, ending and maqam numbers are still plan targets and the
 checker enforces them. The last eight rows are craft diagnostics: count them on
-the draft, not after the full score. In the source repo,
-`analysis/measure_craft.py score.abc` prints the melodic ones and
-`analysis/measure_rhythm.py score.abc --seed seed.abc` prints the rhythm and
-drum-interaction ones; if you only have the shipped zip, count them on 4–8
-phrases by eye.
+the draft, not after the full score. Run `craft.py score.abc --json craft.json`; it prints the melodic numbers
+(rhythm variety, unique bars, end-long, cadence, tessitura). The seed is
+structural in `verify_package.py`. It is a mirror, not a gate.
 
-**Write `seed_sheet.md` before the first bar, as exactly 10 numbered lines
+**Write `seed_sheet.md` after `score.abc`, as exactly 10 numbered lines
 (no title, no blank line).** Rules, not per-line results: frame, cell, period
 rule, cadence rule, melisma rule, riff, subtraction, one 2-bar groove per
 section, three interaction events, and the weakest bar to fix. `phrases.json`
@@ -496,13 +498,20 @@ first; if it prints `FAIL runtime parse`, the renderer cannot read the file at
 all — fix the dialect (usually a blank line, a header line, or a tie), not the
 checker.
 
-**The checker is your measurement instrument, not a final exam.** Run it with
-`--json report.json` after the first `score.abc`, and again after a named fix.
-Read `report.json.measured`; it is the authoritative block for bar counts, note
-counts, register, duration spread, ties, silence, phrase endings and the rest.
-Do not write your own ABC parser or statistics script. The vendored
-`abc_tools.py` is the renderer's parser; the checker is the way to use it. If a
-number you need is missing, add it to the checker, not to a throwaway script.
+**The checker is the score verifier, not a final exam.** Run it with
+`--json report.json` after the first `score.abc`, and again only after a named
+fix. Read `report.json.measured`; it is the authoritative block for bar counts,
+notes, register, duration spread, ties, silence and phrase endings. Stop after a
+pass. A global sanity failure (e.g. `repeated_share`) allows one full rewrite
+and one verification; any contract error after that is a named fix. Maximum four
+runs. Do not write a parser or a statistics script: the seed/drums/docs checks
+are in `verify_package.py`; if a number is missing, extend that file, not a
+throwaway script.
+
+**State.** Copy `templates/STATE.md` to the working directory and update it
+after each artifact and each check (Done / Verified / Decisions / Next). After
+a compaction, read it before anything else; if it says the package is done,
+stop. Do not re-run a check the state records as passed.
 
 The checker is not the aesthetic gate. It does not measure the cell, the
 period, the phrase-rhythm variety or the peak placement; §3.3 and `craft.md` §10
@@ -655,9 +664,10 @@ brief you declared?" Neither is a verdict on beauty. Offline, say so.
 `CHANGES.txt` = the plan's deviation list plus the checker's `MEASURED` block,
 copied verbatim, plus a `WARNINGS` section. `report.json` is the `--json`
 output. Never retype a number. The run also delivers `seed_sheet.md` (exactly 10
-numbered lines of rules: cell, period, cadence, groove, events) and, for a cover
-target, `seed.abc` with the drum voice. The sheet is written before the score; it
-is a plan, not a checker input. The measured block includes `register_mean`,
+numbered lines of rules: cell, period, cadence, groove, events), `notes.md`,
+`verify.json`, `craft.json`, `STATE.md`, and, for a cover target, `seed.abc`
+with the drum voice. The sheet is written **after** `score.abc`; it is a plan,
+not a checker input. The measured block includes `register_mean`,
 `register_top`, `register_range`, `top_duration_share`,
 `distinct_durations`, `ties`, `fill_lengths`, `ins_active_share`, `chords`,
 `unbroken_seconds_max`, `phrase_seconds_median`, `repeated_share`,

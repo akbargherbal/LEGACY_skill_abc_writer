@@ -76,5 +76,23 @@ grep -q "FAIL.*answer fill length" "$tmp/out" || {
   echo "FAIL: wrong error for a two-note answer"; cat "$tmp/out"; exit 1; }
 echo "correctly warned then rejected: $(grep -m1 'answer fill length' "$tmp/out")"
 
+echo "== verify_package: example score + plan"
+python3 scripts/verify_package.py --score example/score.abc --plan example/plan.json \
+  --json "$tmp/verify.json"
+
+echo "== verify_package: a short bar must fail"
+if python3 scripts/verify_package.py --score "$tmp/broken.abc" --plan example/plan.json \
+    --json "$tmp/verify_bad.json"; then
+  echo "FAIL: verify_package accepted a short bar"; exit 1
+fi
+grep -q '"tag": "FAIL"' "$tmp/verify_bad.json" || {
+  echo "FAIL: verify.json has no FAIL for a short bar"; exit 1; }
+echo "correctly rejected: $(grep -m1 '"name"' "$tmp/verify_bad.json")"
+
+echo "== craft: example"
+python3 scripts/craft.py example/score.abc --json "$tmp/craft.json" > /dev/null
+grep -q '"rows"' "$tmp/craft.json" || { echo "FAIL: craft.json missing rows"; exit 1; }
+echo "craft report ok"
+
 echo
 echo "selftest: PASS"
