@@ -19,6 +19,9 @@
 | `ostris-licensing.md` | Data/source inventory; licence status unknown, no clearance claimed |
 | `ostris-handoff.md` | Handoff: frozen contracts, how to add reviewed labels, reproduce commands |
 | `ostris-release-notes.md` | Tools v0.4.0: included commands, verified numbers, upgrade notes |
+| `remixer_proposal.md` | Proposal: turn the skill into a library-aware remixer with capped retrieval, declared quotes, and verification |
+| `remixer-implementation-plan.md` | Execution plan for `abc_remixer`: store, catalog, slice, songmap, motif-find, remix check, packaging, tests |
+| `remixer-implementation-report.md` | 0.1.0 implementation result: counts, tests, package, limitations |
 | `agent-eval-protocol.md` | Drop-folder agent evaluation: intake, task battery, rubric, confusion & token-waste audit, post-mortem → skill change |
 | `0.4.0-remaining-fixes-plan.md` | 0.4.0 implementation plan (applied): anti-anchoring, strict shape, tessitura, style tags, phrase sidecar |
 

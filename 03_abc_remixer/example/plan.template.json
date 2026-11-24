@@ -1,0 +1,55 @@
+{
+  "key": "Dm",
+  "tempo": 76,
+  "meter": "2/4",
+  "unit": "1/16",
+  "bars": 32,
+  "syllables": 32,
+  "sections": ["intro", "verse 1", "chorus", "outro"],
+  "section_bars": [4, 12, 12, 4],
+  "melisma_min": 1.0,
+  "melisma_max": 1.5,
+  "register": {"mean": 74, "top": 84, "tolerance": 5},
+  "max_top_duration_share": 0.65,
+  "min_distinct_durations": 5,
+  "ties_min": 1,
+  "min_fill_notes": 3,
+  "chords_min": 0,
+  "ins_active_share_min": 0.2,
+  "max_unbroken_seconds": 10,
+  "min_phrase_endings": 3,
+  "maqam": null,
+  "maqam_fit_min": 0.95,
+  "maqam_conditioned": false,
+  "cadence": "any",
+  "deviations": [
+    {
+      "bars": "1-4",
+      "channel": "section register",
+      "before": "guitar under the voice",
+      "after": "guitar owns the intro alone"
+    }
+  ],
+  "remix": {
+    "concept": "A sparse D minor groove that answers a borrowed vocal hook with an inverted guitar riff.",
+    "sources": [
+      {
+        "id": "yt500-0701-pRtwkb7eYlw",
+        "role": "vocal hook",
+        "from_bars": "17-20",
+        "to_bars": "9-12",
+        "transform": ["transpose:+0", "fragment:first-5-notes"],
+        "voice": "Vocal"
+      },
+      {
+        "id": "yt500-0001-fbK2ySlxAW4",
+        "role": "guitar riff",
+        "from_bars": "34-37",
+        "to_bars": "5-6, 21-22",
+        "transform": ["invert"],
+        "voice": "Ins"
+      }
+    ],
+    "literal_cap_bars": 4
+  }
+}

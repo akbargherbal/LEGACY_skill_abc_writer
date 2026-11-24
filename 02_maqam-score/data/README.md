@@ -3,7 +3,7 @@
 This directory makes the OSTRIS corpus tools work **offline**. It is a snapshot
 of the generated artifacts, copied from `analysis/out/ostris/` by
 `scripts/bundle_data.sh` (`make ostris-bundle`) and included in
-`dist/abc_score_writer.zip`.
+`dist/abc-score-writer.zip`.
 
 ## What is here
 

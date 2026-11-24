@@ -1,0 +1,203 @@
+X:1
+T:
+M:2/4
+L:1/16
+Q:1/4=70
+V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
+V: Ins clef=treble name="Ins Melody" snm="Inst."
+K:Fm
+% intro
+V: Vocal
+Z|"Bbm7"z8|"Fm7"z8|"Fm7"z8|
+V: Ins
+Z|a'2f'2a'2g'2-|g'2e'4c'2-|c'2z4zc'|
+V: Vocal
+"Db/Eb"z4"Cm7"z4|"Cm7"z4"Gb7"z4|"Gb7"z8|"Fm"z8|
+V: Ins
+a'2f'2b'2g'2-|g'2e'4c'2-|c'6z2|c2c2d2c2|
+V: Vocal
+"Fm"z8|"Cm"z8|"Cm"z8|"Fm"z8|
+V: Ins
+a2gff4|zfgag2f2|g2c6|zfgag2f2|
+V: Vocal
+"Cm"z8|"Bbm"z8|"Bbm"z8|"Eb7"z8|
+V: Ins
+g2c4ed|d2d4ed|d2d4de|f2g2e2d2|
+V: Vocal
+"Abmaj7"z8|"Fm"z8|"Fm"z8|"Cm"z8|
+V: Ins
+d2cc4z|c2c2d2c2|a2gff4|zfgag2f2|
+V: Vocal
+"Cm"z8|"Fm"z8|"Cm"z8|"Bbm"z8|
+V: Ins
+g2c6|zfgag2f2|g2c4ed|d2d2zagd|
+V: Vocal
+"Bbm"z8|"Eb7"z8|"Abmaj7"z8|
+V: Ins
+d2d2z2de|f2g2e2d2|d2cc4z|
+% verse
+V: Vocal
+"Dbmaj7"aa2a2g2f|"Dbmaj7"gfgaf2z2|"Dbmaj7"ff2f2e2f|"Dbmaj7"ggg2z3g|
+V: Ins
+Z4|
+V: Vocal
+"Cm7"gg2g2f2f|"Cm7"fefgfez2|"F"z2ef2d2e|"F"ffffz3f-|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"ff2f2e2d|"Bbm"efff2d2c|"Eb7"deze2c2B|"Ab"cccz"Adim"z3b-|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"bb2b2g2f|"Eb"gfggfeze-|"Db"ed2f2e2d|"Ab"dcccc2z2|
+V: Ins
+Z4|
+V: Vocal
+"Dbmaj7"aa2a2g2f|"Dbmaj7"gfgagf3|"Dbmaj7"ff2g2e2f|"Dbmaj7"ggg2z3g-|
+V: Ins
+Z4|
+V: Vocal
+"Cm7"gg2g2f2e|"Cm7"fefgfez2|"F"ee2f2d2e|"F"ffffz3f-|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"ff2f2e2d|"Bbm"e3f2d2c|"Eb7"d3e2c2B|"Ab"cccz"Adim"z3b-|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"bb2b2g2f|"Eb"gfggfeze-|"Db"ed2f2e2d|"Ab"ddccc2ag|
+V: Ins
+Z4|
+% chorus
+V: Vocal
+"Dbmaj7"a2zgabag|"Dbmaj7"a2zga2a2|"Dbmaj7"abaga2ag|"Dbmaj7"gaag"Eb7/Db"f2gf|
+V: Ins
+Z4|
+V: Vocal
+"Cm"g2zggagf|"Cm"g2zfgagf|"Cm"g2zfgagf|"F7"gggff2f2|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"fgfefgf2|"Bbm"f2zff2f2|"Bbm"f2zef2ag|"Eb7"gaagfeze|
+V: Ins
+Z4|
+V: Vocal
+"Dbmaj7"ee2fg2a2|"Dbmaj7"gfffe2e2|"Bbm"dd2fe2d2|"Abmaj7"c4z2ag|
+V: Ins
+Z4|
+V: Vocal
+"Dbmaj7"a2zgabag|"Dbmaj7"a2zga2a2|"Db6"abaga2ag|"Db6"gbag"Gaug"f2gf|
+V: Ins
+Z4|
+V: Vocal
+"Cm"g2zggagf|"Cm"g2zfgagf|"Cm"g2zfgagf|"F7"gggff2f2|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"fgfefgf2|"Bbm"f2zef2f2|"Bbm"gf2ef2ag|"Eb7"gbagf2ze|
+V: Ins
+Z4|
+V: Vocal
+"Dbmaj7"ee2fg2a2|"Dbmaj7"bbbag2f2|"Bbm"ed2fe2d2|"Abmaj7"c2ddc4|
+V: Ins
+Z4|
+% interlude
+V: Vocal
+"Fm"z8|"Fm"z8|"Cm"z8|"Cm"z8|
+V: Ins
+c2c2d2c2|a2gf4z|zfgag2f2|g2c6|
+V: Vocal
+"Fm"z8|"Cm"z8|"Bbm"z8|"Bbm"z8|
+V: Ins
+zfgag2f2|g2c4ed|d2cd3ed|d2d2z2de|
+V: Vocal
+"Eb7"z8|"Abmaj7"z8|"Fm"z8|"Fm"z8|
+V: Ins
+f2g2e2d2|d2cc4z|c2c2d2c2|a2gffz3|
+V: Vocal
+"Cm"z8|"Cm"z8|"Fm"z8|"Cm"z8|
+V: Ins
+zfgag2f2|g2c6|zfgag2f2|g2c4ed|
+V: Vocal
+"Bbm"z8|"Bbm"z8|"Eb7"z8|"Abmaj7"z8|
+V: Ins
+d2d2zagd|d2d2z2de|f2g2e2d2|d2cc4z|
+% verse
+V: Vocal
+"Dbmaj7"aaaagg2f|"Dbmaj7"gfgaf2z2|"Dbmaj7"ff2f2e2f|"Dbmaj7"ggg2z3g|
+V: Ins
+Z4|
+V: Vocal
+"Cm7"gggggf2e|"Cm7"fefgff2e|"F"ee2f2d2e|"F"ffffz4|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"ff2f2e2d|"Bbm"ee2f2d2c|"Eb7"dede2c2B|"Ab"cccz"Adim"z3b|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"bb2g2g2f|"Eb"gfggf2ze-|"Db"ed2f2e2d-|"Abmaj7"ddccc2z2|
+V: Ins
+Z4|
+V: Vocal
+"Dbmaj7"aa2a2g2f|"Dbmaj7"gfgagfz2|"Eb7/Db"ff2g2e2f|"Eb7/Db"ggeddz2g|
+V: Ins
+Z4|
+V: Vocal
+"Cm7"gg2ggf2e|"Cm7"fefgffze|"F"ee2f2d2e|"F"ffffz4|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"ff2f2e2d|"Bbm"ef2f2d2c|"Eb7"d2de2c2B|"Ab"cccz"Adim"z3b|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"bb2c'2b2g|"Eb"gfggfeze-|"Db"ed2f2e2d-|"Ab"dddcc2ag|
+V: Ins
+Z4|
+% chorus
+V: Vocal
+"Dbmaj7"a2zgabag|"Dbmaj7"a2zga2a2|"Dbmaj7"abaga2ag|"Dbmaj7"abgf"Eb7/Db"e2gf|
+V: Ins
+Z4|
+V: Vocal
+"Cm"g2zggagf|"Cm"g2zfgagf|"Cm"g2zfgagf|"F7"gggfe2fe|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"fgfefgfe|"Bbm"f2zef2fe|"Bbm"f3ef2ag|"Eb7"gagff2ze|
+V: Ins
+Z4|
+V: Vocal
+"Dbmaj7"ee2fg2a2|"Dbmaj7"gfffe2e2|"Bbm"ed2fe2d2|"Abmaj7"c4z2ag|
+V: Ins
+Z4|
+V: Vocal
+"Dbmaj7"a2zgabag|"Dbmaj7"a2zfg2a2|"Eb7/Db"bc'c'ba2gg|"Eb7/Db"gggf"Eb7/G"e2gf|
+V: Ins
+Z4|
+V: Vocal
+"Cm"g2zggagf|"Cm"g2zef2g2|"Cm"bbbag2ff|"F7"gggff2f2|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"fgfefgf2|"Bbm"f2zef2f2|"Bbm"f2zef2ag|"Eb7"gaagf2ze|
+V: Ins
+Z4|
+V: Vocal
+"Dbmaj7"ee2fg2a2|"Dbmaj7"bbbag2f2|"Bbm"ed2fe2d2|"Abmaj7"c2ddc4|
+V: Ins
+Z4|
+% outro
+V: Vocal
+"Bbm7"z8|"Fm7"z8|"Fm7"z8|"Fm7"z8|
+V: Ins
+Z4|
+V: Vocal
+"Fm7"z8|"Fm7"z8|"Fm7"z8|"Fm7"z8|
+V: Ins
+Z4|
+V: Vocal
+"Fm7"z8|
+V: Ins
+Z|

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/abc-remixer/remix_report.schema.json",
+  "title": "abc_remixer remix check report",
+  "type": "object",
+  "required": ["stage", "score", "plan", "pass", "class", "failures", "warnings",
+               "skill_report", "checker", "remix", "maqam_conditioned"],
+  "properties": {
+    "stage": {"type": "string", "const": "remix-check"},
+    "score": {"type": "string"},
+    "plan": {"type": "string"},
+    "pass": {"type": "boolean"},
+    "class": {"type": "string", "enum": ["pass", "warn", "fail"]},
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "class", "detail"],
+        "properties": {
+          "code": {"type": "string"},
+          "class": {"type": "string"},
+          "detail": {"type": "string"}
+        }
+      }
+    },
+    "warnings": {"type": "array", "items": {"type": "object"}},
+    "skill_report": {"type": ["object", "null"]},
+    "checker": {
+      "type": "object",
+      "required": ["pass", "class", "failures", "warnings"]
+    },
+    "remix": {
+      "type": "object",
+      "required": ["concept", "literal_cap_bars", "quotes", "undeclared",
+                   "undeclared_total", "metrics"]
+    },
+    "maqam_conditioned": {"type": "boolean", "const": false}
+  },
+  "additionalProperties": true
+}

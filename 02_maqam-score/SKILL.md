@@ -1,16 +1,16 @@
 ---
-name: abc_score_writer
+name: abc-score-writer
 description: >-
   Compose a NEW ABC score from Arabic lyrics and an arabmaqamrock style prompt:
   a small, declared set of deviations from the LoRA's own default arrangement.
-  Ships its own syllabifier and checker plus a corpus snapshot, so it runs
-  offline in two commands.
+  Ships its own syllabifier and checker; the full package also bundles a corpus
+  snapshot, so it runs offline in two commands.
   Use when asked to write, compose, generate or design a score, melody, or ABC
   file from lyrics and a style. Do NOT use for editing an existing SheetSage2
   transcription.
 ---
 
-# abc_score_writer — composing a score from scratch
+# abc-score-writer — composing a score from scratch
 
 You are writing a **complete two-voice score** for a LoRA that already knows this
 genre and performs competently on its own. The score is not a sketch and not a
@@ -19,9 +19,21 @@ list of gestures: it is the full vocal line plus the guitar part, bar by bar.
 do without it. The deviations are the only intentional changes; the arrangement
 around them is still a real arrangement.
 
+The checked file is two voices. The arrangement it feeds also has drums: the
+**seed** carries them (§3.7), and the vocal's rhythm must give them something to
+answer (`references/rhythm.md`). A score that passes the gate and leaves the
+drummer to the model is the failure the listener hears first.
+
+**Write the tune before you write to the gate.** The checker proves the score is
+readable and inside the corpus; it cannot tell you whether the melody is worth
+hearing. §3.3 and `references/craft.md` are the composition method. A score that
+satisfies every number and has no cell, no period and one phrase rhythm is the
+failure mode this skill exists to prevent.
+
 The tools are bundled. You do not write a parser, a builder, a renderer, or a
 syllabifier, and you do not install anything. **Run the scripts; do not read
-them.** This file and `references/reference.md` are the interface.
+them.** This file, `references/craft.md` and `references/reference.md` are the
+interface.
 
 ```
 <skill>/scripts/syllabify.py       lyrics -> numbers (letters, syllables, bars)
@@ -30,6 +42,10 @@ them.** This file and `references/reference.md` are the interface.
 <skill>/scripts/abc_tools.py       vendored runtime parser (the renderer's contract)
 <skill>/scripts/selftest.sh        proves both work on example/ (run once if in doubt)
 <skill>/example/                   a 16-bar syntax fixture; derive your own shape
+<skill>/example/groove.abc         the seed.abc drum voice, 8 bars
+<skill>/references/craft.md        the composition method: cell, period, cadence, riff
+<skill>/references/rhythm.md       phrase rules, groove, drum interaction, seed drums
+<skill>/references/style-tags.md   style tag -> score decision
 ```
 
 `<skill>` is the directory holding this file. Run the scripts by absolute path;
@@ -162,9 +178,23 @@ score can only avoid causing the problem. Translate style tags with
 python3 <skill>/scripts/syllabify.py <lyrics> --tempo <Q> --json prosody.json
 ```
 
-It prints letters, syllables (marks), the duration cap and token cap, the bar
-budget, the section table, and syllables per line. Copy those numbers; do not
-recount by hand. If it exits 1, the lyrics need more bars than the duration
+When you already know the section layout, write the phrase sidecar in the same
+run and let the tool do the absolute-bar arithmetic:
+
+```bash
+python3 <skill>/scripts/syllabify.py <lyrics> --tempo <Q> --json prosody.json \
+  --phrases phrases.json \
+  --sections "intro=7,verse 1=13,chorus=37,verse 2=46,chorus=65,outro=77"
+```
+
+`--sections` lists the absolute bar of each **sung** section, in lyric order;
+repeat a section name for a repeat (the first `chorus` is the first chorus).
+The tool writes `bar_start`/`bar_end` for every line. Do not add those offsets
+by hand.
+
+The command prints letters, syllables (marks), the duration cap and token cap,
+the bar budget, the section table, and syllables per line. Copy those numbers;
+do not recount by hand. If it exits 1, the lyrics need more bars than the duration
 allows — raise the tempo or cut lines, do not compress the syllables. Pass
 `--duration` when a render length is known, or `--bars` when the length is
 already decided.
@@ -203,7 +233,7 @@ field names, not for its bars, tempo, key, sections, or deviations.
   "chords_min": 0,
   "max_unbroken_seconds": 10,
   "min_phrase_endings": 3,
-  "strict_shape": true,
+  "strict_shape": false,
   "maqam": null,
   "maqam_fit_min": 0.95,
   "deviations": [
@@ -239,7 +269,8 @@ field names, not for its bars, tempo, key, sections, or deviations.
   the chorus lifts the median, not the whole line.
 - `tessitura_share_ge_c5_max`: the share of vocal notes at or above C5. Corpus
   median 71%, P95 84.5%, max 91%. The style target is **0.80**: a score can
-  reach high notes without sitting there. `strict_shape` makes a miss hard.
+  reach high notes without sitting there. `strict_shape: true` makes a miss
+  hard; the default `false` keeps it a warning.
 - `chorus_lift_min`: the median chorus pitch minus the median verse pitch, in
   semitones. Corpus median 2, P95 7; the release target is **5**. It is a
   brief target, not a corpus sanity guard.
@@ -271,11 +302,13 @@ field names, not for its bars, tempo, key, sections, or deviations.
   final one on the tonic. Corpus min 4, median 7. The checker counts them from
   the phrase boundaries; a score with fewer than 3 (and at least 6 phrases)
   fails the sanity guard.
-- `strict_shape`: `true` in the template. It makes the shape targets the plan
+- `strict_shape`: `false` in the template. It makes the shape targets the plan
   declares (`max_unbroken_seconds`, `max_top_duration_share`, `tessitura`,
-  `register`, `chorus_lift_min`, `silence`, `maqam_fit`, phrase plan) **hard**.
-  Without the flag they stay warnings, as in 0.3.0. This is how the brief
-  becomes an acceptance test without changing the corpus sanity gate.
+  `register`, `chorus_lift_min`, `silence`, `maqam_fit`, phrase plan) **hard**
+  when set to `true`. With the default `false` they stay warnings, as in 0.3.0:
+  the brief is a target, not a gate. Set it `true` only when the user asks for a
+  strict release (T21); then fix every shape WARN or report it with approval.
+  Never set it true just to make the checker look strict.
 - `maqam`: **required when the prompt names a maqam**; `null` only when no
   maqam was given. `degrees` is the pitch set the vocal may use; `resting` is
   the set intermediate phrases may end on; `tonic` must match `K:`. When
@@ -287,50 +320,104 @@ Two or three answer shapes, each mutating; a rate that rises, falls, and partly
 returns; the guitar owns the intro/interlude/outro outright. That plan lives in
 the bars, not in prose.
 
-### 3.3 Material — seven decisions, before a pitch
+### 3.3 Compose — the method, before a pitch
 
-- **Maqam and cadence figure.** Use the table in `references/reference.md` §5.1
-  for the pitch set, the default tonic and the resting tones. The phrase that
-  says "this maqam", used once or twice, entered and left by step.
-- **Two or three motifs.** The vocal's cells, 3–6 notes each; every phrase
-  derives from one. Write each with the transformation you will use.
-- **Register.** From a bare render; offline, the `references/reference.md` §7 prior,
-  labelled unmeasured. The corpus verse mean is **71.7–75.1 MIDI** (median 73.5)
-  and the top is **81–86** (median 84). For a full song use 74 mean, 84 top, and
-  a `max_top` of 86; 82 is P25 and 88 is a stretch. The 16-bar fixture uses
-  70/80 because it is a miniature, not a register target. Put the chorus inside
-  the same ceiling and do not write the verse an octave below it. One planned
-  peak per section, not a high tessitura throughout:
-  `tessitura_share_ge_c5_max 0.80` is the target.
-- **Phrase and breath.** **One lyric line is one phrase.** `syllabify.py` prints
-  the bars per line and can write a `phrases.json` sidecar (`--phrases`). Copy
-  the line table, set the absolute `bar_start`/`bar_end` after the section
-  layout, and pass it to the checker. At 80 BPM one beat is 0.75 s (`z4`), two
-  beats 1.5 s (`z8`); a breath is at least 0.5 s. Do not chain a bayt (two
-  hemistichs) into one 5-bar phrase: a 14-syllable line at 80 BPM is about
-  7.5 s, and the ceiling is 10 s unbroken. If a line runs longer, split it at
-  the caesura. The silence floor is 22% of the sung span (corpus median 30%);
-  rests are added by allocating bars, not by removing syllables.
-- **Cadence note.** The **final** vocal note is the tonic. Intermediate phrases
-  end on the maqam's resting tones, and the score uses **at least three
-  different phrase-ending pitches**. Do not end every phrase on the tonic: that
-  is the mechanical cadence the listener hears first. For Kurd the resting set
-  is D, F, A, B♭, C; for Nahawand D, F, A, C; for Hijaz D, F♯, A, B♭; for Ajam
-  D, F♯, A, B.
-- **Rhythm profile.** A sung phrase is not a row of eighth notes. Mix sixteenths
-  and eighths, repeat a note, hold a long note at the phrase end, and tie it
-  when it crosses a beat. Every phrase needs one gesture from the rhythm list:
-  a repeated cell, a long note, a tie, or a short rest inside the phrase.
-  The corpus repeats a pitch on **25–43%** of its melodic intervals (median
-  32%); a line with almost no repeated notes is a scale, not a melody. If you
-  can sing it as "one, two, three, four" in every bar, it is a scale.
-- **Answer shapes.** Two or three, 3–8 notes each, each a transformation of the
-  last. The guitar owns the intro/interlude/outro outright; in the chorus it may
-  become a low bed instead of an answer. A two-note tag at the barline is not
-  an answer.
+Read `references/craft.md` here. The gate comes later; this is the part the gate
+cannot see. Work in this order, and keep a **draft core** of 8–16 bars before
+expanding:
 
-The checker cannot see motifs, so do not claim it did. If a motif carries an
-answer shape, name that shape in the deviation list.
+The core is the **first 8–16 bars of `score.abc`**, not a separate sketch.
+Write it before you plan the rest of the form; do not design the full 82 bars in
+your head before the first file exists. If the core changes after a check, edit
+the opening bars; do not rewrite the whole score. The core is the one place
+extra thinking buys quality — the rest is expansion and local repair.
+
+1. **Lyric as song.** Find the bayt (two hemistichs), the caesura, the qāfiya,
+   the repeated line and the emotional pivot. The score breathes where the poem
+   breathes. Do not name a baḥr unless you scanned it.
+2. **Cell.** 3–6 notes with a rhythm you can sing; one cell per section. It must
+   contain a repeated note, a 4th/5th leap, or a distinctive rhythm.
+3. **Period.** 2 bars antecedent ending open (5th, ♭6, 2nd); 2 bars consequent
+   ending closed (tonic or 3rd). Same head, different tail.
+4. **Transform.** Pick two or three: sequence, inversion, truncation,
+   augmentation, ornament, registral shift, fragmentation, displacement. Never
+   transpose the whole verse; that is a key change, not a variation.
+5. **Elastic text slots.** The period is anchors + shorts + 2–4 fills + one
+   cadence slot, so it absorbs 13–17 syllables without squeezing every note.
+   Write the alignment intent in the report (bar, syllables, slots, where the
+   fill and the melisma are).
+6. **Cadence ladder and sayr.** Open on the 5th; use ♭6/♭7 for colour; the ♭3
+   rarely (4.7% of corpus endings); the tonic for the section close and the final
+   qafla. In Kurd, Jins Kurd (D–E♭–F–G) sits under Jins Nahawand on the 4th
+   (G–A–B♭–C): touch G (the ghammāz), rise to the jawāb once, return.
+7. **Melisma as an event.** Body 1.00–1.10 notes/syllable; 3–8 notes on chosen
+   cadence syllables; overall 1.15–1.35. Write the place; the renderer performs
+   the quarter-tone ornament.
+8. **Guitar as a part.** Two or three answer shapes, 3–8 notes each and each a
+   mutation of the last; a 2-bar riff motif derived from the cell or a pedal;
+   answers in the vocal's gaps; owns the intro/interlude/solo/outro; changes
+   texture at the chorus; the solo develops the cell. A whole-bar arpeggio is a
+   floor, not a part.
+9. **Rhythm section.** Write the phrase and groove **rules** before you encode:
+   how phrases start and end, the 2–4 bar length range, one 2-bar groove per
+   section, and three interaction events (unison, stop, fill, drop). Vary the
+   start (a pickup on the `&` of 4), the length and the cadence beat; leave one
+   **2-beat hole** per 4 bars. Put the rules in `seed_sheet.md` (exactly 10
+   numbered lines, no title). `phrases.json` owns the per-line table; do not
+   retype it. A drummer cannot answer a grid; see `references/rhythm.md`.
+10. **Subtract for intensity.** Remove a layer before the chorus; let the voice
+    drop out for the solo; let the guitar drop out for the last line. The chorus
+    lifts the median about five semitones; it does not add notes.
+
+Then the **audition by reduction** on the draft core (`craft.md` §10): read the
+cell in notation and check its contour, count the ideas, find the peak, count
+the phrase rhythms, check the cadence ladder, check the literal loops. If audio
+is available, hum it; offline, say you did not audition. Fix the core *before*
+encoding the whole score. The numbers are below; the method is what makes them
+music.
+
+| Decision | Target | Basis |
+|---|---|---|
+| register | mean 74, top 84, `max_top` 86 for a full song; one peak per section; `tessitura_share_ge_c5_max` 0.80 | corpus median/P95 |
+| breath | one lyric line = one phrase; ≥0.5 s at the line end; ≤10 s unbroken; silence ≥22% | corpus |
+| cadence | final tonic; intermediate on resting tones; ≥3 distinct endings (aim 5–7); 5th most common, tonic ≤25% | corpus |
+| repeated pitch | 25–43% of intervals | corpus min/max |
+| literal loops | ≥75% unique vocal bars | corpus P10 |
+| phrase rhythm | ≥0.85 distinct phrase rhythms | corpus P10 0.914 |
+| late peak | ≥25% of phrases peak in their second half | corpus P10 |
+| phrase end | not every phrase ends on a long note; ≤0.80 | corpus max 0.821 |
+| melisma | body 1.00–1.10; cadence 3–8; overall 1.15–1.35 | corpus band + design |
+| phrase start | ≥2 distinct beat positions per section; one pickup | design |
+| phrase length | ≥2 distinct lengths; not every line the same 3-bar frame | design |
+| drum hole | one 2-beat internal rest per 4 bars; a fill at the group end | design |
+
+**Phrase plan.** `syllabify.py --phrases` writes the line table. Pass
+`--sections` in the same run to write the absolute `bar_start`/`bar_end` after
+the section layout; do not add the offsets by hand. Then pass
+`--phrases phrases.json` to the checker. At 80 BPM `z4` is 0.75 s; a breath is
+≥0.5 s at the line end and ≥1.0 s at the bayt end. Rests come from allocating
+bars, not from removing syllables. **The sidecar is a map, not a 3-bar
+template:** if every line has the same bar count, the drummer has nothing to
+phrase against.
+
+The register, breath, ending and maqam numbers are still plan targets and the
+checker enforces them. The last eight rows are craft diagnostics: count them on
+the draft, not after the full score. In the source repo,
+`analysis/measure_craft.py score.abc` prints the melodic ones and
+`analysis/measure_rhythm.py score.abc --seed seed.abc` prints the rhythm and
+drum-interaction ones; if you only have the shipped zip, count them on 4–8
+phrases by eye.
+
+**Write `seed_sheet.md` before the first bar, as exactly 10 numbered lines
+(no title, no blank line).** Rules, not per-line results: frame, cell, period
+rule, cadence rule, melisma rule, riff, subtraction, one 2-bar groove per
+section, three interaction events, and the weakest bar to fix. `phrases.json`
+owns the line table (bar ranges, syllables, pauses); do not retype it. The sheet
+is a plan, not a deliverable: if a line is uncertain, write the rule and move
+on. A sheet written after the score is not a plan.
+
+The checker cannot see motifs or grooves, so do not claim it did. If a motif
+carries an answer shape, name that shape in the deviation list.
 
 ### 3.4 Write `score.abc`
 
@@ -354,8 +441,10 @@ V: Ins
 A,4 C4 E4 A4|
 ```
 
-The tempo and key come from your plan, not from this example. The example is
-a dialect fixture; do not copy its register, proportions, or section lengths.
+The tempo and key come from your plan, not from this example. The example is a
+dialect fixture; do not copy its register, proportions, section lengths or
+one-bar phrase lengths. It is a syntax model, not a rhythm model; `rhythm.md`
+and `example/groove.abc` are the rhythm models.
 
 Rules that save a repair pass:
 
@@ -366,7 +455,8 @@ Rules that save a repair pass:
   percent (`% intro`). A `%` inside a block is an annotation and is ignored.
 - Blocks alternate `V: Vocal`, `V: Ins`, each 1–4 bars, music line ending in `|`.
   Both blocks in a pair have the same bar count. Do not insert blank lines
-  between pairs.
+  between pairs. **`score.abc` is two voices:** do not add a Drums voice to the
+  checked file; the contract parser rejects it. Drums go in `seed.abc` (§3.7).
 - **Meter changes are allowed.** `M:2/4` may appear after `V:` and before the
   music line; `[K:...]` may appear inside a bar. The corpus uses nine meters and
   121/177 scores change meter; the checker parses per-bar meter instead of
@@ -399,18 +489,36 @@ python3 <skill>/scripts/checker.py score.abc --plan plan.json \
 ```
 
 Exit 0 means no **hard** check failed; `WARN` lines are style diagnostics and
-do not fail unless `strict_shape` is in the plan or you pass `--strict-style`.
+do not fail unless `strict_shape: true` or you pass `--strict-style`.
 The default check is a validity check. **Release quality is
 `--strict-style` with zero WARNs.** The checker runs the vendored runtime parser
 first; if it prints `FAIL runtime parse`, the renderer cannot read the file at
 all — fix the dialect (usually a blank line, a header line, or a tie), not the
 checker.
 
-On a sanity `FAIL`, fix **only** the bars named, then run it once more. No other
-edits. If a shape target misses, write the missing music; do not lower a
-threshold. If a check can only be satisfied by changing the plan, change the
-plan and say so; never fake a number. A declared arrangement deviation is not a
-waiver for breath, tessitura, duration mix, endings, or silence.
+**The checker is your measurement instrument, not a final exam.** Run it with
+`--json report.json` after the first `score.abc`, and again after a named fix.
+Read `report.json.measured`; it is the authoritative block for bar counts, note
+counts, register, duration spread, ties, silence, phrase endings and the rest.
+Do not write your own ABC parser or statistics script. The vendored
+`abc_tools.py` is the renderer's parser; the checker is the way to use it. If a
+number you need is missing, add it to the checker, not to a throwaway script.
+
+The checker is not the aesthetic gate. It does not measure the cell, the
+period, the phrase-rhythm variety or the peak placement; §3.3 and `craft.md` §10
+do. A PASS is not a verdict on the tune; the listener decides.
+
+On a **contract or sanity FAIL**, fix **only** the bars or headers named, then
+run the checker again. On a **style or shape WARN**, do not rewrite the score:
+report it, or fix it only if the user asked for a strict release. With
+`strict_shape: false` (the template default) the shape targets are warnings, not
+gates; a WARN is information, not a command to recompose. If a check can only be
+satisfied by changing the plan, change the plan and say so; never fake a number.
+A declared arrangement deviation is not a waiver for breath, tessitura, duration
+mix, endings, or silence.
+
+Stop after the check passes. Do not re-run to "confirm"; do not run a fifth
+check after a clean pass.
 
 ### 3.5.1 Error → fix
 
@@ -443,9 +551,9 @@ When the user gives feedback on a finished score:
    A style target is the brief; when the brief changes, the target changes.
 3. **Edit the score in place.** Do not regenerate the whole score unless the
    user asks for a rewrite or the structure is wrong.
-4. **Run the checker once.** If a style target now contradicts the brief,
-   change the target and record it; do not "fix" the music back to the old
-   target.
+4. **Run the checker after the fix.** If a style target now contradicts the
+   brief, change the target and record it; do not "fix" the music back to the old
+   target. One check per change; stop after it passes.
 5. **Stop after one pass.** If the user is still unhappy, ask which section
    (chorus, verse, outro) and work there.
 6. **A quality WARN is not an arrangement deviation.** If the final check has a
@@ -455,6 +563,42 @@ When the user gives feedback on a finished score:
 
 A revision is not a second composition. One scoped edit and one check are the
 whole budget.
+
+### 3.7 Seed delivery — one tune, two renderings
+
+When the target is a cover model (Suno, Udio) or the user asks for chords,
+instruments or backing voices, deliver two files:
+
+| File | What it is | Validated by |
+|---|---|---|
+| `score.abc` | the strict two-voice dialect, the source of truth | `checker.py`, `--strict-style`, `--phrases` |
+| `seed.abc` | free ABC: `"Dm"` chords, `%%MIDI program`, optional backing/strings voices, and a `Drums` voice when the style has drums, `!p!`/`!f!` | bar sums and voice alignment only |
+
+Rules:
+
+- The melody is **the same** in both. Do not compose a second tune for the seed.
+- Write and check `score.abc` first. It is the proof that the melody is complete
+  and inside the corpus; `seed.abc` is the orchestration of that melody.
+- `seed.abc` is **not** contract-checked. Say so in the report, and say which
+  checks were not run. Do not present "every bar adds up" as a validation.
+- If the user asked only for a seed, still write `score.abc`. The strict file
+  costs one pass and prevents the free file from hiding an incomplete melody.
+- Chords are optional in `score.abc` (`chords_min` 0) and expected in the seed.
+  The contract still allows `"Dm"` in the Vocal voice if you want the harmony
+  written in the checked file.
+- **Drums are a voice in the seed, not a hope.** When the style block names
+  drums, rhythm guitar or metal, or the target is a cover model, `seed.abc` must
+  carry a `V: Drums` voice: a 2-bar groove per section, a fill at the end of a
+  4- or 8-bar group, and a drop at the last line. Use `%%MIDI channel 10` and
+  `%%MIDI drummap`; `example/groove.abc` is a working 8-bar model, and
+  `references/rhythm.md` §5 gives the dialect. If the renderer ignores
+  percussion, say so; the phrase rules and the vocal rhythm still carry the
+  interaction.
+- **The melody must imply the groove even without the drum staff.** A drummer
+  reads the vocal's onsets, rests, holds and cadence landings. If the voice is
+  an unbroken eighth-note stream in identical 3-bar phrases, the drum part is
+  decoration. Write the pickup, the 2-beat hole and the varied cadence beat
+  before you write the drums.
 
 ## 4. What the checks mean
 
@@ -492,8 +636,9 @@ prescribe a style.
   `min_phrase_endings`, and the optional `phrases.json` line plan;
 - `cadence: "tonic"` is always a self-imposed hard target.
 
-These are the brief, not a corpus gate. A plan without `strict_shape` falls back
-to the 0.3.0 warnings; a plan with it makes the declared values FAIL.
+These are the brief, not a corpus gate. With `strict_shape: false` (the template
+default) they stay warnings; `strict_shape: true` makes the declared values
+FAIL. Set it true only for a strict release.
 
 **Style — WARN by default; `--strict-style` makes them FAIL:**
 
@@ -509,7 +654,10 @@ brief you declared?" Neither is a verdict on beauty. Offline, say so.
 
 `CHANGES.txt` = the plan's deviation list plus the checker's `MEASURED` block,
 copied verbatim, plus a `WARNINGS` section. `report.json` is the `--json`
-output. Never retype a number. The measured block includes `register_mean`,
+output. Never retype a number. The run also delivers `seed_sheet.md` (exactly 10
+numbered lines of rules: cell, period, cadence, groove, events) and, for a cover
+target, `seed.abc` with the drum voice. The sheet is written before the score; it
+is a plan, not a checker input. The measured block includes `register_mean`,
 `register_top`, `register_range`, `top_duration_share`,
 `distinct_durations`, `ties`, `fill_lengths`, `ins_active_share`, `chords`,
 `unbroken_seconds_max`, `phrase_seconds_median`, `repeated_share`,
@@ -558,6 +706,39 @@ chords at all. See `references/reference.md` §9 for the boundary.
   exercise. Start from a 3–6 note motif, repeat notes, hold a long note, and
   mutate the cell. The corpus repeats a pitch on 25–43% of intervals; a line
   with almost none is a scale.
+- **Writing a phrase grid.** The same 2-2-1-2 rhythm in 26 phrases passes
+  `top_duration_share` and sounds like a metronome. Count the distinct phrase
+  rhythms on the draft (`craft.md` §10); the corpus P10 is 0.914.
+- **The three-bar grid.** Every lyric line set to the same 3-bar frame, starting
+  on beat 1, ending on beat 3 or 4, with a 1-beat gap. The drummer has no cue
+  and will play his own idea. Vary the start, the length and the cadence beat
+  (`references/rhythm.md`).
+- **Drums left to the model.** The style says metal; the score has no drum voice
+  and the seed has none. The listener hears the model's default drummer, not
+  your arrangement. Write the 2-bar groove and the fills in `seed.abc`.
+- **A fill in every gap.** If the voice rests one beat at every line end, there
+  is no room for a fill and no reason for one. Leave a 2-beat hole once per 4
+  bars, at the end of a group, and let the drums answer there.
+- **Looping a bar, or transposing the verse.** One 9-note bar eleven times is a
+  loop; a verse lifted a step is a key change. Reuse the *cell*, not the bar;
+  vary the consequent and the cadence.
+- **Making melisma an average.** 1.11 notes/syllable with one 5-note tag is not a
+  melismatic setting. Put 3–8 notes on chosen cadence syllables and keep the
+  body syllabic (`craft.md` §6).
+- **Every phrase peaking on its first note.** 26 descending sighs is a tic. Let
+  a third of the phrases build to a late peak (corpus P10 0.242).
+- **Ending every phrase long.** A quarter note at every line end kills the
+  forward motion; the corpus max for "end long" is 0.821, and the median is
+  0.241.
+- **Naming a baḥr without scanning.** "Al-basīṭ" is a claim about the poem's
+  feet. If you used a long/short pattern as a guess, call it a heuristic, and do
+  not say the singer "adapts" a line to a tune with the wrong slots.
+- **Leaving the contract silently for a seed.** If the user wants chords,
+  backing voices or Suno, deliver `score.abc` *and* `seed.abc` (§3.7), and say
+  which file passed which check.
+- **The whole-bar arpeggio guitar.** `A,4 C4 E4 A4` is a floor, not a riff.
+  Write a 2-bar motif with rhythm, answer in the vocal's gaps, and change
+  texture at the chorus.
 - **One breath per bayt.** A 5-bar phrase at 80 BPM is about 15 s without a
   breath. One lyric line is one phrase; put a rest at each line end, use the
   `syllabify.py --phrases` sidecar, and pass it to `checker.py --phrases`.
@@ -588,13 +769,38 @@ chords at all. See `references/reference.md` §9 for the boundary.
 
 ## 7. Cost
 
-Composition: one `syllabify` run (with `--phrases`), one plan, one score, one
-check, at most one repair. The first pass must meet the declared shape targets;
-if you are past that, the plan was wrong — go back to 3.2, not to the parser.
+Composition has two drafts, then one check per change:
+
+1. **Core draft** — 8–16 bars: cell, period, one cadence, the guitar motif, the
+   phrase/groove rules (the 10 numbered lines of `seed_sheet.md`). Write the
+   core **before** you plan the rest of the form. Run the §10 checklist on it
+   (read the cell in notation, count the phrase rhythms, find the peak, check
+   the cadence ladder). Do not encode the full score yet.
+2. **Expand** — set the bayts on the elastic slots, write the guitar part, the
+   rhythm section and the subtraction arc, encode `score.abc` (and `seed.abc`
+   with the drum voice if the target is a cover model).
+3. **Check and repair.** Run `checker.py --json report.json`; fix only the bars
+   or headers the checker names, with `edit`. Do not rewrite the whole score.
+   One repair per check; stop after the check passes.
+
+**Economic contract.** The final score is small; the process is not allowed to
+be arbitrarily larger. Treat the score's token size as the unit: write the first
+`score.abc` early, use the checker for measurement, and do not re-derive the
+piece in prose. In an instrumented run the analyst may end the session if it
+spends more than about **10×** the score's token size. A budget is a stop rule,
+not a target and not a reason to lower the music.
+
 Before delivering a release-quality score, run `--strict-style`; a shape WARN
-is a miss, not a free pass. Revision: one scoped edit and one check per
-feedback. If a revision needs a second repair, the plan and the request
-disagree; change the plan, not the music.
+is a miss only for a strict release, not a command to rewrite a default run.
+Revision: one scoped edit and one check per feedback. If a revision needs a
+second repair, the plan and the request disagree; change the plan, not the
+music.
+
+The core draft is the one place extra tokens buy quality. It is 8–16 bars, not a
+second score. Do not skip it to save a pass; a gate-shaped first draft costs
+more, because every later fix is arrangement around a weak tune. The rhythm
+sheet is one page of names and beats, not a second score; it is what keeps the
+drummer from inventing his own arrangement.
 
 ## 8. Corpus tools (bundled)
 

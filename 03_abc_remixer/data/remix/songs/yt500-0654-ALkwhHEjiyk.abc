@@ -1,0 +1,202 @@
+X:1
+T:
+M:2/4
+L:1/16
+Q:1/4=82
+V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
+V: Ins clef=treble name="Ins Melody" snm="Inst."
+K:Cm
+% intro
+V: Vocal
+"Cm"z8|"Cm"z8|"Dbmaj7"z8|"Cm"z8|
+V: Ins
+z4c2c2|g2g2g2g2|a2agf2f2|g2g2g2g2|
+V: Vocal
+"Dbmaj7"z8|"Eb"z8|"F"z4"Bbm"z4|"Cm"z8|
+V: Ins
+a2agf2f2|e2e2e2e2|f2fe_d2B2|c2_df2edc|
+V: Vocal
+"Cm"z8|"Cm"z8|"Dbmaj7"z8|"Cm"z8|
+V: Ins
+cBc2cccc|g2gg3gb|a2agf3f|g2gg3gb|
+V: Vocal
+"Dbmaj7"z4"G7"z4|"Eb"z8|"Dbmaj7"z8|"Bbm"z8|
+V: Ins
+a2agff2g|e2ee3eg|f2fe_dcBB|c2_df2eed|
+V: Vocal
+"Abmaj7"z4"Bb7"z4|"Eb"z8|"Dbmaj7"z8|"Bbm"z8|
+V: Ins
+c2ced2df|e2ee3eg|f2fe_dcBB|c2_df2eed|
+V: Vocal
+"C7sus4"z6zc|
+V: Ins
+c2c2c3z|
+% verse
+V: Vocal
+"Cm"g2gg3gf|"Dbmaj7"gbagf2zf|"Eb"g2agf3g|"Dbmaj7"fe_d2z3f|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"f2fgf2ff|"Eb"gagfe2z_d|"Abmaj7"e2ec_dedd|"C"c2z4g2|
+V: Ins
+Z4|
+V: Vocal
+"Cm"g2gg3gf|"Dbmaj7"gbagf2zf|"Eb"g2agf3g|"Dbmaj7"fe_d2z3f|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"f2fgf2ef|"Eb"gagfe2z_d|"Abmaj7"e2ec_dedd|"Cm"c2z4ze|
+V: Ins
+Z4|
+% chorus
+V: Vocal
+"Eb"e3ff2e2|"Db"fgfe_d2zf|"Bb"f2f2ff2g|"Eb"gfeee2z2|
+V: Ins
+Z4|
+V: Vocal
+"Ab"e3e3e_d|"F7"fgfe_d2zf|"Db"f2f2fffg|"Eb"gfe2gz2g|
+V: Ins
+Z4|
+V: Vocal
+"Ab"agff2_dcd|"F"fffe"Bbm"_d2zd|"Eb"e2ec_dedd|"C7sus4"ccz2"C"z3c|
+V: Ins
+Z4|
+V: Vocal
+"Abmaj7"g2gg3gf|"Db"gbagf2zf|"Eb"gfagf2ef|"Db"f_ddz4d|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"f2fff2fe|"Eb"gagfe2z_d|"Ab"e2ef2e_dc|"Cm"c4z4|
+V: Ins
+Z3|z6zc|
+% interlude
+V: Vocal
+"Cm"z8|"Dbmaj7"z8|"Cm"z8|"Dbmaj7"z8|
+V: Ins
+g2gg3gb|abagf2ff|g2gg3gb|abagf2fg|
+V: Vocal
+"Eb"z8|"F"z4"Bbm"z4|"Cm"z8|"Cm"z8|
+V: Ins
+e2ee3eg|fgfe_dcBB|c2_df2edc|cccccccc|
+V: Vocal
+"Cm"z8|"Dbmaj7"z8|"Cm"z8|"Dbmaj7"z4"G7"z4|
+V: Ins
+g2gg3gb|a2agf3f|g2gg3gb|a2agff2g|
+V: Vocal
+"Eb"z8|"Db"z8|"Bbm"z8|"Abmaj7"z4"Bb7"z4|
+V: Ins
+e2ee3eg|f2fe_dcBB|c2_df2eed|c2ced2df|
+V: Vocal
+"Eb"z8|"Dbmaj7"z8|"Bbm"z8|"C7sus4"z6zc|
+V: Ins
+e2ee3eg|f2fe_dcBB|c2_df2eed|c2c2c3z|
+% verse
+V: Vocal
+"Cm"g2gg3gf|"Dbmaj7"gbagf2zf|"Eb"g2agffff|"Dbmaj7"f2_d2z3f|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"f2fff2ef|"Eb"gagfe2z_d|"Abmaj7"e2e2_dedd|"C"ccz4zg|
+V: Ins
+Z4|
+V: Vocal
+"Cm"g2agfgef|"Dbmaj7"abagf2zf|"Eb"g2agffff|"Dbmaj7"fe_d2z3f|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"f2agfgef|"Eb"gagfe2z_d|"Abmaj7"e2e2_dedd|"C"ccz4ze|
+V: Ins
+Z4|
+V: Vocal
+"Eb"e3ff2e_d|"Db"fgff_d2zf|"Bb"f2f2ff2g|"Eb"abgafge2|
+V: Ins
+Z4|
+V: Vocal
+"Ab"e3e3e_d|"F7"fgfe_d2zf|"Db"f2f2fffg|"Eb"gfe2z3g|
+V: Ins
+Z4|
+V: Vocal
+"Ab"a2fe2_dcd|"F"fffe"Bbm"_d2zd|"Eb"e2ec_dedd|"C7sus4"ccz2"C"z3c|
+V: Ins
+Z4|
+% chorus
+V: Vocal
+"Abmaj7"g2gg3gf|"Db"gbagf2zf|"Eb"gfggfeef|"Db"f_ddz4d|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"f2fff2fe|"Eb"gagfe2z_d|"Ab"e_deffedc|"Cm"c4z4|
+V: Ins
+Z3|z6zc|
+% interlude
+V: Vocal
+"Cm"z8|"Dbmaj7"z8|"Cm"z8|"Dbmaj7"z8|
+V: Ins
+G2GGGGGB|ABAGFFFF|G2GGGGGB|ABAGFFFG|
+V: Vocal
+"Eb"z8|"F"z4"Bbm"z4|"Cm"z8|"Cm"z8|
+V: Ins
+E2EEEEEG|FGFE_DCB,B,|C2_DF2EDC|CCCCCCCc|
+V: Vocal
+"Cm"z8|"Dbmaj7"z8|"Cm"z8|"Dbmaj7"z4"G7"z4|
+V: Ins
+g2gg3gb|a2agf3f|g2gg3gb|a2agff2g|
+V: Vocal
+"Eb"z8|"Db"z8|"Bbm"z8|"Abmaj7"z4"Bb7"z4|
+V: Ins
+e2ee3eg|f2fe_dcBB|c2_df2eed|c2ced2df|
+V: Vocal
+"Eb"z8|"Db"z8|"Bbm"z8|"C7sus4"z6zc|
+V: Ins
+e2ee3eg|f2fe_dcBB|c2_df2eed|c2c2c3z|
+% verse
+V: Vocal
+"Cm"g2gg3gf|"Dbmaj7"gbagf2zf|"Eb"g2gff2fg|"Dbmaj7"fe_d2z3f|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"f2fff2ef|"Eb"gagfe2z_d|"Abmaj7"e2ec_dedd|"C"c2z4g2|
+V: Ins
+Z4|
+V: Vocal
+"Cm"gagff2ef|"Dbmaj7"abagf2za|"Eb"ga2gf2fg|"Dbmaj7"fe_d2z3f|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"f2fgagff|"Eb"gagff2z_d|"Abmaj7"e2ec_dedd|"C"c2z4ze|
+V: Ins
+Z4|
+V: Vocal
+"Eb"e2eee2e2|"Dbmaj7"fgfe_d2zf-|"Bb"ff2f2f2g|"Eb"gggfggfe|
+V: Ins
+Z4|
+V: Vocal
+"Ab"e3e3e2|"F7"fgfec2zf|"Db"f2f2fffg|"Eb"gfe2g2gg|
+V: Ins
+Z4|
+V: Vocal
+"Ab"gggff2_dz|"F"zggf"Bbm"f2z2|"Eb"z_de2fddz|"C7sus4"c2z2"C"z3c|
+V: Ins
+Z4|
+% chorus
+V: Vocal
+"Abmaj7"g2gg3gf|"Db"abagf2ze|"Eb"gfggfeef|"Db"f_ddz4d|
+V: Ins
+Z4|
+V: Vocal
+"Bbm"f2fff2fe|"Eb"gagfe2z_d|"Ab"e2ef2e_dc|"Cm"c4"Bb7"z4|
+V: Ins
+Z3|z4d2df|
+% outro
+V: Vocal
+"Eb"z8|"Db"z8|"Bbm"z8|"Cm"z8|
+V: Ins
+e2ee3eg|f2fe_dcBB|c2_df2eed|c2c2z4|
+V: Vocal
+"Cm"z8|"Cm"z8|"Cm"z8|"Cm"z8|
+V: Ins
+Z4|
+V: Vocal
+Z|
+V: Ins
+Z|

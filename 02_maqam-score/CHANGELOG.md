@@ -1,5 +1,188 @@
 # Changelog
 
+## 0.5.3 — economic contract (source; contract still 0.4.0)
+
+**Evidence:** `analysis/eval/reports/2026-11-24-deepseek-session-07.md` and the
+causal audit that followed it. The run delivered all artifacts and passed the
+checker, but generated 241,400 tokens for a ~2.1 k-token score (115×). 57,425
+reasoning tokens went to 19 hand-written parser/stats scripts, 39,930 to
+gate-tuning, and 33,890 to repairing a full score rewrite. The skill and the
+task made the correct path unclear: the checker was described as a final step,
+the default plan made shape targets hard, and `syllabify` left absolute bars to
+hand arithmetic.
+
+**Why:** the tools were present but the contract made them look like decoration.
+A competent agent wrote a worse checker because it could not use the real one
+as a measuring instrument until the end.
+
+### Instructions
+- `SKILL.md` §3.5: the checker is a **measurement instrument**, not a final
+  exam. Run it with `--json report.json` after the first score and after a
+  named fix; read `report.json.measured`; do not write a parser or statistics
+  script; stop after a pass.
+- `SKILL.md` §3.2 and `example/plan.json`: `strict_shape` defaults to **false**.
+  Shape targets are warnings by default; only a strict release sets it true.
+- `SKILL.md` §3.1/§3.3: `syllabify.py --sections` writes absolute
+  `bar_start`/`bar_end`; do not hand-type offsets. The task uses it.
+- `SKILL.md` §3.3/§7: `core_draft.abc` is the **first 8–16 bars of
+  `score.abc`**; write it before planning the full form. No full-score rewrite
+  after the first complete file; repair named bars with `edit`.
+- `SKILL.md` §3.3/§5/§7: exactly **10 numbered lines** for `seed_sheet.md` and
+  `notes.md`; no title or blank line.
+- `SKILL.md` §3.3: offline, read the cell in notation; do not claim a mental
+  audition. "Hum" only when audio exists.
+- `SKILL.md` §7: write the score early; in an instrumented run the analyst may
+  end the session at about **10×** the score's token size. It is a stop rule,
+  not a quality target.
+
+### Tools
+- `scripts/syllabify.py`: add `--sections`/`--layout` (`"intro=7,verse 1=13,
+  chorus=37,verse 2=46,chorus=65,outro=77"`). It groups the lyric sections in
+  order and writes absolute `bar_start`/`bar_end`; repeated names are consumed
+  in order. Tests: `tests/test_syllabify.py`.
+- No change to `checker.py`, `calibration.json`, `abc_tools.py`, the corpus
+  numbers, or the contract.
+
+### Evaluation
+- Session 08 task/checklist: `analysis/eval/inbox/deepseek_session_08/task.md`,
+  `analysis/eval/checklists/2026-11-24-session-08-economic.md`.
+- One experiment: checker-first measurement + no custom parser + targeted edits
+  + a manual 10× analyst stop. Do not change the model in the same run.
+
+---
+
+## 0.5.2 — lean sheet (source; contract still 0.4.0)
+
+**Evidence:** `analysis/eval/reports/2026-11-24-claude-session-05.md`. The 0.5.1
+run never wrote a note. It spent 19 m 42 s in hidden design, produced a 5.5 KB
+`seed_sheet.md` with a 26-row line table, and stopped before `core_draft.abc`.
+The prompt had asked for the sheet and the core "before any ABC"; the agent
+obeyed, and the session ended at the sheet.
+
+**Why:** the sheet asked for **results** — every line's start beat, bar count,
+slots and breath — before the music existed. The model had to compose the whole
+piece in its head to fill the table. That is the 19 minutes. The line table is
+already `phrases.json`; retyping it is duplicate arithmetic, not a plan.
+
+### Instructions
+- `SKILL.md` §3.3 step 9: write the phrase/groove **rules**, not the per-line
+  table; `phrases.json` owns the table.
+- `SKILL.md` §3.3 sheet paragraph: a **10-line scratchpad** (frame, cell,
+  period rule, cadence rule, melisma rule, riff, subtraction, groove, three
+  events, weakest bar). Rules, not results; a plan, not a deliverable.
+- `craft.md` §1 step 8: the same rules-level wording.
+- `SKILL.md` §5 and §7: the sheet is 10 lines of rules.
+
+### Not changed
+- The checker, `calibration.json`, the 177 corpus numbers, the rhythm layer
+  (`rhythm.md`), the seed drum voice, and the §3.3 numeric craft table.
+- This is a process change, not a musical one. The rhythm hypothesis is still
+  untested because session 05 produced no score.
+
+### Evaluation
+- Session 06 is the lean rerun: rules-level sheet, score before report, no task
+  list, one checker run. If the score exists and the ear improves, the next
+  one-change run is the skill split (a later 0.5.x) to cut the 43.5 KB fixed
+  context.
+
+---
+
+## 0.5.1 — rhythm section (source; contract still 0.4.0)
+
+**Evidence:** `analysis/eval/reports/2026-11-24-claude-session-04.md`. A 0.5.0
+score passed `--strict-style` with 0 hard checks and 0 warnings, then the user
+heard "the drums are not supporting the vocal phrasing; the drummer is playing
+his own idea." Measured on the final artifact: all 26 phrases started on beat 1,
+25/26 used only two phrase lengths (a 3-bar frame), line-end gaps were only 1,
+1.5 or 2 beats, 4/436 notes sustained through beat 3, and neither `score.abc`
+nor `seed.abc` had a drum voice.
+
+**Why:** the craft layer taught the cell, the period, the guitar and
+subtraction, but the rhythm section was left to the model. The two-voice corpus
+has no drum staff, so no gate could see the part the listener hears first. This
+is the third run with the same rhythmic-uniformity finding; the fix is a method
+and a seed part, not another gate.
+
+### Instructions
+- Add `references/rhythm.md`: the three clocks, five phrase-rhythm rules, a
+  2-bar groove per section, three interaction events, the seed drum voice, the
+  three tests and the 3-bar-grid anti-pattern.
+- `SKILL.md` §3.3: add step 9 (rhythm section), the phrase-start/length/drum-hole
+  craft rows, and `seed_sheet.md` as a required pre-ABC artifact.
+- `SKILL.md` §3.7: `seed.abc` must carry a `V: Drums` voice when the style has
+  drums or the target is a cover model; point to `example/groove.abc`.
+- `SKILL.md` §3.4/§6/§7: state that the checked file is two voices, add the
+  three-bar-grid, drums-left-to-the-model and fill-every-gap traps, and put the
+  rhythm sheet in the core draft.
+- `craft.md`: add §7.5 (the drummer is a partner), §11.7 (the three-bar grid),
+  and audition items 11–13 (clap the backbeat, count starts/lengths, find the
+  fill).
+- Add `example/groove.abc`: a working 8-bar percussion voice.
+
+### Measurement
+- Add `analysis/measure_rhythm.py`: report-only phrase starts, lengths, gaps,
+  onset syncopation, sustain-through-beat-3, and (with `--seed`) drum hits in
+  vocal rests, fill bars and drop bars. It prints flags for the session-04
+  pattern. **No checker or calibration change.**
+- Session-04 baseline: `distinct_phrase_starts 1`, `25/26` phrases in two
+  lengths, `weak16_share 0.071`, `sustain_beat3 4/436`, no drum voice.
+
+### Evaluation
+- Add T31 (rhythm section) to `docs/agent-eval-protocol.md`; report-only.
+- The next run must use the controlled brief (D Kurd, 80 BPM), write
+  `seed_sheet.md` before ABC, and deliver a drum voice in `seed.abc`.
+
+---
+
+## 0.5.0 — craft (source; not released, contract still 0.4.0)
+
+**Evidence:** `analysis/eval/reports/2026-11-24-claude-session-03.md` (a 0.4.0
+score that passed `--strict-style` with 0 warnings and was rejected on
+listening) and the 177-track craft measurements in
+`analysis/out/craft.json`.
+
+**Why:** 0.4.0 measures validity and shape, but a score can satisfy every number
+and still be a phrase grid. The session-03 v1 had phrase-rhythm variety 0.62,
+peak-late 0.08 and end-long 1.00, all outside the 177; v2, after the evaluator's
+prosody fix, had rhythm variety 0.23 and peak-late 0.00. The missing layer was
+composition technique, not another gate.
+
+### Instructions
+- Add `references/craft.md`: cell → 2+2 period → transformation vocabulary →
+  elastic text slots → cadence ladder and sayr → melisma as an event → guitar as
+  a part → intensity by subtraction → the audition-by-reduction checklist →
+  anti-pattern gallery (bad/fixed ABC pairs).
+- Rewrite `SKILL.md` §3.3 as the nine-step method, with a compact target table
+  and the draft→critique→expand process. The gate moves to "last step, not
+  first".
+- Add `SKILL.md` §3.7 seed delivery: `score.abc` (contract, checked) plus
+  `seed.abc` (free ABC, chords/voices/instruments, not contract-checked), same
+  melody.
+- Add craft traps: phrase grid, bar loop, transposed verse, melisma average,
+  early peaks, every-phrase-long, unscanned baḥr, silent contract exit,
+  whole-bar arpeggio guitar.
+- `references/style-tags.md`: rewrite the table into score decisions
+  (belting = a peak, tarab = a cadence, metal = a riff, somber = gaps/colour).
+- `example/score.abc`: replace the whole-bar arpeggio Ins with a pedal riff and
+  a 3-bar development; the vocal fixture and plan are unchanged. Still 0 WARN
+  under `--strict-style`.
+
+### Measurement
+- Add `analysis/measure_craft.py`: report-only phrase rhythm variety, contour,
+  peak placement, cadence ladder, literal bar repetition and n-gram recurrence.
+  It writes `analysis/out/craft.json` and registers the distributions in
+  `references/numbers.md` §7.1. **No checker or calibration change.**
+- The nine sanity guards, the 175/177 joint pass, and the 0.4.0 plan contract
+  are unchanged. The old mediocre score still fails the same three guards.
+
+### Evaluation
+- Add T25–T30 to `docs/agent-eval-protocol.md`: hook/period, elastic text, seed
+  delivery, no false prosody, cadence ladder, self-critique. They are
+  report-only, not gates.
+- Add the session-03 post-mortem with the measured before/after.
+
+---
+
 ## 0.4.0 — acceptance, anti-anchoring, and the remaining expert findings
 
 **Evidence:** `analysis/eval/inbox/claude_session_02/expert_opinion.md` (the

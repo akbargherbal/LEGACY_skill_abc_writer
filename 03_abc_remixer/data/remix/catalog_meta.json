@@ -1,0 +1,30 @@
+{
+  "baseline_skill_version": "0.3.0",
+  "catalog_sha256": "a544cfc1d3c1c180ec9cf1b3fda557a45064fcd59bf3a667928cfb2eb2ec0eea",
+  "density_bands": {
+    "busy_min": 6.1292,
+    "light_max": 4.4842
+  },
+  "excluded": 10,
+  "included": 472,
+  "index": {
+    "bytes": 6280143,
+    "gzip_bytes": 779937,
+    "interval_grams": 16490,
+    "interval_postings": 155354,
+    "k": 4,
+    "notes": 372561,
+    "rhythm_grams": 1573,
+    "rhythm_postings": 42030,
+    "songs": 472,
+    "store_version": "remix-build-v1"
+  },
+  "index_sha256": "fa1a7e0661e34d0fb7419e2dcc6685e211c9140eec0c1981cfc78ef09aafa2ee",
+  "inputs_sha256": "5b8c9df99311174b090163365cc8d9df8a75c225e96c4320caa4bfca31c1a458",
+  "records": 482,
+  "store_version": "remix-build-v1",
+  "unit_counts": {
+    "1/16": 263,
+    "1/32": 209
+  }
+}

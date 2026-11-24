@@ -170,6 +170,18 @@ on a given task so differences are attributable.
 | **T22 template independence** | Different lyric, non-Kurd maqam, 110 BPM, no attachments | Derives bars/syllables/tempo/key from the prompt and `syllabify` | plan contains no 78 bars / 74 BPM / 361 syllables / the session-01 deviation ranges; example key/tempo not copied |
 | **T23 belting/tessitura** | Style says "belting, operatic, powerful"; Maqam Kurd | Plans 2–3 peaks, not a high tessitura; chorus median lift ≥5; tessitura ≤0.80 | `tessitura_share_ge_c5` ≤0.80; `max_top` respected; no 100% ≥ C5 line |
 | **T24 tarab/ornament** | Style says "tarab, melismatic, microtonal ornaments" | Places cadence melisma; keeps microtones in the prompt; does not claim ABC encoded them | melisma at cadences, not every syllable; report says the score writes the place, the renderer performs the ornament |
+| **T25 hook and period** | Same lyrics; asks for a full score | Writes a named cell, a 2+2 antecedent/consequent period, and a guitar motif; no literal bar loop | `rhythm_variety` ≥0.85, `distinct_bar_share` ≥0.75, the report names the cell and two transformations; the guitar has a 2-bar motif |
+| **T26 elastic text** | Lyrics with 13-, 16- and 17-syllable lines | Uses anchor/fill/cadence slots; states the alignment intent; does not squeeze every note | the report gives the slot plan per line; `rhythm_variety` ≥0.85; no line is set as a uniform grid |
+| **T27 seed delivery** | "Give me a Suno seed with chords and backing vocals" | Delivers `score.abc` (contract, checked) and `seed.abc` (free ABC), same melody; says which check each passed | both files exist; the vocal line is the same; the report does not present seed.abc as contract-checked |
+| **T28 no false prosody** | "Set it in al-basīṭ" (or the agent claims a baḥr) | Scans and shows the feet, or labels the pattern a heuristic; does not say the singer "adapts" a line to the wrong slot count | no unscanned baḥr claim; the report says heuristic or gives the scansion |
+| **T29 cadence ladder** | Full song, 6+ phrases | Ends on ≥5 distinct degrees; the 5th is the most common intermediate; the tonic is the section close and the final qafla | `distinct_end_degrees` ≥5; tonic share ≤25% except the final; final note tonic |
+| **T30 self-critique** | Full song; the agent must show the draft core | Runs the `craft.md` §10 checklist on 8–16 bars before encoding; fixes the two weakest items; the final score is not outside the corpus on the craft bands | the report lists the checklist and the changes; `rhythm_variety`, `peak_late`, `end_long`, `distinct_bar_share` are inside P10–P90, or the miss is named |
+| **T31 rhythm section** | Same lyrics; style names drums/metal; "the drummer must answer the vocal" | Writes the phrase-start/length/cadence rules and a 2-bar groove in a 10-line `seed_sheet.md` before ABC (`phrases.json` owns the per-line table); varies starts and lengths; leaves a 2-beat hole per 4 bars; puts a `Drums` voice in `seed.abc`; names three interaction events | ≥2 distinct phrase starts, ≥2 phrase lengths, one pickup; a 2-beat hole; seed drum voice present; no 3-bar grid; the report names the events |
+
+The craft battery (T25–T31) is **report-only**: it does not change the gate. A
+task passes when the score is valid *and* the craft checklist was actually used.
+The numbers come from `analysis/measure_craft.py` (S1, n=177), not from a new
+gate. An agent that hits every median without a cell has still failed T25.
 
 An agent that asks a clarifying question instead of guessing is **passing**,
 unless the task explicitly says not to.
@@ -229,6 +241,8 @@ not guess from the final answer.
 | checker runs | count; and runs with no intervening edit | redundant verification |
 | repairs | fix → recheck cycles | instability |
 | final answer length | characters | report discipline |
+| artifact tokens | tokens in `score.abc` (+ `seed.abc`) | the useful output |
+| generated / artifact | (output + reasoning) ÷ artifact tokens | economic feasibility; >10× is a failure |
 | tokens | exported usage; else characters/4 | cost (mark estimates) |
 | wall clock | if exported | cost |
 
@@ -247,11 +261,18 @@ not guess from the final answer.
 | W9 | re-checks after a pass | no stop rule | "one check per change" |
 | W10 | long final report | no length target | cap the report |
 | W11 | reads the scripts instead of running them | curiosity / distrust | repeat "run, do not read" |
-| W12 | builds its own parser/checker | skill not found or not loaded | packaging + startup selftest |
+| W12 | builds its own parser/checker | skill not found or not loaded; the checker is restricted to a final run | packaging + startup selftest + checker as a measurement tool |
+| W13 | generated tokens exceed 10× the artifact | no budget and no early-write checkpoint | write the core first; measure with the checker; stop at 10× |
 
 **Token waste** = any action that did not change an artifact or a decision, or
 that one documented command could have replaced. Count the tokens attached to
 those actions, not the whole session.
+
+**Economic gate (evaluation only):** `artifact_tokens` = tokens in
+`score.abc` (optionally + `seed.abc`); `generated_tokens` = output + reasoning.
+A run above **10×** the artifact is an economic failure even if the score is
+correct. The budget is a stop rule, not a quality target; do not lower the
+music to meet it.
 
 ### 5.3 Batch roll-up
 

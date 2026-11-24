@@ -1,9 +1,12 @@
-.PHONY: test selftest acceptance zip zip-public release check-corpus offline-check ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval clean
+.PHONY: test selftest acceptance zip zip-public release check-corpus craft offline-check ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval remix-build remix-verify remix-test remix-offline remix-zip remix-zip-public remix-release clean
 
 CORPUS ?= $(HOME)/Jupyter_Notebooks/OpenCode/arabmaqamrock/datasets/five_stars
 DIST := dist
-SKILL_NAME := abc_score_writer
+SKILL_NAME := abc-score-writer
 VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '02_maqam-score/scripts'); from ostris.contract import SKILL_VERSION; print(SKILL_VERSION)")
+REMIX_VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '03_abc_remixer/scripts'); from remix.shared import REMIX_VERSION; print(REMIX_VERSION)")
+REMIX_DATA := 03_abc_remixer/data/remix
+REMIX_ZIP := $(DIST)/abc_remixer.zip
 ZIP := $(DIST)/$(SKILL_NAME).zip
 OSTRIS_CACHE ?= analysis/out/ostris/source
 OSTRIS_OUT ?= analysis/out/ostris
@@ -43,6 +46,9 @@ release: test selftest acceptance offline-check zip zip-public
 
 check-corpus:
 	python3 analysis/test_checker_corpus.py --corpus "$(CORPUS)"
+
+craft:
+	python3 analysis/measure_craft.py --corpus "$(CORPUS)" --out analysis/out
 
 ostris-sync:
 	@test -n "$(DATA_ROOT)" || { echo "set DATA_ROOT=gs://<bucket> or a local data root"; exit 1; }
@@ -92,6 +98,42 @@ ostris-check:
 
 ostris-eval:
 	python3 02_maqam-score/scripts/ostris_cli.py eval --runs "$(RUNS)" --out "$(OSTRIS_OUT)" --strict
+
+remix-build:
+	python3 03_abc_remixer/scripts/remix_cli.py library build \
+		--ostris-data 02_maqam-score/data/ostris --out $(REMIX_DATA)
+
+remix-verify:
+	python3 03_abc_remixer/scripts/remix_cli.py library verify
+
+remix-test:
+	cd 03_abc_remixer && python3 -m unittest discover -s tests -t . -v
+
+remix-zip:
+	scripts/package_remixer.sh "$(DIST)"
+
+remix-zip-public:
+	scripts/package_remixer.sh --public "$(DIST)"
+
+remix-release: remix-test remix-verify remix-zip remix-zip-public
+	@test -n "$(REMIX_VERSION)" || { echo "remix-release: cannot read REMIX_VERSION"; exit 1; }
+	@mkdir -p "$(DIST)/releases"
+	@cp "$(DIST)/abc_remixer.zip" "$(DIST)/releases/abc_remixer-$(REMIX_VERSION).zip"
+	@if [ -f "$(DIST)/abc_remixer-public.zip" ]; then \
+		cp "$(DIST)/abc_remixer-public.zip" "$(DIST)/releases/abc_remixer-$(REMIX_VERSION)-public.zip"; \
+	fi
+	@cd "$(DIST)/releases" && sha256sum "abc_remixer-$(REMIX_VERSION)"*.zip > "SHA256SUMS-remixer-$(REMIX_VERSION).txt"
+	@echo "remix release $(REMIX_VERSION):"
+	@cat "$(DIST)/releases/SHA256SUMS-remixer-$(REMIX_VERSION).txt"
+
+remix-offline:
+	@tmp=$$(mktemp -d); trap 'rm -rf "$$tmp"' EXIT; \
+	python3 03_abc_remixer/scripts/remix_cli.py catalog --limit 3 --ledger "$$tmp/ledger" >/dev/null; \
+	python3 03_abc_remixer/scripts/remix_cli.py songmap yt500-0001-fbK2ySlxAW4 --ledger "$$tmp/ledger" >/dev/null; \
+	python3 03_abc_remixer/scripts/remix_cli.py slice yt500-0001-fbK2ySlxAW4 --bars 17-20 --ledger "$$tmp/ledger" >/dev/null; \
+	python3 03_abc_remixer/scripts/remix_cli.py motif-find --intervals "0,-2,0,-2" --limit 2 --ledger "$$tmp/ledger" >/dev/null; \
+	python3 03_abc_remixer/scripts/remix_cli.py budget --ledger "$$tmp/ledger" >/dev/null; \
+	echo "remix offline: PASS"
 
 clean:
 	find . -path ./.git -prune -o -name '__pycache__' -type d -exec rm -rf {} +

@@ -85,6 +85,7 @@ def check_phrase_failure() -> tuple[bool, str]:
             str(EXAMPLE_PLAN),
             "--phrases",
             path,
+            "--strict-shape",
         )
     finally:
         Path(path).unlink(missing_ok=True)
@@ -118,7 +119,7 @@ def check_mediocre() -> tuple[bool, str]:
 def check_template() -> tuple[bool, str]:
     text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
     start = text.index("### 3.2 Plan")
-    end = text.index("### 3.3 Material", start)
+    end = text.index("### 3.3 Compose", start)
     block = text[start:end]
     forbidden = ('"bars": 78', '"tempo": 74', "361", "5-58", "34-38", "66-78")
     hits = [item for item in forbidden if item in block]

@@ -1,0 +1,106 @@
+{
+  "baseline_skill_version": "0.3.0",
+  "canonical_failures": [],
+  "checks": [
+    {
+      "detail": "472 included; 0 parse failures",
+      "name": "coverage",
+      "ok": true,
+      "required": true
+    },
+    {
+      "detail": "482/482 joined; 0 without ABC",
+      "name": "join",
+      "ok": true,
+      "required": true
+    },
+    {
+      "detail": "472/472 stored songs re-parse",
+      "name": "reparse",
+      "ok": true,
+      "required": true
+    }
+  ],
+  "counts": {
+    "canonical_ok": 482,
+    "excluded": 10,
+    "included": 472,
+    "linked": 482,
+    "parse_ok": 482,
+    "records": 482,
+    "with_abc": 482
+  },
+  "density_bands": {
+    "busy_min": 6.1292,
+    "light_max": 4.4842
+  },
+  "dialect": {
+    "L:1/16": 266,
+    "L:1/32": 216
+  },
+  "exclusions": [
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0054-Pz59wizOqLw"
+    },
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0070-WtmVYOtqz98"
+    },
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0181-QS0v8uxzfJM"
+    },
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0220-nzbd8Zra2cY"
+    },
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0299-xF5MexEUoOQ"
+    },
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0339-PiPu_1FSrhQ"
+    },
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0350-QGm0xMfCdw0"
+    },
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0413-ikcfOn9VzYo"
+    },
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0613-yQMn7cOmnYs"
+    },
+    {
+      "reason": "exclude_from_priors",
+      "song_id": "yt500-0637-t58Atvs7e1k"
+    }
+  ],
+  "gate_pass": true,
+  "join_failures": [],
+  "no_abc": [],
+  "outputs": {
+    "catalog_bytes": 103236,
+    "index_bytes": 779937,
+    "songs": 472,
+    "songs_bytes": 1805782
+  },
+  "parse_failures": [],
+  "quality": {
+    "flags": {
+      "duration_mismatch_minor": 4,
+      "low_coverage": 4,
+      "no_vocal_notes": 1,
+      "qc_octave_suspect": 4,
+      "selected_status_no-abc": 1
+    },
+    "ins_only": 1,
+    "min": 0.8
+  },
+  "stage": "remix-build",
+  "store_version": "remix-build-v1"
+}

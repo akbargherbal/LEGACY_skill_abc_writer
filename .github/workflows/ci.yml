@@ -27,3 +27,7 @@ jobs:
         run: make acceptance
       - name: Contract pins
         run: python3 02_maqam-score/scripts/ostris_cli.py contract --strict
+      - name: Remixer tests
+        run: make remix-test
+      - name: Remixer offline
+        run: make remix-offline

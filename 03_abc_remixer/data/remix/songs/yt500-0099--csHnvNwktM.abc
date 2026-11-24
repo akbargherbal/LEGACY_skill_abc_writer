@@ -1,0 +1,146 @@
+X:1
+T:
+M:4/4
+L:1/32
+Q:1/4=101
+V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
+V: Ins clef=treble name="Ins Melody" snm="Inst."
+K:Fm
+% intro
+V: Vocal
+z24z4"Fm"z4|"Fm"z32|"Fm"z32|"Fm"z32|
+V: Ins
+Z|F4F4c2c2B2A2z4F4E4F4|z4F4c2c2B2A2z4F4E4F4|z4F4c2c2B2A2z4F4E4F4|
+V: Vocal
+"Db"z32|"Fm"z32|"Fm"z32|"Fm"z32|
+V: Ins
+z4D4A2A2F4A4F4A4F4|z4F4c2c2B2A2z4F4E4F4|z4F4c2c2B2A2z4F4E4F4|z4F4c2c2B2A2z4F4E4F4|
+V: Vocal
+"Db"z32|"Fm"z4e4f4z8e4f4z4|"Fm"z4e4f4_g4a4=g4f4z4|"Fm"z4e4f4z4"Db"z4e4f4z4|
+V: Ins
+z4D4A2A2F4A4F4A4F4|Z3|
+V: Vocal
+"Bbm"z4e4f4_g4"Eb"a4=g4"Fm"f4z4|
+V: Ins
+Z|
+% verse
+V: Vocal
+"Fm"z4f4f4_g4a4b4a2g2g4|"Bbm"b4b2b6a2_g2"Eb"g2f2a2b2a2g2g4|"Bbm"z4b4b4a2_g2"Eb"g2f2a2b2a2g2g4|"Ab"a4f2g2_g2f2f4"Db"f4f2f2f4f4|
+V: Ins
+Z4|
+V: Vocal
+"Fm"z4e4f4_g2f2"Ab"a4b2b2a2g2g4|"Bbm"b4b2b6a2_g2"Eb"g4a2b4a2g2f2|"Bbm"z4b2b2b2b2a2_g2"Eb"g2f2b2b2a2g2g4|"Ab"a4f2g2_g2f2f4"Db"f4f4f2f2f2z2|
+V: Ins
+Z4|
+V: Vocal
+"Fm"z4e4f4_g2f2a4b2b2a2g2g4|"Bbm"b4b2c'6a4"Eb"_g4a2b4=g2_g4|"Bbm"z4b4b4a2_g2"Eb"g2f2b2b2a2g2g4|"Ab"a4f2b4a2_g2f2"Db"f4f2f2f2f2f2z2|
+V: Ins
+Z4|
+V: Vocal
+"Fm"z4e4f4_g2f2"Ab"a4b2b2=g2_g2g4|"Bbm"b4b2b6a2_g2"Eb"g4a2b6a2g2|"Bbm"z4b2b2b2b2a2_g2"Eb"g2f2b2b2a2g2g4|"Ab"a4f2g2f2g2g2f2"Db"f4f2f2f2z2f2f2|
+V: Ins
+Z4|
+% chorus
+V: Vocal
+"Fm"f4f4f4g2a2-"Ab6"a4b4g2_g2f4|"Bbm"b4b2c'6a2_g2"Eb"g4b2b2a2g2g4|"Bbm"z4b4b4a2_g2"Eb"g4b4a4g4|"Ab"a4f2g2g4f4"Db"f4f8f4|
+V: Ins
+Z4|
+% interlude
+V: Vocal
+"Fm"z32|"Fm"z32|"Fm"z32|"Fm"z32|
+V: Ins
+f4A2F2c4F2B6f2F6A2a2|z4A2F2c4F2B6f2F6F2f2|z4A2F2c4F2B6f2A6A2F2|z4e2c2z4c2A2F4B2A2E4F4|
+V: Vocal
+"Bbm"z32|"Bbm"z32|"Bbm"z32|"Eb"z16"Fm"z16|
+V: Ins
+c4B2c2B16A4B4|c4B2c2B12A2_G2F4E4|c4B2c2B16A4B4|f4e2d2c4B2A2B4A2_G2F4F4|
+V: Vocal
+"Bbm"z32|"Eb"z16"Ab"z16|"Bbm"z32|"Eb"z16"Fm"z16|
+V: Ins
+c'4b2c'2b4a2b2a4_g2a2g4f4|f4f2_g2g4a4b4c'2c'2b4a2b2|c'4b2c'2b4a2b2a4_g2a2g4f4|_g2g4a2a4b4c'2b2a2g2f8|
+V: Vocal
+"Eb"z8"Fm"z24|"Fm"z32|"Eb"z8"Fm"z24|"Bbm"z16"Eb"z8"Fm"z8|
+V: Ins
+E4e4F4f4z6f4e2f2_g2|a2_g2a2b2g2a2f2g4f2g2a2f2g2f2f2|E4e4F4f4z6c'4d'2b2c'2|b4c'2a2b4a2b2_g2a2a2g4a2f4|
+V: Vocal
+"Fm"z32|"Fm"z32|"Fm"z16"Db"z16|"Bbm"z16"Eb"z8"Fm"z8|
+V: Ins
+z4e4f4z8e4f4z4|z4e4f4_g4a4g4f8|z4e4f8z4e4f8|z4e4f4_g4a4g4f8|
+% verse
+V: Vocal
+"Fm"z4e4f4_g4"Db"a4b4a2g2g4|"Bbm"b4b2b2b4a2_g2"Eb"g4b4a2g2f4|"Bbm"z4b4b4a4"Eb"_g4b4a2g2g4|"Ab"a4f2g2_g2f2f4"Db"f4f4f4z4|
+V: Ins
+Z4|
+V: Vocal
+"Fm"z4e4f4_g4"Ab"a4b4a2g2g4|"Bbm"b4b2b2b4a2_g2"Eb"g4b4a2g2f4|"Bbm"z4b4b4a2_g2"Eb"g4b4a2g2g4|"Ab"a4_g2a2g2b2a2g2"Db"f4f4f4z4|
+V: Ins
+Z4|
+V: Vocal
+"Fm"z4a4_g4a4g4b2a2g2f2e4|"Bbm"b4b2b2b4a2_g2"Eb"g4b4a2g2g4|"Bbm"z4b4b4b4"Eb"b2a2b2a2g2_g2g4|"Ab"a4_g2b4a2g2f2"Db"f4f4f4z4|
+V: Ins
+Z4|
+V: Vocal
+"Fm"z4a4_g4a4"Ab"g4b2a2g2f2e4|"Bbm"b4b2b2b4a2_g2"Eb"g4b2b2a2g2g2f2|"Bbm"z4b4b4a2_g2"Eb"g4b2b2=g2_g2g4|"Ab"a4_g2a2g2b2a2g2"Db"f4a2g2=g2_g2f4|
+V: Ins
+Z4|
+% chorus
+V: Vocal
+"Fm"f2f2f2f2f4g2a6b4g2_g2f4|"Bbm"b4b2b2b4a2_g2"Eb"g4b2b2=g2_g2f4|"Bbm"b4a2b4a2b4"Eb"z4b4b2a2_g4|"Ab"a4_g2b4a2g2f2"Db"f4f4f4f4|
+V: Ins
+Z4|
+% interlude
+V: Vocal
+"Fm"z32|"Fm"z32|"Fm"z32|"Fm"z32|
+V: Ins
+f4f4b4b4b4b4g4g4|b4b4b4g4b4b4g4g4|b4b4b4g4b4b4g4g4|g4g4b4g4b4b4g4g4|
+V: Vocal
+"Fm"z32|
+V: Ins
+g4g4g4g4g4g4g4g4|
+% verse
+V: Vocal
+"Fm"z4e4f4g4"Db"z4a2b2a2g2_g4|"Bbm"b4b2b6a2_g2"Eb"g4a2b4a2g2g2|"Bbm"z4b4b4a2_g2"Eb"g4b2b2a2g2g4|"Ab"a4f2g4f2f4-"Db"f4f4f4z4|
+V: Ins
+f4z24z4|Z3|
+V: Vocal
+"Fm"z4e4f4g2f2"Ab6"b4b2b2a2_g2g4|"Bbm"b4b2b6a2_g2"Eb"g4a2b4=g2_g2g2|"Bbm"z4b4b4a2_g2"Eb"g4a2b2a2g2g4|"Ab"a4f2g4f2f4"Db"f2z2f4f4z4|
+V: Ins
+Z4|
+V: Vocal
+"Fm"z4a4_g4a4z4=g2a4_g2g4|"Bbm"b4b2b4a2_g2g2"Eb"g4a4b4a2g2|"Bbm"f2z2b4b4a2_g2"Eb"g4b2b2a2g2g4|"Ab"a4_g2b4a2g2f2"Db"f2z2f8z4|
+V: Ins
+Z4|
+V: Vocal
+"Fm"z4a4_g4a4"Ab6"g4a2b2g2f2e2z2|"Bbm"b4b2b6a2_g2"Eb"g4a2b4=g2_g2g2|"Bbm"z4b4b4b4"Eb"b4b2a2b2a2_g2f2|"Ab"a4_g2b4a2g2f2"Db"f2z2f8f4|
+V: Ins
+Z4|
+% chorus
+V: Vocal
+"Fm"f4f4f4g2a6b4a2_g2f4|"Bbm"b4b2b2b4a2_g2"Eb"g4b2b2a2g2g4|"Bbm"z4b4b4a2_g2"Eb"g4b4a2g2g4|"Ab"a4_g2b4a2g2f2"Db"f4f8f4|
+V: Ins
+Z4|
+% outro
+V: Vocal
+"Fm"z32|"Fm"z4f4c'4z16z4|"Fm"z4f4c'4z16z4|"Db"z32|
+V: Ins
+f4f4c'4b2a6f4e4_g2e2-|e4z8b2a6f4e4_g2e2-|e4z8b2a2z4f4e4_g2a2-|a4f4f4z4a4f4a4_g2e2-|
+V: Vocal
+"Fm"z32|"Fm"z32|"Fm"z32|"Db"z32|
+V: Ins
+e4f4c'4b2a2z4f4a4_g2e2-|e4f4c'4b2a2z4f4a4_g2e2-|e4f4c'4b2a2z4f4a4_g2a2-|a4b4b4b4a4f4f4f4|
+V: Vocal
+M:3/8
+"Fm"z12|
+V: Ins
+M:3/8
+z8f2z2|
+V: Vocal
+M:4/4
+"Fm"z32|"Fm"z32|"Fm"z32|"Fm"z32|
+V: Ins
+M:4/4
+z4f4c4B2A6F4E4_G2E2-|E4F4c4B2A6F4E4_G2E2-|E4F4c4B2A6F4E4_G2A2-|A4F4z24|
+V: Vocal
+"Fm"z32|"Fm"z32|"Fm"z32|"Fm"z4z24z4|
+V: Ins
+Z4|

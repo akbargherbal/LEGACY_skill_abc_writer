@@ -235,7 +235,7 @@ def build_plan(manifest: dict, priors: dict, out_dir: str | Path) -> dict:
         "tessitura_share_ge_c5_max": targets["tessitura_share_ge_c5_max"],
         "chorus_lift_min": targets["chorus_lift_min"],
         # The generated plan is objective; strict_shape is an opt-in brief
-        # decision. The composer template sets it true.
+        # decision. The composer template keeps it false by default.
         "strict_shape": False,
         "maqam_fit_min": 0.95,
         "voices": "vocal+ins",

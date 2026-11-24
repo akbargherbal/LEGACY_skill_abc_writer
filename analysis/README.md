@@ -18,6 +18,7 @@ python3 analysis/calibrate_177.py \
 | `out/tracks.jsonl` | صف لكل مقطع: القياسات الخام + حكم كل بوابة |
 | `out/summary.json` | التوزيعات، نسب الاجتياز، مقارنة A6، ومجموعة **حدود الانحطاط** (`sanity_gate_set`) |
 | `measure_phrasing.py` | shape: أطول غناء متصل، تكرار النغمة، القفلات، الطسيتورا، وفرق verse→chorus — على 177 أو على ملف واحد |
+| `measure_craft.py` | craft (تقرير فقط): تنوّع إيقاع العبارة، الكنتور، موضع الذروة، سلّم القفلات، التكرار الحرفي، و4-gram — يكتب `out/craft.json` |
 | `verify_0_4_0.py` | بوابة قبول 0.4.0: المثال strict، الـ phrases، السكور القديم، القالب، والـ177 إن وُجد |
 
 **قاعدة 95%:** البوابات الصلبة يجب أن تمرّر ≥95% من الـ 177. المجموعة الأساسية
@@ -25,6 +26,10 @@ python3 analysis/calibrate_177.py \
 (سجل أعلى + tie) تمرّر 174/177. قياسات الشكل (unbroken، repeated، endings)
 تأتي من `analysis/measure_phrasing.py`؛ التفاصيل في
 `docs/constraints-calibration.md §3.1` و`references/reference.md §7.5`.
+
+`measure_craft.py` مختلف: أرقامه **مرجع حرفة، لا بوابات**. لا تدخل
+`scripts/calibration.json` ولا يقرأها `checker.py`؛ تُستخدم لمراجعة مسودة
+(`references/craft.md §10`) وتُسجَّل في `references/numbers.md §7.1`.
 
 ## اختبار التكامل
 

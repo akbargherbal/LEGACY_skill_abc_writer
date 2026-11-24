@@ -10,21 +10,21 @@ K:Am
 V: Vocal
 Z|
 V: Ins
-A,4 C4 E4 A4|
+A,2 A,2 A,2 C2 A,2 A,2 G,2 A,2|
 % verse
 V: Vocal
 F2 F2 A8 G2 F2|z16|G1 G1 A4 F4 D6|
 V: Ins
-Z|A,4 C4 E4 A4|Z|
+Z|A,2 A,2 C2 A,2 G,2 F,2 G,2 A,2|Z|
 V: Vocal
 Z3|
 V: Ins
-G,4 B,4 D4 G4|Z|Z|
+A,4 A,2 C2 A,4 G,4|F,2 F,2 A,2 G,2 F,4 A,4|A,2 A,2 C2 A,2 G,2 F,2 E,2 G,2|
 % chorus
 V: Vocal
 c2 c2 e4 d4 a4|z16|d2 d2 f4 e2 a4-a2|
 V: Ins
-Z|A,4 C4 E4 A4|Z|
+Z|A,4 E4 A4 G4|Z|
 V: Vocal
 Z4|
 V: Ins
@@ -33,4 +33,4 @@ Z4|
 V: Vocal
 Z2|
 V: Ins
-A,4 C4 E4 A4|Z|
+F,2 F,2 A,2 G,2 F,8|Z|

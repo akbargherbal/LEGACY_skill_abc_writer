@@ -8,3 +8,6 @@ analysis/out/ostris/work/
 analysis/eval/runs/
 # Raw evaluation drop folder
 analysis/eval/inbox/
+
+# Remixer session ledger
+.remix-ledger.jsonl

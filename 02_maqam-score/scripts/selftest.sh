@@ -50,7 +50,7 @@ out = []
 inserted = False
 for line in lines:
     out.append(line)
-    if not inserted and line == "A,4 C4 E4 A4|":
+    if not inserted and line == "A,2 A,2 A,2 C2 A,2 A,2 G,2 A,2|":
         out.append("")
         inserted = True
 print("\n".join(out))
@@ -63,7 +63,7 @@ grep -q 'runtime parse' "$tmp/out" || {
 echo "correctly rejected: $(grep -m1 'runtime parse' "$tmp/out")"
 
 echo "== checker: a two-note answer warns by default, fails with --strict-style"
-sed 's/A,4 C4 E4 A4|/A,4 C4 z8|/' example/score.abc > "$tmp/shortfill.abc"
+sed 's/Z|A,2 A,2 C2 A,2 G,2 F,2 G,2 A,2|Z|/Z|A,4 C4 z8|Z|/' example/score.abc > "$tmp/shortfill.abc"
 if ! python3 scripts/checker.py "$tmp/shortfill.abc" --plan example/plan.json > "$tmp/out" 2>&1; then
   echo "FAIL: the default checker rejected a two-note answer"; cat "$tmp/out"; exit 1
 fi

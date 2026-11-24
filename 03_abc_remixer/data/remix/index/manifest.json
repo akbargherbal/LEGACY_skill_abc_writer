@@ -1,0 +1,12 @@
+{
+  "bytes": 6280143,
+  "gzip_bytes": 779937,
+  "interval_grams": 16490,
+  "interval_postings": 155354,
+  "k": 4,
+  "notes": 372561,
+  "rhythm_grams": 1573,
+  "rhythm_postings": 42030,
+  "songs": 472,
+  "store_version": "remix-build-v1"
+}

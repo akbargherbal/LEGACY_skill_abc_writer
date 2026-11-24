@@ -31,7 +31,7 @@
   "min_phrase_endings": 3,
   "tessitura_share_ge_c5_max": 0.8,
   "chorus_lift_min": 5,
-  "strict_shape": true,
+  "strict_shape": false,
   "maqam": null,
   "maqam_fit_min": 0.95,
   "deviations": [

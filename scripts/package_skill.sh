@@ -4,7 +4,7 @@
 #   scripts/package_skill.sh [--public] [OUT_DIR]
 #
 # The archive always has a single top-level directory named after the skill
-# (abc_score_writer/), matching SKILL.md's `name`.  Developer-only files are
+# (abc-score-writer/), matching SKILL.md's `name`.  Developer-only files are
 # excluded: CHANGELOG.md, the bundle notes, generated Markdown reports and
 # __pycache__.  Tests, schemas and references stay in.
 #
@@ -13,7 +13,7 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-NAME=abc_score_writer
+NAME=abc-score-writer
 SRC="$ROOT/02_maqam-score"
 PUBLIC=0
 OUT="$ROOT/dist"

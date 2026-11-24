@@ -1,0 +1,183 @@
+X:1
+T:
+M:2/4
+L:1/16
+Q:1/4=75
+V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
+V: Ins clef=treble name="Ins Melody" snm="Inst."
+K:Am
+% intro
+V: Vocal
+Z2|"Am7"z8|"D7"z8|
+V: Ins
+Z2|e8-|e4z2eg|
+V: Vocal
+"Am7"z8|"D7"z8|"Am7"z8|"D7"z8|
+V: Ins
+b8|z6ae|ezABcABe-|e6-ec'|
+V: Vocal
+"Fmaj7"z8|"Cmaj7"z8|"Am7"z8|"D7"z8|
+V: Ins
+ab2d'2d'3|z4zd'2^c'|^c'3ba3g|g^fez2d'2^c'|
+V: Vocal
+"Am7"z8|"D7"z8|"Am7"z8|"D7"z8|
+V: Ins
+^c'c'z2a3b|g4zd'2^c'|^c'e'd'c'agg^f|g2e^fedeg|
+V: Vocal
+"Fmaj7"z8|"Cmaj7"z8|
+V: Ins
+^ff2ed2ef|^feeez4|
+% verse
+V: Vocal
+"Em"z8|"Em"z8|"Cmaj7"z4d'2e'2|"Cmaj7"b2az3g2|
+V: Ins
+ze2ba2z2|gg2e^f2z2|z2bc'z4|Z|
+V: Vocal
+"Am7"za2ge2z2|"Am7"g2age2z2|"Em"^f2ee3c'c'-|"Em"c'd'2e'c'2a2|
+V: Ins
+Z4|
+V: Vocal
+"Am7"zB2BB2A2|"Am7"zB2BA2z2|"Am7"E2BBB2A2|"Am7"zB2BB2A2|
+V: Ins
+Z4|
+V: Vocal
+"Cmaj7"A4z2A2|"Cmaj7"G4zBc2|"Fmaj7"c2B2A2A2|"F#m7b5"A2A2G2A2|
+V: Ins
+Z4|
+V: Vocal
+"G"G2zAG4|"Ebaug"zA2AA2G2|"G"zA2AG2z2|"Fmaj7"A2B2d2c2|
+V: Ins
+Z4|
+V: Vocal
+"E7/G#"Ad2dd2c2|"Am"A2G2G2A2|"Ebaug"^F2zGF2z2|"Am7"B3BB2B2|
+V: Ins
+Z4|
+V: Vocal
+"Am7"A2B2B2z2|"Am7"B2B2B2B2|"Am7"G2B2B2A2|"Cmaj7"d2z4B2|
+V: Ins
+Z4|
+V: Vocal
+"Cmaj7"A2A2z2c2|"Fmaj7"z4A2z2|"F#m7b5"z8|"G"z8|
+V: Ins
+Z2|B2B2d2c2|A2A2A2G2|
+V: Vocal
+"Ebaug"z8|"G"z8|"Fmaj7"z8|"E7/G#"z8|
+V: Ins
+z2A2B2A2|G2A2A2z2|A2B2d2B2|d2z2d2c2|
+V: Vocal
+"Am"z8|"Ebaug"z4"Cmaj7"z4|
+V: Ins
+A2z4G2|^F4F2z2|
+% interlude
+V: Vocal
+"Am7"z8|"D7"z8|"Am7"z8|"D7"z8|
+V: Ins
+zebaba^g^f|^gaze^f=ggf|eebaba^g^f|^gazabc'd'e'|
+V: Vocal
+"Fmaj7"z8|"F#m7b5"z8|"E7"z8|"G"z8|
+V: Ins
+bbc'bc'bag|gaaggaag|^fe^g=g^g=gfe|^fgzefggf|
+V: Vocal
+"Am7"z8|"D7"z8|"Am7"z8|"D7"z8|
+V: Ins
+eebaba^g^f|^gaze^f=ggf|eebaba^g^f|^gazabc'd'e'|
+V: Vocal
+"Fmaj7"z8|"F#m7b5"z8|"E7"z8|"G"z8|
+V: Ins
+bbc'bc'bag|gaaggaag|^fe^g=g^g=gfe|^fgz3d'2^c'|
+V: Vocal
+"Am7"z8|"D7"z8|"Am7"z8|"D7"z8|
+V: Ins
+^c'c'zba3g|g^fez2d'2^c'|^c'c'zba3b|g4zd'2^c'|
+V: Vocal
+"Am7"z8|"D7"z8|"Fmaj7"z8|"Cmaj7"z8|
+V: Ins
+^c'bd'c'agg^f|g2e^fedeg|^ff2ed2ef|eeez4z|
+% verse
+V: Vocal
+A2ABG2^F2|"Am7"zGGGG2E2|"Am7"zG2AB2z2|"Cmaj7"GG2AB4|
+V: Ins
+Z4|
+V: Vocal
+"Cmaj7"zG2AB2c2|"Fmaj7"d4c2c2|"F#m7b5"z2A2A2Gz|"G6"zG^FFF2E2|
+V: Ins
+Z4|
+V: Vocal
+"F#m7b5"z2AAA2A2|"Fmaj7"B2AAB2AG|"G6"z2E^FG2A2|"E/G#"zBAAB2AG|
+V: Ins
+Z4|
+V: Vocal
+"Am"AAGG^F2E2|"C"^F2EEz4|"Am7"A2ABG2^F2|"Am7"A2GG^F2E2|
+V: Ins
+Z4|
+V: Vocal
+"Am7"zGGAB2z2|"Cmaj7"zBB2B2AA|"Cmaj7"GzGAB2c2|"Fmaj7"d3cc2A2|
+V: Ins
+Z4|
+V: Vocal
+"F#m7b5"A2ABA2G2|"G6"A2FFF2E2|"F#m7b5"z2AAA2G2|"Fmaj7"z2AAB2AG|
+V: Ins
+Z4|
+V: Vocal
+"G6"G2E2G2A2|"E/G#"c2ABB2AG|"Am"A2GGF2E2|"C"F2GGF2z2|
+V: Ins
+Z4|
+V: Vocal
+"C7/Bb"z8|
+V: Ins
+Z|
+% chorus
+V: Vocal
+"Am"e2dc4c|"Am"cc2cd2e2|"Fmaj7"c2c2e2dd|"Fmaj7"c2Bcc2c2|
+V: Ins
+Z4|
+V: Vocal
+"C"zB2cd2e2|"C"B2z3AA2|"Am7"G2z3GG2|"Am7"G2G2E2z2|
+V: Ins
+Z4|
+V: Vocal
+"Am7"e2dc2z2e|"Am7"e2d2e2e2|"Fmaj7"c2zef2e2|"Fmaj7"d2c2d2c2|
+V: Ins
+Z4|
+V: Vocal
+"C"z2Bcd2e2|"C"B2z4A2|"Am7"G2z4A2|"Am7"G2G2E4|
+V: Ins
+Z4|
+V: Vocal
+"Em"zE2BA2z2|"Em"GG2EG2z2|"Cmaj7"zB2cd2e2|"Cmaj7"B2ABB2A2|
+V: Ins
+Z4|
+V: Vocal
+"Am7"zA2GE2z2|"Am7"GA2GE2zE|"Em"G2EEz2cc-|"Em"cd2ec2A2|
+V: Ins
+Z4|
+% verse
+V: Vocal
+"Am7"B2B2B2A2|"Am7"z2B2B2z2|"Am7"E2B2B2A2|"Am7"z2B2B2d2|
+V: Ins
+Z4|
+V: Vocal
+"C"B2c2BzB2|"C"B2z4c2|"Fmaj7"c2B2A2A2|"F#m7b5"A2z4Az|
+V: Ins
+Z4|
+V: Vocal
+"G6"A2A2G4|"Ebaug"z2A2A2G2|"G"z2A2A2c2|"Fmaj7"A2B2d2c2|
+V: Ins
+Z4|
+V: Vocal
+"E7/G#"A2c2d2c2|"Am"A2G2G2G2|"Cmaj7"F2z2G2Fz|
+V: Ins
+Z3|
+% outro
+V: Vocal
+"Am7"z8|"Am7"z8|"Am7"z8|"Am7"z8|
+V: Ins
+Z4|
+V: Vocal
+"Am7"z8|"Am7"z8|"Am7"z8|"Am7"z8|
+V: Ins
+Z4|
+V: Vocal
+"Am7"z8|"Am7"z8|"Am7"z2z6|
+V: Ins
+Z3|

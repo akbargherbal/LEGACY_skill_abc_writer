@@ -5,12 +5,14 @@ Every release keeps the exact archive that shipped. The unversioned files in
 
 | Version | Full skill | Public (code only) | Notes |
 |---|---|---|---|
+| **abc_remixer 0.1.0** | `abc_remixer-0.1.0.zip` | `abc_remixer-0.1.0-public.zip` | sibling remixer; see `../RELEASE-0.1.0-remixer.md` |
 | **0.4.0** | `abc_score_writer-0.4.0.zip` | `abc_score_writer-0.4.0-public.zip` | acceptance/strict shape, tessitura, phrase sidecar; see `../RELEASE-0.4.0.md` |
 | **0.3.0** | `abc_score_writer-0.3.0.zip` | `abc_score_writer-0.3.0-public.zip` | shape gate; see `../RELEASE-0.3.0.md` |
 | **0.2.0** | `abc_score_writer-0.2.0.zip` | `abc_score_writer-0.2.0-public.zip` | previous release; six validity guards |
 
 Checksums:
 
+- `SHA256SUMS-remixer-0.1.0.txt`
 - `SHA256SUMS-0.2.0.txt`
 - `SHA256SUMS-0.3.0.txt`
 - `SHA256SUMS-0.4.0.txt`
@@ -32,6 +34,19 @@ python3 scripts/ostris_cli.py contract
 ```
 
 Expected: `selftest: PASS`, 51 tests OK, `skill v0.4.0: pinned`.
+
+## Verify the remixer
+
+```bash
+sha256sum -c SHA256SUMS-remixer-0.1.0.txt
+unzip -q abc_remixer-0.1.0.zip
+cd abc_remixer
+python3 scripts/remix_cli.py contract
+python3 -m unittest discover -s tests -t . -v
+python3 scripts/remix_cli.py catalog --limit 5
+```
+
+Expected: pinned runtime, 53 tests OK, 472 songs in the catalog.
 
 ## Which one do I install?
 

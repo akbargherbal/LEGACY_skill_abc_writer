@@ -17,6 +17,8 @@ Usage:
     python3 syllabify.py lyrics.md
     python3 syllabify.py lyrics.md --tempo 73 --json prosody.json
     python3 syllabify.py lyrics.md --duration 262.15   # known render length
+    python3 syllabify.py lyrics.md --phrases phrases.json \\
+        --sections "intro=7,verse 1=13,chorus=37,verse 2=46,chorus=65,outro=77"
 """
 from __future__ import annotations
 
@@ -56,6 +58,76 @@ def syllables(text: str) -> int:
 
 def norm_section(name: str) -> str:
     return re.sub(r"\s+", " ", name.strip().lower())
+
+
+def parse_section_starts(spec: str) -> list[tuple[str, int]]:
+    """Parse ``intro=7,verse 1=13,chorus=37,...`` into ordered starts.
+
+    A repeated section name is consumed in order, so the first ``chorus`` entry
+    belongs to the first chorus and the second to the second chorus.
+    """
+    starts: list[tuple[str, int]] = []
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "=" not in part:
+            raise ValueError(f"expected section=bar, got {part!r}")
+        name, bar = part.split("=", 1)
+        name = norm_section(name)
+        if not name:
+            raise ValueError(f"empty section name in {part!r}")
+        try:
+            bar = int(bar.strip())
+        except ValueError as exc:
+            raise ValueError(f"bar must be an integer in {part!r}") from exc
+        if bar < 1:
+            raise ValueError(f"bar must be >= 1 in {part!r}")
+        starts.append((name, bar))
+    if not starts:
+        raise ValueError("no section starts given")
+    return starts
+
+
+def apply_section_starts(
+    line_rows: list[dict], starts: list[tuple[str, int]]
+) -> None:
+    """Add absolute ``bar_start``/``bar_end`` from ordered section starts.
+
+    The body bars are global (1..body_bars). A section start is the absolute
+    bar of that section's first sung line; the offset is applied to every line
+    in the section. This keeps the section layout a musical decision while the
+    arithmetic stays in the tool.
+    """
+    groups: list[tuple[str, list[dict]]] = []
+    for row in line_rows:
+        if not groups or groups[-1][0] != row["section"]:
+            groups.append((row["section"], [row]))
+        else:
+            groups[-1][1].append(row)
+    if len(starts) != len(groups):
+        names = ", ".join(f"{name}@{bar}" for name, bar in starts)
+        got = ", ".join(name for name, _ in groups)
+        raise ValueError(
+            f"--sections has {len(starts)} entries ({names}) but the lyrics "
+            f"have {len(groups)} sung section(s): {got}"
+        )
+    previous_end = 0
+    for (name, rows), (expected, absolute_start) in zip(groups, starts):
+        if name != expected:
+            raise ValueError(
+                f"--sections order mismatch: expected {name!r}, got {expected!r}"
+            )
+        if absolute_start <= previous_end:
+            raise ValueError(
+                f"section {name!r} starts at bar {absolute_start}, "
+                f"but the previous section ends at {previous_end}"
+            )
+        offset = absolute_start - rows[0]["body_bar_start"]
+        for row in rows:
+            row["bar_start"] = row["body_bar_start"] + offset
+            row["bar_end"] = row["body_bar_end"] + offset
+        previous_end = rows[-1]["bar_end"]
 
 
 def load_calibration(path: Path | None) -> dict:
@@ -110,6 +182,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", type=Path, default=None, help="write prosody JSON here")
     ap.add_argument("--phrases", type=Path, default=None,
                     help="write the per-line phrase sidecar here")
+    ap.add_argument("--sections", "--layout", dest="sections", default=None,
+                    help="comma-separated section=absolute_bar starts in lyric "
+                         "section order (e.g. 'verse 1=13,chorus=37,chorus=65'); "
+                         "writes absolute bar_start/bar_end. Repeat a section "
+                         "name for repeats.")
     args = ap.parse_args(argv)
 
     text = args.lyrics.read_text(encoding="utf-8")
@@ -189,6 +266,16 @@ def main(argv: list[str] | None = None) -> int:
             "pause_after_s": 0.5 if pair_index % 2 == 0 else 1.0,
         })
         body_start += b
+
+    absolute_sections = False
+    if args.sections:
+        try:
+            starts = parse_section_starts(args.sections)
+            apply_section_starts(line_rows, starts)
+        except ValueError as exc:
+            print(f"FAIL  --sections: {exc}", file=sys.stderr)
+            return 2
+        absolute_sections = True
 
     print("INPUTS")
     print(f"  lines            {len(lines)}")
@@ -285,8 +372,11 @@ def main(argv: list[str] | None = None) -> int:
         args.phrases.write_text(
             json.dumps(sidecar, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8")
-        print(f"\nwrote {args.phrases} (add absolute bar_start/bar_end before "
-              "checker.py --phrases)")
+        if absolute_sections:
+            print(f"\nwrote {args.phrases} (absolute bar_start/bar_end from --sections)")
+        else:
+            print(f"\nwrote {args.phrases} (body bars only; pass --sections "
+                  "to write absolute bar_start/bar_end)")
     return 0
 
 
