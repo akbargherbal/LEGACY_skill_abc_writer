@@ -6,6 +6,9 @@ analysis/out/ostris/work/
 
 # Agent evaluation payloads (transcripts, lyrics, artifacts)
 analysis/eval/runs/
+# Generated SUNO canonical bundle (rebuild with `make suno-build`)
+data/suno/
+
 # Raw evaluation drop folder
 analysis/eval/inbox/
 

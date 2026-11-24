@@ -2,17 +2,17 @@
 name: abc_remixer
 description: >-
   Compose a NEW two-voice ABC score by retrieving bounded material from a
-  472-song Arabic transcription library, transforming it, and declaring every
+  670-score SUNO ABC library, transforming it, and declaring every
   borrowing for verification. Use when asked to remix, borrow from, quote,
-  interpolate, or build on existing Arabic songs. Do NOT use for reading or
-  editing an existing transcription.
+  interpolate, or build on existing scores. Do NOT use for reading or
+  editing an existing score or transcription.
 ---
 
 # abc_remixer — library-aware remixing
 
 You are writing a **complete two-voice score** with an explicit relationship to
-the library. The library is a set of objective transcriptions, not a style
-prompt. You must go to specific songs, choose material that serves your concept,
+the library. The library is a set of project-compiled SUNO ABC scores, not a
+style prompt. You must go to specific scores, choose material that serves your concept,
 transform it, and declare every borrowing. The tools retrieve and verify; **you
 write the ABC by hand**.
 
@@ -24,6 +24,7 @@ The shared runtime is `abc_score_writer` 0.3.0: the same `checker.py`,
 - Open creative brief: you choose the concept, form, key/maqam, tempo, and
   texture.
 - The library is required. A run that never retrieves is not a remix.
+- Only `suno-*` ids are accepted. Legacy `yt500-*`/`fs18-*` ids are rejected.
 - Every borrowed phrase is declared in `plan.json` under `remix.sources`.
 - The declaration must match what is in the score; `remix check` verifies it.
 - You may transform: transpose, invert, retrograde, augment/diminish, fragment,
@@ -88,8 +89,8 @@ Use the call budgets; the ledger enforces the character budget.
    curve. Write one sentence.
 2. **Catalog (≤3–5 calls).** Shortlist candidates by key, meter, tempo, bars,
    density, title, or a random seed.
-3. **Songmap (≤3–4 songs).** Inspect sections, hooks, riffs, and cadences.
-4. **Choose 2–4 source songs.** Assign one role to each. Do not use one song
+3. **Songmap (≤3–4 scores).** Inspect sections, hooks, riffs, and cadences.
+4. **Choose 2–4 source scores.** Assign one role to each. Do not use one score
    for everything.
 5. **Slice (≤8 bars per call).** Pull the exact bars. The output is a reference,
    not an auto-insert.
@@ -105,12 +106,12 @@ python3 scripts/remix_cli.py catalog --key Dm --mode minor --limit 12
 python3 scripts/remix_cli.py catalog --tempo 70-90 --bars 60-120 --density light
 python3 scripts/remix_cli.py catalog --random --seed 7 --limit 8
 
-# one song
-python3 scripts/remix_cli.py songmap yt500-0001-fbK2ySlxAW4
+# one score
+python3 scripts/remix_cli.py songmap suno-0024
 
 # extraction (≤8 bars, dialect-valid ABC)
-python3 scripts/remix_cli.py slice yt500-0001-fbK2ySlxAW4 --bars 17-20 --voice Vocal
-python3 scripts/remix_cli.py slice yt500-0001-fbK2ySlxAW4 --bars 17-20 --to-key Dm
+python3 scripts/remix_cli.py slice suno-0024 --bars 34-37 --voice Vocal
+python3 scripts/remix_cli.py slice suno-0024 --bars 34-37 --to-key Dm
 
 # pattern → source bars
 python3 scripts/remix_cli.py motif-find --intervals "0,0,2,-2" --limit 8
@@ -135,7 +136,7 @@ Keep the 15 checker targets exactly as in `abc_score_writer`. Add:
   "concept": "one sentence",
   "sources": [
     {
-      "id": "yt500-0001-fbK2ySlxAW4",
+      "id": "suno-0024",
       "role": "vocal hook",
       "from_bars": "17-20",
       "to_bars": "9-12",
@@ -150,7 +151,7 @@ Keep the 15 checker targets exactly as in `abc_score_writer`. Add:
 Rules:
 
 - `id` must exist in the catalog.
-- `from_bars` is one-based, in the source song.
+- `from_bars` is one-based, in the source score.
 - `to_bars` is one-based, in your score; comma-separate multiple ranges.
 - `voice` is `Vocal`, `Ins`, or `both`.
 - `transform` is applied left to right; empty means a literal quote.
@@ -176,7 +177,7 @@ Replace the deviation list with the quote/transform ledger:
 
 | source | source bars | role | transform | target bars | voice |
 |---|---|---|---|---|---|
-| `yt500-...` | 17-20 | vocal hook | transpose:+2, augment:2x | 9-12 | Vocal |
+| `suno-0024` | 34-37 | vocal hook | transpose:+2, augment:2x | 9-12 | Vocal |
 
 Then copy the checker's `MEASURED` block and the `remix check` metrics verbatim.
 Never retype a number. State “offline, not auditioned” unless the renderer was
@@ -191,9 +192,9 @@ actually run and heard.
 - Declaring a quote that the check cannot find.
 - Claiming an audition that did not happen.
 - Reading library files directly; the ledger and the transcript expose it.
-- Treating a transcription artifact as a rule.
+- Treating a generated-score artifact as a rule.
 - Writing `K:Dhijaz`/`K:Dkurd`; only standard major/minor keys are accepted.
-- Adding a maqam label to a library song; the library has none.
+- Adding a maqam label to a library score; the library has none.
 
 The checker remains the only gate. `remix check` adds quotation metrics; it does
 not judge quality.

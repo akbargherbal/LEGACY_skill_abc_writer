@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from .helpers import OSTRIS, SAMPLE_SONG, plan_payload, store, write_json
+from .helpers import SAMPLE_SONG, plan_payload, store, write_json
 
 from remix.quotecheck import check  # noqa: E402
 from remix.slice import slice_song  # noqa: E402
@@ -43,14 +43,13 @@ class RemixCheckTests(unittest.TestCase):
         return write_json(self.root / "plan.json", plan_payload(remix=remix))
 
     def test_declared_quote_is_verified(self):
-        report = check(self.store, self._score(), self._plan(), ostris_dir=OSTRIS)
+        report = check(self.store, self._score(), self._plan())
         quote = report["remix"]["quotes"][0]
         self.assertEqual(quote["status"], "verified")
         self.assertTrue(report["remix"]["metrics"]["literal_share"] > 0)
 
     def test_literal_cap_is_a_hard_failure(self):
-        report = check(self.store, self._score(), self._plan(literal_cap=1),
-                       ostris_dir=OSTRIS)
+        report = check(self.store, self._score(), self._plan(literal_cap=1))
         codes = [item["code"] for item in report["failures"]]
         self.assertIn("literal_cap", codes)
         self.assertFalse(report["pass"])
@@ -58,16 +57,16 @@ class RemixCheckTests(unittest.TestCase):
     def test_undeclared_quote_is_detected(self):
         # Use a score from one song but declare a different source.
         score = self._score()
-        plan = self._plan(source="yt500-0701-pRtwkb7eYlw")
-        report = check(self.store, score, plan, ostris_dir=OSTRIS)
+        plan = self._plan(source="suno-0000")
+        report = check(self.store, score, plan)
         self.assertGreater(report["remix"]["undeclared_total"], 0)
         codes = [item["code"] for item in report["warnings"]]
         self.assertIn("undeclared_quote", codes)
 
     def test_strict_quotes_turns_not_found_into_failure(self):
         score = self._score()
-        plan = self._plan(source="yt500-0701-pRtwkb7eYlw")
-        report = check(self.store, score, plan, ostris_dir=OSTRIS,
+        plan = self._plan(source="suno-0000")
+        report = check(self.store, score, plan,
                        strict_quotes=True)
         quote = report["remix"]["quotes"][0]
         self.assertEqual(quote["status"], "not_found")
@@ -76,8 +75,8 @@ class RemixCheckTests(unittest.TestCase):
 
     def test_fail_on_undeclared_turns_it_into_failure(self):
         score = self._score()
-        plan = self._plan(source="yt500-0701-pRtwkb7eYlw")
-        report = check(self.store, score, plan, ostris_dir=OSTRIS,
+        plan = self._plan(source="suno-0000")
+        report = check(self.store, score, plan,
                        fail_on_undeclared=True)
         codes = [item["code"] for item in report["failures"]]
         self.assertIn("undeclared_quote", codes)

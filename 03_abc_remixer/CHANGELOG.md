@@ -1,5 +1,36 @@
 # Changelog — abc_remixer
 
+## 0.2.0 — SUNO material library
+
+Replaces the OSTRIS-derived verbatim material store with the project-compiled
+SUNO ABC dataset.  The `abc-score-writer` aggregate priors/idioms/similarity
+bundle is unchanged.
+
+### Data
+
+- New canonical builder: `tools/build_suno_library.py` reads
+  `data/SUNO_ABC_SCORE_DATASET.pkl` and writes `data/suno/` (670 canonical
+  songs, `catalog_source.jsonl`, `dataset.json`, `manifest.json`).
+- `library build --dataset suno` builds the store from that bundle.  The build
+  no longer reads `02_maqam-score/data/ostris/records.jsonl` or `source/`.
+- Store: **670** songs, **0** excluded, **644** with vocal notes, **26**
+  `Ins`-only; ids are `suno-0000` … `suno-0669`.
+- Every catalog row carries `source="suno_abc_score_dataset"`; legacy
+  `yt500-*` / `fs18-*` ids are not present and are rejected by `remix check`.
+- The optional prior snapshot is vendored at
+  `03_abc_remixer/data/remix/priors/`; `remix check` no longer defaults to the
+  sibling skill's data path.
+- `quality` is `null` (no reviewer); catalog default sort is now `bars`.
+
+### Tests and packaging
+
+- Remixer tests read the 670-song store, use `suno-*` sample ids, and cover the
+  SUNO builder, idempotence, and the dataset allow-list.
+- `make suno-build`, `make suno-check`, and updated `make remix-build` /
+  `make remix-offline`.
+- Full package includes the new store and its priors snapshot; public package
+  remains code-only until the provenance record is cleared.
+
 ## 0.1.0 — library-aware remixer on abc_score_writer 0.3.0
 
 First implementation of `docs/remixer_proposal.md`.

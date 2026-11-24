@@ -1,4 +1,4 @@
-.PHONY: test selftest acceptance zip zip-public release check-corpus craft offline-check ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval remix-build remix-verify remix-test remix-offline remix-zip remix-zip-public remix-release clean
+.PHONY: test selftest acceptance zip zip-public release check-corpus craft offline-check ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval suno-build suno-check remix-build remix-verify remix-test remix-offline remix-zip remix-zip-public remix-release clean
 
 CORPUS ?= $(HOME)/Jupyter_Notebooks/OpenCode/arabmaqamrock/datasets/five_stars
 DIST := dist
@@ -6,6 +6,8 @@ SKILL_NAME := abc-score-writer
 VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '02_maqam-score/scripts'); from ostris.contract import SKILL_VERSION; print(SKILL_VERSION)")
 REMIX_VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '03_abc_remixer/scripts'); from remix.shared import REMIX_VERSION; print(REMIX_VERSION)")
 REMIX_DATA := 03_abc_remixer/data/remix
+SUNO_PKL ?= data/SUNO_ABC_SCORE_DATASET.pkl
+SUNO_DATA ?= data/suno
 REMIX_ZIP := $(DIST)/abc_remixer.zip
 ZIP := $(DIST)/$(SKILL_NAME).zip
 OSTRIS_CACHE ?= analysis/out/ostris/source
@@ -99,9 +101,15 @@ ostris-check:
 ostris-eval:
 	python3 02_maqam-score/scripts/ostris_cli.py eval --runs "$(RUNS)" --out "$(OSTRIS_OUT)" --strict
 
-remix-build:
+suno-build:
+	python3 tools/build_suno_library.py --pkl $(SUNO_PKL) --out $(SUNO_DATA)
+
+suno-check:
+	python3 tools/build_suno_library.py --pkl $(SUNO_PKL) --out $(SUNO_DATA) --check
+
+remix-build: suno-build
 	python3 03_abc_remixer/scripts/remix_cli.py library build \
-		--ostris-data 02_maqam-score/data/ostris --out $(REMIX_DATA)
+		--dataset suno --data $(SUNO_DATA) --out $(REMIX_DATA)
 
 remix-verify:
 	python3 03_abc_remixer/scripts/remix_cli.py library verify
@@ -129,8 +137,8 @@ remix-release: remix-test remix-verify remix-zip remix-zip-public
 remix-offline:
 	@tmp=$$(mktemp -d); trap 'rm -rf "$$tmp"' EXIT; \
 	python3 03_abc_remixer/scripts/remix_cli.py catalog --limit 3 --ledger "$$tmp/ledger" >/dev/null; \
-	python3 03_abc_remixer/scripts/remix_cli.py songmap yt500-0001-fbK2ySlxAW4 --ledger "$$tmp/ledger" >/dev/null; \
-	python3 03_abc_remixer/scripts/remix_cli.py slice yt500-0001-fbK2ySlxAW4 --bars 17-20 --ledger "$$tmp/ledger" >/dev/null; \
+	python3 03_abc_remixer/scripts/remix_cli.py songmap suno-0024 --ledger "$$tmp/ledger" >/dev/null; \
+	python3 03_abc_remixer/scripts/remix_cli.py slice suno-0024 --bars 34-37 --ledger "$$tmp/ledger" >/dev/null; \
 	python3 03_abc_remixer/scripts/remix_cli.py motif-find --intervals "0,-2,0,-2" --limit 2 --ledger "$$tmp/ledger" >/dev/null; \
 	python3 03_abc_remixer/scripts/remix_cli.py budget --ledger "$$tmp/ledger" >/dev/null; \
 	echo "remix offline: PASS"

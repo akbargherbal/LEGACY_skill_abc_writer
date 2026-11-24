@@ -28,11 +28,11 @@ class CatalogTests(unittest.TestCase):
     def test_limit_and_total(self):
         rows, total, bands = catalog_mod.select(self.store, self._filters(), limit=5)
         self.assertEqual(len(rows), 5)
-        self.assertEqual(total, 472)
+        self.assertEqual(total, 670)
         self.assertIn("light_max", bands)
         rows, total, _ = catalog_mod.select(self.store, self._filters(), limit=999)
         self.assertEqual(len(rows), 40)
-        self.assertEqual(total, 472)
+        self.assertEqual(total, 670)
 
     def test_key_and_mode_filter(self):
         rows, total, _ = catalog_mod.select(
@@ -77,12 +77,12 @@ class CatalogTests(unittest.TestCase):
         for row in rows:
             self.assertLessEqual(row["density"], bands["light_max"])
 
-    def test_title_filter(self):
+    def test_source_filter(self):
         rows, total, _ = catalog_mod.select(
-            self.store, self._filters(title="maktooba"), limit=5
+            self.store, self._filters(source="suno_abc_score_dataset"), limit=40
         )
-        self.assertGreaterEqual(total, 1)
-        self.assertTrue(any("Maktooba" in row["title"] for row in rows))
+        self.assertEqual(total, 670)
+        self.assertTrue(all(row["source"] == "suno_abc_score_dataset" for row in rows))
 
 
 if __name__ == "__main__":

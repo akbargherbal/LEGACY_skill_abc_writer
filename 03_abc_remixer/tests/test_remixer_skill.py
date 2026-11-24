@@ -33,6 +33,8 @@ class SkillTests(unittest.TestCase):
 
     def test_store_and_runtime_are_present(self):
         self.assertTrue((STORE / "catalog.tsv").is_file())
+        self.assertTrue((STORE / "dataset.json").is_file())
+        self.assertTrue((STORE / "priors" / "priors.json").is_file())
         self.assertTrue((STORE / "index" / "manifest.json").is_file())
         self.assertTrue((SKILL / "scripts" / "remix_cli.py").is_file())
         self.assertTrue((SKILL / "scripts" / "remix" / "cli.py").is_file())

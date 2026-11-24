@@ -10,12 +10,13 @@ SKILL = Path(__file__).resolve().parents[1]
 REPO = SKILL.parent
 STORE = SKILL / "data" / "remix"
 OSTRIS = REPO / "02_maqam-score" / "data" / "ostris"
+SUNODATA = REPO / "data" / "suno"
 
 sys.path.insert(0, str(SKILL / "scripts"))
 
 from remix.store import Store, voice_notes  # noqa: E402
 
-SAMPLE_SONG = "yt500-0001-fbK2ySlxAW4"
+SAMPLE_SONG = "suno-0024"
 
 
 def store() -> Store:

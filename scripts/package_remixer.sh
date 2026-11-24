@@ -58,14 +58,12 @@ for name in abc_tools.py checker.py calibration.json syllabify.py; do
 done
 rm -rf "$STAGE/$NAME/scripts/ostris"
 cp -a "$SHARED/ostris" "$STAGE/$NAME/scripts/ostris"
+find "$STAGE/$NAME/scripts/ostris" -name '__pycache__' -type d -prune -exec rm -rf {} +
+find "$STAGE/$NAME/scripts/ostris" -name '*.pyc' -type f -delete
 
-# Optional prior percentiles.  The remixer check still works without them; the
-# prior is advisory.
-if [ "$PUBLIC" -eq 0 ] && [ -d "$ROOT/02_maqam-score/data/ostris/priors" ]; then
-  mkdir -p "$STAGE/$NAME/data/ostris"
-  rm -rf "$STAGE/$NAME/data/ostris/priors"
-  cp -a "$ROOT/02_maqam-score/data/ostris/priors" "$STAGE/$NAME/data/ostris/priors"
-fi
+# The remixer store vendors its own optional priors snapshot under
+# data/remix/priors/.  It is copied with data/ above; do not reach into the
+# sibling skill's data tree at package time.
 
 # Hash manifest for the copied runtime.
 python3 - "$STAGE/$NAME" <<'PY'

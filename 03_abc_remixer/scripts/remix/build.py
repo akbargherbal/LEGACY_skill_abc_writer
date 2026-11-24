@@ -106,6 +106,197 @@ def _density_bands(rows: list[dict]) -> dict:
     return {"light_max": q(1 / 3), "busy_min": q(2 / 3)}
 
 
+def _suno_record(row: dict) -> dict:
+    """Map one ``catalog_source.jsonl`` row to the legacy record shape."""
+    return {
+        "id": row["song_id"],
+        "title": row.get("title") or "",
+        "artist": row.get("artist") or "",
+        "key": row.get("key"),
+        "meter": row.get("meter"),
+        "section_count": row.get("section_count"),
+        "density": row.get("density"),
+        "silence": row.get("silence"),
+        "quality_score": row.get("quality"),
+        "source": row.get("source") or "suno_abc_score_dataset",
+        "flags": list(row.get("flags") or []),
+    }
+
+
+def build_suno(dataset_dir: str | Path, out: str | Path, *,
+               timestamp: bool = False) -> dict:
+    """Build the remixer store from ``tools/build_suno_library.py`` output.
+
+    This path never reads ``02_maqam-score/data``.  It expects the canonical
+    bundle to contain ``dataset.json``, ``catalog_source.jsonl`` and
+    ``songs/<song_id>.abc``.
+    """
+    dataset_dir = Path(dataset_dir).expanduser().resolve()
+    out = Path(out).expanduser().resolve()
+    dataset_path = dataset_dir / "dataset.json"
+    catalog_source = dataset_dir / "catalog_source.jsonl"
+    songs_source = dataset_dir / "songs"
+    if not dataset_path.is_file() or not catalog_source.is_file() or not songs_source.is_dir():
+        raise RemixError(
+            f"missing SUNO canonical bundle under {dataset_dir}; "
+            "run tools/build_suno_library.py first",
+            code=5,
+        )
+
+    dataset = json.loads(dataset_path.read_text(encoding="utf-8"))
+    source_rows = [
+        json.loads(line)
+        for line in catalog_source.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    out.mkdir(parents=True, exist_ok=True)
+    store = Store(out)
+    if store.songs_dir.exists():
+        shutil.rmtree(store.songs_dir)
+    if store.index_dir.exists():
+        shutil.rmtree(store.index_dir)
+    store.songs_dir.mkdir(parents=True, exist_ok=True)
+    store.index_dir.mkdir(parents=True, exist_ok=True)
+
+    rows: list[dict] = []
+    parse_failures: list[dict] = []
+    missing: list[dict] = []
+    for source_row in source_rows:
+        song_id = source_row.get("song_id", "")
+        text_path = songs_source / f"{song_id}.abc"
+        if not text_path.is_file():
+            missing.append({"song_id": song_id, "reason": "missing song file"})
+            continue
+        text = text_path.read_text(encoding="utf-8")
+        try:
+            score = abc_tools.parse(text)
+        except Exception as error:
+            parse_failures.append({"song_id": song_id, "error": f"{type(error).__name__}: {error}"})
+            continue
+        row = _catalog_row(_suno_record(source_row), score, text)
+        rows.append(row)
+        (store.songs_dir / f"{song_id}.abc").write_text(text, encoding="utf-8")
+
+    rows.sort(key=lambda row: row["song_id"])
+    catalog_text = "\n".join(["\t".join(CATALOG_COLUMNS)] + [tsv_line(row) for row in rows]) + "\n"
+    store.catalog_path.write_text(catalog_text, encoding="utf-8")
+
+    manifest = build_index(store, rows)
+    catalog_sha = _sha256(catalog_text.encode("utf-8"))
+    index_path = store.index_dir / "motif.json.gz"
+    index_sha = _sha256(index_path.read_bytes()) if index_path.is_file() else None
+    bands = _density_bands(rows)
+    units = Counter(row["unit"] for row in rows)
+    meta = {
+        "store_version": shared.STORE_VERSION,
+        "baseline_skill_version": shared.BASELINE_SKILL_VERSION,
+        "dataset": dataset.get("dataset"),
+        "dataset_version": dataset.get("dataset_version"),
+        "source": dataset.get("source"),
+        "source_sha256": dataset.get("source_sha256"),
+        "included": len(rows),
+        "excluded": 0,
+        "records": len(source_rows),
+        "density_bands": bands,
+        "unit_counts": dict(sorted(units.items())),
+        "catalog_sha256": catalog_sha,
+        "index_sha256": index_sha,
+        "index": manifest,
+    }
+    store.meta_path.write_text(
+        json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    dataset_record = {
+        "dataset": dataset.get("dataset"),
+        "dataset_version": dataset.get("dataset_version"),
+        "source": dataset.get("source"),
+        "source_sha256": dataset.get("source_sha256"),
+        "license_status": dataset.get("license_status"),
+        "store_version": shared.STORE_VERSION,
+        "counts": {
+            "records": len(source_rows),
+            "included": len(rows),
+            "excluded": 0,
+            "vocal_rows": sum(1 for row in rows if not row["ins_only"]),
+            "ins_only_rows": sum(1 for row in rows if row["ins_only"]),
+        },
+        "artifacts": {
+            "catalog.tsv": catalog_sha,
+            "index/motif.json.gz": index_sha,
+        },
+    }
+    (out / "dataset.json").write_text(
+        json.dumps(dataset_record, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    checks = [
+        {
+            "name": "coverage",
+            "required": True,
+            "ok": len(rows) > 0 and not parse_failures and not missing,
+            "detail": f"{len(rows)} included; {len(parse_failures)} parse failures; "
+                      f"{len(missing)} missing",
+        },
+        {
+            "name": "dataset",
+            "required": True,
+            "ok": all(row["source"] == dataset.get("dataset") for row in rows)
+                  and all(row["song_id"].startswith("suno-") for row in rows),
+            "detail": "every catalog row comes from the SUNO dataset",
+        },
+        {
+            "name": "reparse",
+            "required": True,
+            "ok": all(
+                abc_tools.parse((store.songs_dir / f"{row['song_id']}.abc").read_text(encoding="utf-8"))
+                is not None
+                for row in rows
+            ),
+            "detail": f"{len(rows)}/{len(rows)} stored songs re-parse",
+        },
+    ]
+    report = {
+        "stage": "remix-build",
+        "store_version": shared.STORE_VERSION,
+        "baseline_skill_version": shared.BASELINE_SKILL_VERSION,
+        "dataset": dataset.get("dataset"),
+        "dataset_version": dataset.get("dataset_version"),
+        "source_sha256": dataset.get("source_sha256"),
+        "counts": {
+            "records": len(source_rows),
+            "included": len(rows),
+            "excluded": 0,
+            "parse_ok": len(rows),
+            "vocal_rows": sum(1 for row in rows if not row["ins_only"]),
+            "ins_only_rows": sum(1 for row in rows if row["ins_only"]),
+        },
+        "missing": sorted(missing, key=lambda item: item["song_id"]),
+        "parse_failures": sorted(parse_failures, key=lambda item: item["song_id"]),
+        "dialect": dict(sorted(Counter(row["unit"] for row in rows).items())),
+        "quality": {"min": None, "flags": {}, "ins_only": sum(1 for row in rows if row["ins_only"])},
+        "density_bands": bands,
+        "outputs": {
+            "songs": len(rows),
+            "catalog_bytes": len(catalog_text.encode("utf-8")),
+            "index_bytes": index_path.stat().st_size if index_path.is_file() else 0,
+            "songs_bytes": sum(
+                (store.songs_dir / f"{row['song_id']}.abc").stat().st_size for row in rows
+            ),
+        },
+        "checks": checks,
+        "gate_pass": all(check["ok"] for check in checks if check["required"]),
+    }
+    if timestamp:
+        from datetime import datetime, timezone
+        report["generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    store.report_path.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return report
+
+
 def build(ostris_data: str | Path, out: str | Path, *, include_all: bool = False,
           quality_min: float = 0.8, timestamp: bool = False) -> dict:
     ostris_data = Path(ostris_data).expanduser().resolve()

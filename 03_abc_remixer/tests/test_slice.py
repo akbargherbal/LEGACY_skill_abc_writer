@@ -81,10 +81,10 @@ class SliceTests(unittest.TestCase):
 
     def test_key_change_is_refused_by_default(self):
         with self.assertRaises(RemixError):
-            self._slice("yt500-0071-UO5jte9NP-U", "40-44")
+            self._slice("suno-0211", "34-40")
 
     def test_meter_change_roundtrip(self):
-        result = self._slice("fs18-al_dawr_ala_meen_1678957498", "1-8")
+        result = self._slice("suno-0000", "1-8")
         score = abc_tools.parse(result["text"])
         self.assertEqual(len(score.voices["Vocal"].bars), 8)
 

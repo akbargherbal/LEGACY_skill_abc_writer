@@ -12,8 +12,8 @@ import os
 import sys
 from pathlib import Path
 
-REMIX_VERSION = "0.1.0"
-STORE_VERSION = "remix-build-v1"
+REMIX_VERSION = "0.2.0"
+STORE_VERSION = "remix-build-v2"
 BASELINE_SKILL_VERSION = "0.3.0"
 
 _HERE = Path(__file__).resolve()
@@ -65,12 +65,16 @@ def data_dir() -> Path:
 
 
 def ostris_data_dir() -> Path:
-    """The optional OSTRIS data directory used for prior percentiles."""
-    local = _SKILL_ROOT / "data" / "ostris"
-    if local.is_dir():
+    """Return the directory holding the optional prior snapshot.
+
+    The remixer vendors a fixed ``priors/`` tree under its own store.  The
+    legacy OSTRIS path is only a development fallback when the local snapshot
+    is absent; it is never required to build or verify the store.
+    """
+    local = _SKILL_ROOT / "data" / "remix"
+    if (local / "priors" / "priors.json").is_file():
         return local
-    dev = _REPO_ROOT / "02_maqam-score" / "data" / "ostris"
-    return dev
+    return _SKILL_ROOT / "data" / "ostris"
 
 
 def default_ledger() -> Path:

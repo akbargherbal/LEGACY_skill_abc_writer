@@ -34,7 +34,7 @@
     "concept": "A sparse D minor groove that answers a borrowed vocal hook with an inverted guitar riff.",
     "sources": [
       {
-        "id": "yt500-0701-pRtwkb7eYlw",
+        "id": "suno-0024",
         "role": "vocal hook",
         "from_bars": "17-20",
         "to_bars": "9-12",
@@ -42,7 +42,7 @@
         "voice": "Vocal"
       },
       {
-        "id": "yt500-0001-fbK2ySlxAW4",
+        "id": "suno-0000",
         "role": "guitar riff",
         "from_bars": "34-37",
         "to_bars": "5-6, 21-22",

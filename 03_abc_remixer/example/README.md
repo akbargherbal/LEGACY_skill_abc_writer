@@ -8,11 +8,11 @@ It shows the funnel commands and the shape of a plan with two declared sources.
 python3 scripts/remix_cli.py catalog --key Dm --mode minor --limit 8
 
 # 2. Inspect the shortlist
-python3 scripts/remix_cli.py songmap yt500-0701-pRtwkb7eYlw
+python3 scripts/remix_cli.py songmap suno-0024
 
 # 3. Extract two fragments
-python3 scripts/remix_cli.py slice yt500-0701-pRtwkb7eYlw --bars 17-20 --voice Vocal
-python3 scripts/remix_cli.py slice yt500-0001-fbK2ySlxAW4 --bars 34-37 --voice Ins
+python3 scripts/remix_cli.py slice suno-0024 --bars 17-20 --voice Vocal
+python3 scripts/remix_cli.py slice suno-0000 --bars 34-37 --voice Ins
 
 # 4. Write plan.json from the template, then score.abc by hand
 

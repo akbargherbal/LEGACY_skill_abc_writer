@@ -82,7 +82,7 @@ def _density_bands(store: Store, rows: list[dict]) -> dict:
 
 
 def select(store: Store, filters: Filters, *, limit: int = DEFAULT_LIMIT,
-           sort: str = "quality", random_seed: int | None = None
+           sort: str = "bars", random_seed: int | None = None
            ) -> tuple[list[dict], int, dict]:
     if limit < 1:
         raise RemixError("--limit must be positive")
@@ -178,7 +178,7 @@ def _line(row: dict) -> str:
 
 
 def render(store: Store, filters: Filters, *, limit: int = DEFAULT_LIMIT,
-           sort: str = "quality", random_seed: int | None = None,
+           sort: str = "bars", random_seed: int | None = None,
            as_json: bool = False) -> str:
     rows, total, bands = select(
         store, filters, limit=limit, sort=sort, random_seed=random_seed

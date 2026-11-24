@@ -13,7 +13,7 @@ shared.bootstrap()
 
 from . import catalog as catalog_mod  # noqa: E402
 from . import textcap  # noqa: E402
-from .build import build, verify  # noqa: E402
+from .build import build, build_suno, verify  # noqa: E402
 from .errors import RemixError  # noqa: E402
 from .ledger import Ledger  # noqa: E402
 from .motif import query, query_contour, render as render_motif  # noqa: E402
@@ -40,12 +40,30 @@ def _print(text: str) -> None:
 
 
 def cmd_library_build(args) -> int:
+    out = args.out or shared.data_dir()
+    if args.dataset == "suno":
+        data = args.data
+        if data is None:
+            data = shared.skill_root().parent / "data" / "suno"
+        report = build_suno(data, out, timestamp=args.timestamp)
+        if args.json:
+            _print(json.dumps(report, indent=2, ensure_ascii=False))
+        else:
+            counts = report["counts"]
+            print(f"remix library: {'PASS' if report['gate_pass'] else 'FAIL'}")
+            print(
+                f"dataset {report['dataset']} | records {counts['records']} | "
+                f"included {counts['included']} | excluded {counts['excluded']} | "
+                f"vocal {counts['vocal_rows']} | ins-only {counts['ins_only_rows']}"
+            )
+            for check in report["checks"]:
+                print(f"  {'ok' if check['ok'] else 'FAIL'}  {check['name']}: {check['detail']}")
+            print(f"wrote {out}")
+        return 0 if report["gate_pass"] else 1
+
     ostris = args.ostris_data
     if ostris is None:
-        ostris = shared.skill_root().parent / "02_maqam-score" / "data" / "ostris"
-        if not Path(ostris).is_dir():
-            ostris = shared.ostris_data_dir()
-    out = args.out or shared.data_dir()
+        raise SystemExit("legacy build requires --ostris-data; use --dataset suno by default")
     report = build(
         ostris,
         out,
@@ -244,7 +262,11 @@ def build_parser() -> argparse.ArgumentParser:
     library = sub.add_parser("library", help="build or verify the remix store")
     library_sub = library.add_subparsers(dest="library_command", required=True)
     build_parser = library_sub.add_parser("build", help="build songs, catalog and index")
-    build_parser.add_argument("--ostris-data", type=Path, default=None)
+    build_parser.add_argument("--dataset", choices=("suno", "ostris"), default="suno")
+    build_parser.add_argument("--data", type=Path, default=None,
+                              help="canonical SUNO bundle (default: <repo>/data/suno)")
+    build_parser.add_argument("--ostris-data", type=Path, default=None,
+                              help="legacy OSTRIS data; only with --dataset ostris")
     build_parser.add_argument("--out", type=Path, default=None)
     build_parser.add_argument("--include-all", action="store_true")
     build_parser.add_argument("--quality-min", type=float, default=0.8)
@@ -267,7 +289,7 @@ def build_parser() -> argparse.ArgumentParser:
     catalog.add_argument("--title")
     catalog.add_argument("--artist")
     catalog.add_argument("--source")
-    catalog.add_argument("--sort", default="quality",
+    catalog.add_argument("--sort", default="bars",
                          choices=("quality", "density", "bars", "tempo", "title"))
     catalog.add_argument("--limit", type=int, default=15)
     catalog.add_argument("--random", action="store_true")

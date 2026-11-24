@@ -1,0 +1,19 @@
+{
+  "artifacts": {
+    "catalog.tsv": "c2bbdbdd2705e30702abf04bb0d99c0238dcbacbb711546b4b1298384741eca6",
+    "index/motif.json.gz": "09eccc65b8b70c8ab3dd82c35211b078dc68c5b1efa737d3b5a4e21e970d564c"
+  },
+  "counts": {
+    "excluded": 0,
+    "included": 670,
+    "ins_only_rows": 26,
+    "records": 670,
+    "vocal_rows": 644
+  },
+  "dataset": "suno_abc_score_dataset",
+  "dataset_version": "1",
+  "license_status": "pending-clearance",
+  "source": "data/SUNO_ABC_SCORE_DATASET.pkl",
+  "source_sha256": "4217a4f140a25e78c15c9bb7dfeb898b2b20f90b3225ade204ca76c7523e78ac",
+  "store_version": "remix-build-v2"
+}

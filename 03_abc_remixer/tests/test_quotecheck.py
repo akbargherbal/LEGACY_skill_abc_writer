@@ -101,6 +101,13 @@ class QuoteTests(unittest.TestCase):
         self.assertEqual(result["status"], "not_found")
         self.assertEqual(result["reason"], "source_not_found")
 
+    def test_legacy_id_is_rejected(self):
+        item = dict(self.item)
+        item["id"] = "yt500-0001-fbK2ySlxAW4"
+        result = verify_item(self.store, item, {"Vocal": [], "Ins": []})
+        self.assertEqual(result["status"], "not_found")
+        self.assertEqual(result["reason"], "source_not_found")
+
 
 if __name__ == "__main__":
     unittest.main()

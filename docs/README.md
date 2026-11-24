@@ -17,6 +17,7 @@
 | `ostris-m5-m6-integration-eval.md` | M5/M6 result: CLI, wrapper, held-out split, objective metrics and what was not measured |
 | `ostris-implementation-checklist.md` | Phase-by-phase progress: what is done, partial, deferred, and next |
 | `ostris-licensing.md` | Data/source inventory; licence status unknown, no clearance claimed |
+| `suno-dataset-migration-plan.md` | Plan (rev 2): swap only the remixer's verbatim material library to `data/SUNO_ABC_SCORE_DATASET.pkl`; keep the OSTRIS aggregate priors/idioms/similarity and the 177 calibration unchanged |
 | `ostris-handoff.md` | Handoff: frozen contracts, how to add reviewed labels, reproduce commands |
 | `ostris-release-notes.md` | Tools v0.4.0: included commands, verified numbers, upgrade notes |
 | `remixer_proposal.md` | Proposal: turn the skill into a library-aware remixer with capped retrieval, declared quotes, and verification |

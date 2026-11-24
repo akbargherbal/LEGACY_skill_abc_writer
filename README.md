@@ -3,7 +3,7 @@
 Source of the **`maqam-score`** skill and the 177-track calibration that
 justifies its numbers.
 
-**Version:** 0.4.0 (skill contract) · tools 0.4.0 · offline corpus bundle · **remixer 0.1.0** ·
+**Version:** 0.4.0 (skill contract) · tools 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
 **Date:** 2026-11-23
 
 ## Layout
@@ -11,7 +11,7 @@ justifies its numbers.
 | Path | What it is | Status |
 |---|---|---|
 | `02_maqam-score/` | Skill source: `SKILL.md`, scripts, references, example, tests | **active source** |
-| `03_abc_remixer/` | Sibling skill source: library-aware remixer CLI, prebuilt 472-song store, tests | **active source** |
+| `03_abc_remixer/` | Sibling skill source: library-aware remixer CLI, prebuilt 670-score SUNO store, tests | **active source** |
 | `02_maqam-score/scripts/ostris/` | OSTRIS corpus tools (M0–M6: sync, audit, build, features, priors, plan, idioms, similarity, check, eval) | **active** |
 | `02_maqam-score/data/ostris/` | Packaged corpus artifacts: source cache, records, priors, idiom bank, similarity index, eval split | **bundled, ships in the zip** |
 | `02_maqam-score/schemas/` | JSON contracts for records, priors, plans, phrases, reports, eval | **active** |
@@ -39,24 +39,25 @@ make check-corpus    # 177/177 parse, 175/177 hard (98.9%)
 make craft           # craft distributions over the 177 (report-only, not a gate)
 make zip             # build dist/abc-score-writer.zip
 make release         # test + selftest + acceptance + offline + zip + dist/releases/<version>
-make remix-build     # build the 472-song remixer store
+make suno-build      # build data/suno/ from the SUNO pickle
+make remix-build     # build the 670-score remixer store
 make remix-test      # remixer unit tests
 make remix-release   # remixer tests + verify + full/public zips + checksums
 ```
 
 ## Remixer
 
-`03_abc_remixer/` is a sibling skill built on the 0.3.0 baseline; its 53 tests
+`03_abc_remixer/` is a sibling skill built on the 0.3.0 baseline; its 57 tests
 also pass with the 0.4.0 runtime. It exposes
 `catalog`, `songmap`, `slice`, `motif-find`, `budget`, and `remix check`, with a
 hard session ledger and declared-quote verification. See
 `03_abc_remixer/SKILL.md` and `docs/remixer-implementation-plan.md`. The prebuilt
-store under `03_abc_remixer/data/remix/` contains 472 included songs.
+store under `03_abc_remixer/data/remix/` contains 670 included SUNO scores.
 
 ```bash
 make remix-build
 python3 03_abc_remixer/scripts/remix_cli.py catalog --key Dm --limit 5
-python3 03_abc_remixer/scripts/remix_cli.py slice yt500-0001-fbK2ySlxAW4 --bars 17-20
+python3 03_abc_remixer/scripts/remix_cli.py slice suno-0024 --bars 34-37
 ```
 
 ## OSTRIS corpus tools
