@@ -12,7 +12,7 @@
   },
   "dataset": "suno_abc_score_dataset",
   "dataset_version": "1",
-  "license_status": "pending-clearance",
+  "license_status": "open-source-no-author",
   "source": "data/SUNO_ABC_SCORE_DATASET.pkl",
   "source_sha256": "4217a4f140a25e78c15c9bb7dfeb898b2b20f90b3225ade204ca76c7523e78ac",
   "store_version": "remix-build-v2"

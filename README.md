@@ -52,7 +52,9 @@ also pass with the 0.4.0 runtime. It exposes
 `catalog`, `songmap`, `slice`, `motif-find`, `budget`, and `remix check`, with a
 hard session ledger and declared-quote verification. See
 `03_abc_remixer/SKILL.md` and `docs/remixer-implementation-plan.md`. The prebuilt
-store under `03_abc_remixer/data/remix/` contains 670 included SUNO scores.
+store under `03_abc_remixer/data/remix/` contains 670 included SUNO scores;
+its provenance is recorded in `data/SOURCE.md` (open-source Suno tracks, no
+attributed author).
 
 ```bash
 make remix-build

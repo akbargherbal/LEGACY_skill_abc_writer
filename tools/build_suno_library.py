@@ -244,7 +244,7 @@ def _build(pkl: Path, out: Path) -> dict:
         "source": source_label,
         "source_sha256": source_hash,
         "source_bytes": pkl.stat().st_size,
-        "license_status": "pending-clearance",
+        "license_status": "open-source-no-author",
         "counts": counts,
         "files": {
             "catalog_source": "catalog_source.jsonl",

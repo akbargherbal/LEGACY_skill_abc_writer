@@ -28,8 +28,9 @@ bundle is unchanged.
   SUNO builder, idempotence, and the dataset allow-list.
 - `make suno-build`, `make suno-check`, and updated `make remix-build` /
   `make remix-offline`.
-- Full package includes the new store and its priors snapshot; public package
-  remains code-only until the provenance record is cleared.
+- Both full and public packages include the new store and its priors snapshot;
+  the public archive omits tests only. The source is recorded in
+  `data/SOURCE.md` as open-source Suno tracks with no attributed author.
 
 ## 0.1.0 — library-aware remixer on abc_score_writer 0.3.0
 

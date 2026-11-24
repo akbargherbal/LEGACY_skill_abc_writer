@@ -29,7 +29,8 @@ Implemented on 2026-11-24:
 | Priors | fixed snapshot vendored at `data/remix/priors/` |
 | Guards | only `suno-*` ids; legacy ids resolve as `source_not_found` |
 | Tests | 57 remixer tests (54 previous + 2 SUNO builder tests + 1 legacy-id guard); skill tests unchanged |
-| Packaging | `dist/abc_remixer.zip` full (with data); `abc_remixer-public.zip` code-only |
+| Licensing | `data/SOURCE.md` records open-source Suno tracks with no attributed author; `license_status="open-source-no-author"` |
+| Packaging | `dist/abc_remixer.zip` and `abc_remixer-public.zip` both carry the 670-score store (public omits tests) |
 | Score writer | unchanged: `make test`, `make selftest`, `make offline-check` pass |
 
 The phase list below remains as the implementation record.
@@ -189,12 +190,10 @@ Recommendations:
 
 1. Tag the current state (`abc_remixer` 0.1.0) so the old store is recoverable.
 2. Add `data/SOURCE.md` (or `data/suno/PROVENANCE.md`) covering:
-   - which Suno plan/terms produced the scores;
-   - model/version and generation dates;
-   - whether prompts referenced existing songs, artists or melodies;
-   - who or what produced the ABC text;
-   - who owns the lyrics, if any;
-   - `source_sha256` of the pickle.
+   - the owner's basis: open-source Suno tracks with no attributed author;
+   - the ABC compilation and `source_sha256` of the pickle;
+   - any formal licence/URL if one exists;
+   - confirmation that no third-party attribution is required.
 3. Decide how the pickle is versioned. It is currently in `.gitignore`; either
    commit it, use Git LFS, or record its hash and keep a mirrored copy.
 4. Do **not** delete the old remixer store. Keep it as the rollback path.
@@ -322,9 +321,10 @@ the report names the dataset.
 - `Makefile`: `remix-build` uses `--dataset suno --data data/suno`;
   `remix-offline` uses `suno-0000`.
 - `scripts/package_remixer.sh`:
-  - include `dataset.json`;
+  - include `dataset.json` and the `data/remix/` store in both archives;
   - stop copying `02_maqam-score/data/ostris/priors` at package time; ship the
     remixer's own `data/remix/priors` snapshot instead;
+  - the public archive drops `tests/` only, not `data/`;
   - add a packaging grep test for `yt500-`, `fs18-`, `fadl`, `OSTRIS` in the
     shipped `data/`.
 - `03_abc_remixer/example/README.md` and `example/plan.template.json`: replace
@@ -332,7 +332,7 @@ the report names the dataset.
 - `README.md`, `03_abc_remixer/CHANGELOG.md`.
 
 **Exit:** both remixer zips build; the default store has no legacy ids; the
-public variant is code-only as before.
+public variant ships the same 670-score store (tests excluded).
 
 ### Phase 5 (deferred) — optional aggregate refresh
 
@@ -364,20 +364,18 @@ Until then, the OSTRIS aggregate bundle stays exactly as it is.
   it quotes;
 - the output report can name a single, auditable dataset.
 
-**Still needs care:**
+**Recorded basis:**
 
-- “compiled myself” is not a licence conclusion. Suno’s terms, the prompts
-  used, and the ABC-generation method determine whether the scores are safe to
-  redistribute.
-- If a prompt referenced an existing song or artist, the generated score may
-  still be derivative.
-- If the ABC was produced by transcribing audio, there is a second layer of
-  uncertainty.
-- Aggregate priors and idiom sequences are lower-risk than verbatim ABC, but
-  they are not automatically copyright-free either.
+- The source tracks are open-source Suno tracks with no attributed author.
+- The project owner asserts the compiled ABC dataset is free to use and
+  redistribute, with no third-party attribution required.
+- `data/SOURCE.md` records that basis and the source hash; if a formal licence
+  instrument exists, add its name/URL there.
+- Aggregate priors and idiom sequences remain lower-risk than verbatim ABC, and
+  are unchanged in this migration.
 
 **Mitigation:** the provenance record in Phase 0, the dataset allow-list in
-Phase 3, and the existing public/code-only packaging split.
+Phase 3, and the public archive now carrying the same store.
 
 ---
 
@@ -392,7 +390,7 @@ Phase 3, and the existing public/code-only packaging split.
 | **R5** | Titles/artists | Empty; use `suno-XXXX` as the display id |
 | **R6** | Legacy ids | Reject in `remix check`; no fallback |
 | **R7** | `remix check` priors | Vendor one fixed priors snapshot in the remixer store; optional at runtime |
-| **R8** | Public packaging | Code-only until the provenance record is complete |
+| **R8** | Public packaging | Include the 670-score store; omit tests only |
 | **R9** | Aggregate refresh | Deferred; separate plan |
 | **R10** | Pickle tracking | Commit/LFS it or pin its hash and mirror it |
 
@@ -411,6 +409,7 @@ Phase 3, and the existing public/code-only packaging split.
 | Quote guard | `remix check` with `suno-0000` | passes |
 | Legacy guard | `remix check` with `yt500-0001-…` | fails `source_not_found` |
 | Packaging | `make remix-zip` | no legacy ids or `source/` in the shipped data |
+| Public package | `make remix-zip-public` | contains `data/remix/` (670 songs, dataset.json, priors) and no legacy ids |
 | Unchanged skill | `make test`, `make selftest`, `make offline-check` | still pass; no `02_maqam-score/data/` edits |
 
 ---

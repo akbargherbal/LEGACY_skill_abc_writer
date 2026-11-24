@@ -41,7 +41,9 @@ EXCLUDES=(
   --exclude '*.tmp'
 )
 if [ "$PUBLIC" -eq 1 ]; then
-  EXCLUDES+=(--exclude 'data/' --exclude 'tests/')
+  # The SUNO store is open-source and ships in both archives; only dev tests
+  # are left out of the public build.
+  EXCLUDES+=(--exclude 'tests/')
   ZIP="$OUT/$NAME-public.zip"
 else
   ZIP="$OUT/$NAME.zip"
