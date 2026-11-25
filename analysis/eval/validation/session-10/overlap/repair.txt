@@ -1,0 +1,3 @@
+FAIL simultaneity: 32 overlapping sixteenths
+  bars: [1, 2]
+wrote ../analysis/eval/validation/session-10/overlap/repair.json

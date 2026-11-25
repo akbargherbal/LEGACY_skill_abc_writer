@@ -1,0 +1,10 @@
+
+per-line phrase table
+  line section      bars    syl  notes beat cell                    rest_after  unbroken  mean  rep   leap  end
+     1 verse        1-1        4     4  1.0 4-4-4-4                       0.0      3.0  64.5   0.0   0.0   F
+     2 verse        2-2        4     4  1.0 4-4-4-4                       0.0      3.0  66.2   0.0   0.0   D
+     3 verse        3-3        4     4  1.0 4-4-4-4                       0.0      3.0  65.8   0.0   0.0   F
+     4 verse        4-4        4     4  1.0 4-4-4-4                      None      3.0  62.8   0.0   0.0  Bb
+  lyric lines 4  detected phrases 1  merged 3
+
+wrote ../analysis/eval/validation/session-10/grid/craft.json

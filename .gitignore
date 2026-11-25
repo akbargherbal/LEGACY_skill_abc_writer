@@ -14,3 +14,9 @@ analysis/eval/inbox/
 
 # Remixer session ledger
 .remix-ledger.jsonl
+
+# Windows download metadata (NTFS alternate data streams)
+*:Zone.Identifier
+
+# Extracted release staging (rebuild from dist/session-10-ready.zip)
+dist/session-10-ready/

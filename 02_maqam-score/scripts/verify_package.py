@@ -22,6 +22,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -149,7 +150,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--core", type=Path)
     ap.add_argument("--sheet", type=Path)
     ap.add_argument("--notes", type=Path)
+    ap.add_argument("--review", type=Path)
     ap.add_argument("--report", type=Path)
+    ap.add_argument("--state", type=Path)
+    ap.add_argument("--require-core-first", action="store_true",
+                    help="FAIL if core_draft.abc was written after score.abc")
     ap.add_argument("--json", type=Path, default=Path("verify.json"))
     args = ap.parse_args(argv)
 
@@ -269,6 +274,14 @@ def main(argv: list[str] | None = None) -> int:
                     add("PASS", f"core {voice}", f"first {n} bars of score")
                 else:
                     add("FAIL", f"core {voice}", "not a prefix of score")
+            if args.require_core_first:
+                try:
+                    if Path(args.core).stat().st_mtime > Path(args.score).stat().st_mtime + 1:
+                        add("FAIL", "core order", "core_draft.abc was written after score.abc")
+                    else:
+                        add("PASS", "core order", "core predates score")
+                except OSError as exc:
+                    add("FAIL", "core order", str(exc))
 
     if args.sheet:
         try:
@@ -282,6 +295,17 @@ def main(argv: list[str] | None = None) -> int:
             add("PASS", "notes.md", "10 numbered lines")
         except Exception as exc:  # noqa: BLE001
             add("FAIL", "notes.md", str(exc))
+    if args.review:
+        try:
+            raw = [l for l in Path(args.review).read_text(encoding="utf-8").splitlines() if l.strip()]
+            if len(raw) != 5:
+                raise ValueError(f"{args.review}: {len(raw)} non-empty lines, expected 5")
+            for i, line in enumerate(raw, 1):
+                if not re.match(rf"^{i}\.\s", line):
+                    raise ValueError(f"{args.review}: line {i} does not start with '{i}. '")
+            add("PASS", "core_review.md", "5 numbered lines")
+        except Exception as exc:  # noqa: BLE001
+            add("FAIL", "core_review.md", str(exc))
 
     if args.report:
         try:
@@ -294,6 +318,30 @@ def main(argv: list[str] | None = None) -> int:
                 add("PASS", "report.json", f"ok; measured bars {measured.get('bars')}")
             else:
                 add("FAIL", "report.json", f"ok={report.get('ok')}; bars={measured.get('bars')}")
+
+    if args.state:
+        try:
+            state = json.loads(Path(args.state).read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            add("FAIL", "state.json", f"{type(exc).__name__}: {exc}")
+        else:
+            required = ("phase", "last_artifact", "last_check", "pass",
+                        "report_sha", "next_action", "open_issues", "files")
+            missing = [k for k in required if k not in state]
+            if missing:
+                add("FAIL", "state.json", f"missing keys: {', '.join(missing)}")
+            else:
+                add("PASS", "state.json", f"phase {state.get('phase')!r}")
+                if args.report:
+                    digest = hashlib.sha256(Path(args.report).read_bytes()).hexdigest()
+                    if state.get("report_sha") and state["report_sha"] != digest:
+                        add("FAIL", "state check", "report_sha does not match report.json")
+                    else:
+                        add("PASS", "state check", "report hash matches (or is unset)")
+                if state.get("pass") is not True:
+                    add("FAIL", "state pass", f"pass={state.get('pass')!r}; update state after a PASS")
+                else:
+                    add("PASS", "state pass", "true")
 
     fails = sum(1 for c in checks if c["tag"] == "FAIL")
     warns = sum(1 for c in checks if c["tag"] == "WARN")

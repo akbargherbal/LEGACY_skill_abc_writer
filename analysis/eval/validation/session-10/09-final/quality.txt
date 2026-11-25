@@ -1,0 +1,7 @@
+PASS unbroken                 8.25s vs max 10s
+PASS top_duration_share       42% vs max 60%
+PASS distinct_bar_share       97% unique vs min 75%
+PASS tessitura_share_ge_c5    29% at/above C5 vs max 60%
+FAIL pause hierarchy          0 short gap(s); max identical 48%; 7 distinct value(s)
+
+FAIL  objective quality; wrote ../analysis/eval/validation/session-10/09-final/quality.json

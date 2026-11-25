@@ -1,0 +1,7 @@
+PASS unbroken                 3.0s vs max 10s
+PASS top_duration_share       45% vs max 85%
+PASS distinct_bar_share       100% unique vs min 50%
+PASS tessitura_share_ge_c5    50% at/above C5 vs max 90%
+PASS pause hierarchy          0 short gap(s); max identical 67%; 2 distinct value(s)
+
+PASS  objective quality; wrote ../analysis/eval/validation/session-10/quality_pass.json

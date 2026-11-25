@@ -1,0 +1,73 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "name": "unbroken",
+      "actual": 3.0,
+      "target": 10.0,
+      "ok": true,
+      "detail": "3.0s vs max 10s",
+      "bars": []
+    },
+    {
+      "name": "top_duration_share",
+      "actual": 0.45,
+      "target": 0.85,
+      "ok": true,
+      "detail": "45% vs max 85%",
+      "bars": []
+    },
+    {
+      "name": "distinct_bar_share",
+      "actual": 1.0,
+      "target": 0.5,
+      "ok": true,
+      "detail": "100% unique vs min 50%",
+      "bars": []
+    },
+    {
+      "name": "tessitura_share_ge_c5",
+      "actual": 0.5,
+      "target": 0.9,
+      "ok": true,
+      "detail": "50% at/above C5 vs max 90%",
+      "bars": []
+    },
+    {
+      "name": "pause hierarchy",
+      "actual": {
+        "max_identical_share": 0.667,
+        "distinct": 2,
+        "violations": []
+      },
+      "target": {
+        "min_s": 0.0,
+        "section_end_min_s": 0.0,
+        "max_identical_share": 1.0,
+        "min_distinct_values": 1
+      },
+      "ok": true,
+      "detail": "0 short gap(s); max identical 67%; 2 distinct value(s)",
+      "bars": []
+    }
+  ],
+  "targets": {
+    "unbroken_seconds_max": 10.0,
+    "top_duration_share_max": 0.85,
+    "distinct_bar_share_min": 0.5,
+    "tessitura_share_ge_c5_max": 0.9,
+    "pause": {
+      "min_s": 0.0,
+      "section_end_min_s": 0.0,
+      "max_identical_share": 1.0,
+      "min_distinct_values": 1
+    }
+  },
+  "measured": {
+    "unbroken_seconds_max": 3.0,
+    "top_duration_share": 0.45,
+    "distinct_bar_share": 1.0,
+    "tessitura_share_ge_c5": 0.5,
+    "phrases": 4
+  }
+}

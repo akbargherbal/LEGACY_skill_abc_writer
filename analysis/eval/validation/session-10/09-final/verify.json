@@ -1,0 +1,92 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "tag": "PASS",
+      "name": "bar count",
+      "detail": "82 bars"
+    },
+    {
+      "tag": "PASS",
+      "name": "bar sums",
+      "detail": "every written bar = 16"
+    },
+    {
+      "tag": "PASS",
+      "name": "strict_shape",
+      "detail": "false"
+    },
+    {
+      "tag": "PASS",
+      "name": "register default",
+      "detail": "70"
+    },
+    {
+      "tag": "PASS",
+      "name": "seed bars",
+      "detail": "82"
+    },
+    {
+      "tag": "PASS",
+      "name": "seed Vocal",
+      "detail": "same bars as score"
+    },
+    {
+      "tag": "PASS",
+      "name": "seed Ins",
+      "detail": "same bars as score"
+    },
+    {
+      "tag": "PASS",
+      "name": "seed Drums",
+      "detail": "82 bars"
+    },
+    {
+      "tag": "PASS",
+      "name": "drums out",
+      "detail": "silent 77-82"
+    },
+    {
+      "tag": "PASS",
+      "name": "drums activity",
+      "detail": "76 active bars; 54 under the voice"
+    },
+    {
+      "tag": "PASS",
+      "name": "core length",
+      "detail": "15 bars"
+    },
+    {
+      "tag": "PASS",
+      "name": "core Vocal",
+      "detail": "first 15 bars of score"
+    },
+    {
+      "tag": "PASS",
+      "name": "core Ins",
+      "detail": "first 15 bars of score"
+    },
+    {
+      "tag": "PASS",
+      "name": "seed_sheet.md",
+      "detail": "10 numbered lines"
+    },
+    {
+      "tag": "PASS",
+      "name": "notes.md",
+      "detail": "10 numbered lines"
+    },
+    {
+      "tag": "PASS",
+      "name": "report.json",
+      "detail": "ok; measured bars 82"
+    }
+  ],
+  "summary": {
+    "score_bars": 82,
+    "plan_bars": 82,
+    "drums_active": 76,
+    "drums_under_vocal": 54,
+    "core_bars": 15
+  }
+}

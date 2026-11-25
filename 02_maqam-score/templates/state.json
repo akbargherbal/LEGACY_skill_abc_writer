@@ -1,0 +1,11 @@
+{
+  "phase": "start",
+  "last_artifact": null,
+  "last_check": null,
+  "pass": null,
+  "report_sha": null,
+  "next_action": "syllabify",
+  "open_issues": [],
+  "files": [],
+  "generated_estimate": 0
+}

@@ -1,0 +1,10 @@
+
+score.abc
+  bars 82  phrases 26  notes/phrase 14.5
+  phrases: rhythm 0.77  contour 0.88  shape 0.23
+  intervals: step 0.843  repeat 0.260  4th+ 0.039  5th+ 0.013
+  contour: descending 0.38  same-start-end 0.12  peak-late 0.73  end-long 0.04
+  repetition: unique bars 0.60  4-note pitch 0.68  rhythm 0.94
+  endings (5): {0: 9, 3: 2, 5: 6, 7: 8, 10: 1}
+
+wrote ../analysis/eval/validation/session-10/08/craft.json

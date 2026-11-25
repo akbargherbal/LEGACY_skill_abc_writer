@@ -1,0 +1,2 @@
+No FAIL/WARN rows in the report; a full diagnostic map is in repair.json
+wrote ../analysis/eval/validation/session-10/09-final/repair.json

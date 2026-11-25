@@ -4,6 +4,7 @@ CORPUS ?= $(HOME)/Jupyter_Notebooks/OpenCode/arabmaqamrock/datasets/five_stars
 DIST := dist
 SKILL_NAME := abc-score-writer
 VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '02_maqam-score/scripts'); from ostris.contract import SKILL_VERSION; print(SKILL_VERSION)")
+SKILL_RELEASE ?= 0.7.0
 REMIX_VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '03_abc_remixer/scripts'); from remix.shared import REMIX_VERSION; print(REMIX_VERSION)")
 REMIX_DATA := 03_abc_remixer/data/remix
 SUNO_PKL ?= data/SUNO_ABC_SCORE_DATASET.pkl
@@ -40,11 +41,11 @@ zip-public:
 release: test selftest acceptance offline-check zip zip-public
 	@test -n "$(VERSION)" || { echo "release: cannot read SKILL_VERSION"; exit 1; }
 	@mkdir -p "$(DIST)/releases"
-	@cp "$(DIST)/$(SKILL_NAME).zip" "$(DIST)/releases/$(SKILL_NAME)-$(VERSION).zip"
-	@cp "$(DIST)/$(SKILL_NAME)-public.zip" "$(DIST)/releases/$(SKILL_NAME)-$(VERSION)-public.zip"
-	@cd "$(DIST)/releases" && sha256sum "$(SKILL_NAME)-$(VERSION)"*.zip > "SHA256SUMS-$(VERSION).txt"
-	@echo "release $(VERSION):"
-	@cat "$(DIST)/releases/SHA256SUMS-$(VERSION).txt"
+	@cp "$(DIST)/$(SKILL_NAME).zip" "$(DIST)/releases/$(SKILL_NAME)-$(SKILL_RELEASE).zip"
+	@cp "$(DIST)/$(SKILL_NAME)-public.zip" "$(DIST)/releases/$(SKILL_NAME)-$(SKILL_RELEASE)-public.zip"
+	@cd "$(DIST)/releases" && sha256sum "$(SKILL_NAME)-$(SKILL_RELEASE)"*.zip > "SHA256SUMS-$(SKILL_RELEASE).txt"
+	@echo "release $(SKILL_RELEASE):"
+	@cat "$(DIST)/releases/SHA256SUMS-$(SKILL_RELEASE).txt"
 
 check-corpus:
 	python3 analysis/test_checker_corpus.py --corpus "$(CORPUS)"

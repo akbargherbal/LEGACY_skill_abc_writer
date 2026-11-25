@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.7.0 — root repair: core first, three layers, one tool per question
+
+**Evidence:** session 09 spent 232,396 generated tokens for a 2,082-token score
+(111.6×). Of that, 41.2% was autonomous waste before intervention, 8.8% was
+avoidable first-score repair, 32.6% was post-intervention loops, and 17.3% was
+necessary. The same patterns repeated in 07/08/09: first `skill` failed 3/3,
+the pre-core design block was 32k/32k/28k, checker runs 7/7/17, full score
+writes 2/2/5, scripts 19/14/37+20. The ear stayed at 6; the 7–7.5 came from a
+human critic.
+
+**Why:** the contract allowed a full-form design before the core, a global
+metric to trigger a full rewrite, a WARN to mean "do not fix", and an aggregate
+craft report that hid a 13-vs-25 phrase grid. The missing per-line data forced
+the model to write scripts.
+
+### Instructions
+- **One order.** `syllabify → core (8–16) → core_review → plan → score → seed →
+  sheet/notes`. The core is the first composition artifact, not an extraction.
+- **Three acceptance layers.** `checker.py` is the contract; `quality.py` is the
+  objective craft gate for a quality run; `references/critic.md` is the taste
+  review (5 notes, no gate). The old "do not rewrite for a WARN" applies only to
+  a validity run.
+- **One tool per question.** `repair.py` localizes a global failure to
+  bars/phrases; `craft.py --phrases` gives the per-line table; `abc_doctor.py`
+  explains parser errors; `verify_package.py --state` checks the state hash and
+  the pass flag.
+- **One state.** `templates/state.json` + `templates/STATE.md` from the start.
+
+### Tools
+- `scripts/quality.py`: objective quality gate (unbroken, pause hierarchy,
+  distinct bars, top duration, tessitura). It does not judge taste.
+- `scripts/repair.py`: turns register/simultaneity/repeated/distinct/top
+  duration/unbroken/tessitura/phrase failures into bars and phrases.
+- `scripts/craft.py --phrases`: per-line bars, syllables, start beat, rhythm
+  cell, rest before/after, unbroken, register, repeat, leaps, cadence degree;
+  it reports lyric lines and detected phrases separately.
+- `scripts/abc_doctor.py`: plain-language parser diagnosis; the vendored
+  `abc_tools.py` parser is not edited.
+- `scripts/verify_package.py`: adds `--state`, `--require-core-first`,
+  `--review`; existing checks unchanged.
+- `templates/state.json`, `templates/STATE.md`, `references/critic.md`.
+
+### Not changed
+- `checker.py`, `calibration.json`, and the `abc_tools.py` parser logic.
+- No new taste gate; no retrieval; no task list.
+
 ## 0.6.0 — one contract, one toolchain, one state (source; contract still 0.4.0)
 
 **Evidence:** `analysis/eval/reports/2026-11-24-deepseek-session-08.md`.

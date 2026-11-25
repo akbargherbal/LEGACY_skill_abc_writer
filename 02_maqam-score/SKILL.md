@@ -38,8 +38,11 @@ interface.
 ```
 <skill>/scripts/syllabify.py       lyrics -> numbers (letters, syllables, bars)
 <skill>/scripts/checker.py         score verifier: PASS/WARN/FAIL + measured block
-<skill>/scripts/verify_package.py  package verifier: score<->seed, Drums, core, docs
-<skill>/scripts/craft.py           report-only tune mirror (rhythm, cadence, register)
+<skill>/scripts/verify_package.py  package verifier: score<->seed, Drums, core, docs, state
+<skill>/scripts/craft.py           report-only tune mirror; --phrases for the per-line table
+<skill>/scripts/quality.py         objective quality gate (unbroken/pause/distinct/top/tessitura)
+<skill>/scripts/repair.py          global failure -> bars/phrases repair map
+<skill>/scripts/abc_doctor.py      explains a parser error in plain language
 <skill>/scripts/abc_tools.py       score parser CLI: inspect / strip-chords / compare
 <skill>/scripts/calibration.json   the 177-track thresholds (do not edit)
 <skill>/scripts/selftest.sh        proves the tools work on example/
@@ -47,6 +50,7 @@ interface.
 <skill>/example/groove.abc         the seed.abc drum voice, 8 bars
 <skill>/references/craft.md        the composition method: cell, period, cadence, riff
 <skill>/references/rhythm.md       phrase rules, groove, drum interaction, seed drums
+<skill>/references/critic.md       the 8-point core review (5 numbered lines)
 <skill>/references/style-tags.md   style tag -> score decision
 ```
 
@@ -174,6 +178,22 @@ score can only avoid causing the problem. Translate style tags with
 
 ## 3. The pipeline — one pass
 
+### 3.0 The order — one order only
+
+```text
+syllabify → core_draft.abc (8–16) → core_review.md → plan.json
+          → score.abc → seed.abc → seed_sheet.md / notes.md
+```
+
+- `core_draft.abc` is the **first composition file**. Do not write `plan.json`
+  or `score.abc` before it. Do not design the full 82 bars before it.
+- The core uses the targets in `example/plan.json` and the absolute bars in
+  `prosody.json`/`phrases.json`. The full `plan.json` is written **after** the
+  core and its review.
+- `core_review.md` is the critic's 5-line review (`references/critic.md`).
+- `seed_sheet.md` is written **after** `score.abc`. The full frame is not a
+  precondition for the core.
+
 ### 3.1 Numbers
 
 ```bash
@@ -207,12 +227,16 @@ sixteenths per sung syllable** (corpus median 2.84), and **cap ratio 0.884**
 (corpus median `audio/cap`). The old 73 BPM / 2.29 / 0.87 were a single-case
 prior; they compressed the vocal.
 
-### 3.2 Plan — one JSON file
+### 3.2 Plan — one JSON file (after the core)
 
-Write `plan.json`. This is the brief; every value is a number or a name. The
-checker fails a plan that omits a required target, so write the complete object
-before the first bar. The block below is the 16-bar fixture: use it for the
-field names, not for its bars, tempo, key, sections, or deviations.
+After the core and its review, write `plan.json`. This is the brief; every
+value is a number or a name. The checker fails a plan that omits a required
+target, so write the complete object before the first bar of the **full**
+score. The block below is the 16-bar fixture: use it for the field names, not
+for its bars, tempo, key, sections, or deviations.
+
+The core itself uses the targets in `example/plan.json` and the bars in
+`prosody.json`/`phrases.json`; do not write this file to start the core.
 
 ```json
 {
@@ -328,11 +352,13 @@ Read `references/craft.md` here. The gate comes later; this is the part the gate
 cannot see. Work in this order, and keep a **draft core** of 8–16 bars before
 expanding:
 
-The core is the **first 8–16 bars of `score.abc`**, not a separate sketch.
-Write it before you plan the rest of the form; do not design the full 82 bars in
-your head before the first file exists. If the core changes after a check, edit
-the opening bars; do not rewrite the whole score. The core is the one place
-extra thinking buys quality — the rest is expansion and local repair.
+The core is the **first 8–16 bars of `score.abc`**, and it is the **first
+composition artifact**. Write `core_draft.abc` before `plan.json` and before
+`score.abc`; do not design the full 82 bars in your head before the first file
+exists. The core is not extracted from a finished score: it is written first,
+reviewed, fixed, then expanded. If the core changes after a check, edit the
+opening bars; do not rewrite the whole score. The core is the one place extra
+thinking buys quality — the rest is expansion and local repair.
 
 1. **Lyric as song.** Find the bayt (two hemistichs), the caesura, the qāfiya,
    the repeated line and the emotional pivot. The score breathes where the poem
@@ -421,6 +447,11 @@ on. A sheet written after the score is not a plan.
 The checker cannot see motifs or grooves, so do not claim it did. If a motif
 carries an answer shape, name that shape in the deviation list.
 
+**Before the full score:** run `craft.py core_draft.abc --phrases phrases.json`
+to see the per-line table, then run the critic in `references/critic.md` and
+write `core_review.md` (exactly 5 numbered lines, one issue per line, tied to a
+bar). Fix the core. Only then write `plan.json` and expand to `score.abc`.
+
 ### 3.4 Write `score.abc`
 
 Write the ABC directly. Do not generate it with a script and do not build one.
@@ -508,26 +539,57 @@ runs. Do not write a parser or a statistics script: the seed/drums/docs checks
 are in `verify_package.py`; if a number is missing, extend that file, not a
 throwaway script.
 
-**State.** Copy `templates/STATE.md` to the working directory and update it
-after each artifact and each check (Done / Verified / Decisions / Next). After
-a compaction, read it before anything else; if it says the package is done,
-stop. Do not re-run a check the state records as passed.
+**Tool map — one question, one tool.**
+
+| Question | Tool |
+|---|---|
+| Is the score valid? | `checker.py` → `report.json` |
+| Where is the global failure? | `repair.py` → `repair.json` (bars/phrases) |
+| What is each lyric line doing? | `craft.py --phrases` → `phrase_table.json` |
+| Are the objective quality targets met? | `quality.py` → `quality.json` |
+| Why did the parser reject? | `abc_doctor.py` |
+| Is the package/order/state consistent? | `verify_package.py` → `verify.json` |
+| What is the state? | `state.json` + `STATE.md` |
+
+If a tool cannot answer a number, add it to that tool; do not write a heredoc.
+
+**State.** Copy `templates/STATE.md` and `templates/state.json` to the working
+directory **before the first artifact**. Update both after each artifact and each
+check (phase, last artifact, last check, pass, report hash, next action).
+After a compaction, read `state.json` before anything else; if it says the
+package is done, stop. Do not re-run a check the state records as passed.
+`verify_package.py --state state.json` checks the hash and the pass flag.
 
 The checker is not the aesthetic gate. It does not measure the cell, the
 period, the phrase-rhythm variety or the peak placement; §3.3 and `craft.md` §10
 do. A PASS is not a verdict on the tune; the listener decides.
 
-On a **contract or sanity FAIL**, fix **only** the bars or headers named, then
-run the checker again. On a **style or shape WARN**, do not rewrite the score:
-report it, or fix it only if the user asked for a strict release. With
-`strict_shape: false` (the template default) the shape targets are warnings, not
-gates; a WARN is information, not a command to recompose. If a check can only be
-satisfied by changing the plan, change the plan and say so; never fake a number.
-A declared arrangement deviation is not a waiver for breath, tessitura, duration
-mix, endings, or silence.
+On a **contract or sanity FAIL**, read `report.json.measured` and run
+`repair.py score.abc --report report.json --plan plan.json --phrases phrases.json`
+to get the bars/phrases responsible. Fix **only** those bars or headers, then
+run the checker again. Do not rewrite the whole score for a global metric unless
+the repair map covers most of it and you declare why.
+
+On a **style or shape WARN**:
+- In a **validity run** (no `quality_targets.json`), a WARN is diagnostic;
+  report it. Do not rewrite the score for a WARN.
+- In a **quality run** (`quality_targets.json` present, as in session 10), the
+  objective Layer-2 targets are acceptance: `unbroken`, `pause hierarchy`,
+  `distinct_bar_share`, `top_duration`, `tessitura`. Fix them with the repair
+  map, then run `quality.py`. Taste (cell, sayr, melisma, dialogue, ostinato,
+  arc) stays with the critic; it is not a gate.
+
+The old sentence "do not rewrite the score for a WARN" applies only to the
+validity run. A quality run that leaves a declared objective target failing is
+not done. If a check can only be satisfied by changing the plan, change the
+plan and say so; never fake a number. A declared arrangement deviation is not a
+waiver for breath, tessitura, duration mix, endings, silence, or pause
+hierarchy.
 
 Stop after the check passes. Do not re-run to "confirm"; do not run a fifth
-check after a clean pass.
+check after a clean pass. In a quality run, run `quality.py` once after the
+checker passes; if it fails, use `repair.json` for one scoped fix and one
+verification.
 
 ### 3.5.1 Error → fix
 
@@ -547,6 +609,32 @@ check after a clean pass.
 
 One check per change. If a check passes, stop checking; do not re-run after a
 pass to "confirm".
+
+### 3.5.2 Quality run — the objective layer
+
+If the task includes `quality_targets.json` (session 10 does), run:
+
+```bash
+python3 <skill>/scripts/quality.py score.abc --plan plan.json \
+  --phrases phrases.json --targets quality_targets.json --json quality.json
+```
+
+`quality.py` fails only on the objective targets the task declared:
+
+- `unbroken_seconds_max`;
+- `pause hierarchy` (actual gaps vs the sidecar, plus variation);
+- `top_duration_share_max`;
+- `distinct_bar_share_min`;
+- `tessitura_share_ge_c5_max`.
+
+The sidecar's `pause_after_s` is the **intended** rest. Edit that value to the
+hierarchy (caesura 0.5–0.75 s, line end 1.0–1.5 s, section end longer), never
+the `bar_start`/`bar_end` ranges. `quality.py` compares the actual gap to it.
+
+It does not judge the cell, sayr, melisma, dialogue, ostinato or the arc; those
+are `references/critic.md`. If `quality.py` fails, read `repair.json` (or run
+`repair.py`), fix the named bars/lines, and verify once. A quality run is not
+done while an objective target is open.
 
 ### 3.6 Revision — one channel, one pass
 
@@ -586,8 +674,9 @@ instruments or backing voices, deliver two files:
 Rules:
 
 - The melody is **the same** in both. Do not compose a second tune for the seed.
-- Write and check `score.abc` first. It is the proof that the melody is complete
-  and inside the corpus; `seed.abc` is the orchestration of that melody.
+- Write and check the full `score.abc` **before** `seed.abc`. It is the proof
+  that the melody is complete and inside the corpus; `seed.abc` is the
+  orchestration of that melody.
 - `seed.abc` is **not** contract-checked. Say so in the report, and say which
   checks were not run. Do not present "every bar adds up" as a validation.
 - If the user asked only for a seed, still write `score.abc`. The strict file
@@ -665,9 +754,12 @@ brief you declared?" Neither is a verdict on beauty. Offline, say so.
 copied verbatim, plus a `WARNINGS` section. `report.json` is the `--json`
 output. Never retype a number. The run also delivers `seed_sheet.md` (exactly 10
 numbered lines of rules: cell, period, cadence, groove, events), `notes.md`,
-`verify.json`, `craft.json`, `STATE.md`, and, for a cover target, `seed.abc`
-with the drum voice. The sheet is written **after** `score.abc`; it is a plan,
-not a checker input. The measured block includes `register_mean`,
+`core_review.md` (5 numbered critic lines), `verify.json`, `craft.json`,
+`repair.json` (when a global metric failed), `quality.json` (quality run),
+`craft.json`/`core_table.json` includes the per-line table when `--phrases` is
+used, `state.json`, `STATE.md`, and, for a cover target, `seed.abc` with the
+drum voice. The sheet is written **after**
+`score.abc`; it is a plan, not a checker input. The measured block includes `register_mean`,
 `register_top`, `register_range`, `top_duration_share`,
 `distinct_durations`, `ties`, `fill_lengths`, `ins_active_share`, `chords`,
 `unbroken_seconds_max`, `phrase_seconds_median`, `repeated_share`,

@@ -1,0 +1,432 @@
+{
+  "ok": true,
+  "strict_style": false,
+  "strict_shape": false,
+  "phrases_checked": true,
+  "require_final_rest": true,
+  "calibration_version": "2026-11-23c",
+  "checks": [
+    {
+      "tag": "PASS",
+      "name": "runtime parse",
+      "ok": true,
+      "class": "contract",
+      "detail": "abc_tools.parse accepted the file"
+    },
+    {
+      "tag": "PASS",
+      "name": "key",
+      "ok": true,
+      "class": "contract",
+      "detail": "K:Dm (plan Dm)"
+    },
+    {
+      "tag": "PASS",
+      "name": "meter",
+      "ok": true,
+      "class": "contract",
+      "detail": "4/4 (plan 4/4)"
+    },
+    {
+      "tag": "PASS",
+      "name": "unit",
+      "ok": true,
+      "class": "contract",
+      "detail": "L:1/16 (plan 1/16)"
+    },
+    {
+      "tag": "PASS",
+      "name": "tempo",
+      "ok": true,
+      "class": "contract",
+      "detail": "Q:80 (plan 80)"
+    },
+    {
+      "tag": "PASS",
+      "name": "bars",
+      "ok": true,
+      "class": "contract",
+      "detail": "82 (plan 82)"
+    },
+    {
+      "tag": "PASS",
+      "name": "plan targets",
+      "ok": true,
+      "class": "contract",
+      "detail": "complete"
+    },
+    {
+      "tag": "PASS",
+      "name": "simultaneity",
+      "ok": true,
+      "class": "sanity",
+      "detail": "0 overlapping sixteenths (max 4)"
+    },
+    {
+      "tag": "PASS",
+      "name": "notes per syllable",
+      "ok": true,
+      "class": "sanity",
+      "detail": "403/361 = 1.12 (sanity 1.00-1.55)"
+    },
+    {
+      "tag": "PASS",
+      "name": "melisma target",
+      "ok": true,
+      "class": "style",
+      "detail": "1.12 (plan 1.10-1.45)"
+    },
+    {
+      "tag": "PASS",
+      "name": "register mean",
+      "ok": true,
+      "class": "sanity",
+      "detail": "mean 69.7 vs sanity 74 +/- 5"
+    },
+    {
+      "tag": "PASS",
+      "name": "register top floor",
+      "ok": true,
+      "class": "style",
+      "detail": "top 82 vs floor 80"
+    },
+    {
+      "tag": "PASS",
+      "name": "register target mean",
+      "ok": true,
+      "class": "style",
+      "detail": "mean 69.7 vs plan 70 +/- 3"
+    },
+    {
+      "tag": "PASS",
+      "name": "register target top",
+      "ok": true,
+      "class": "style",
+      "detail": "top 82 vs plan >=80"
+    },
+    {
+      "tag": "PASS",
+      "name": "register max top",
+      "ok": true,
+      "class": "style",
+      "detail": "top 82 vs plan <=84"
+    },
+    {
+      "tag": "PASS",
+      "name": "tessitura share",
+      "ok": true,
+      "class": "style",
+      "detail": "29% of vocal notes at/above C5 (plan max 80%)"
+    },
+    {
+      "tag": "PASS",
+      "name": "duration spread",
+      "ok": true,
+      "class": "sanity",
+      "detail": "most common duration 42% of notes (sanity max 85%)"
+    },
+    {
+      "tag": "PASS",
+      "name": "duration spread target",
+      "ok": true,
+      "class": "style",
+      "detail": "42% (plan max 65%)"
+    },
+    {
+      "tag": "PASS",
+      "name": "duration variety",
+      "ok": true,
+      "class": "sanity",
+      "detail": "6 distinct durations (sanity min 4)"
+    },
+    {
+      "tag": "PASS",
+      "name": "duration variety target",
+      "ok": true,
+      "class": "style",
+      "detail": "6 distinct durations (plan min 5)"
+    },
+    {
+      "tag": "PASS",
+      "name": "ties floor",
+      "ok": true,
+      "class": "style",
+      "detail": "1 tied vocal notes (floor 1)"
+    },
+    {
+      "tag": "PASS",
+      "name": "ties target",
+      "ok": true,
+      "class": "style",
+      "detail": "1 tied vocal notes (plan min 1)"
+    },
+    {
+      "tag": "PASS",
+      "name": "ins activity",
+      "ok": true,
+      "class": "sanity",
+      "detail": "Ins sounds in 38% of bars (sanity min 5%)"
+    },
+    {
+      "tag": "PASS",
+      "name": "ins activity target",
+      "ok": true,
+      "class": "style",
+      "detail": "Ins sounds in 38% of bars (plan min 20%)"
+    },
+    {
+      "tag": "PASS",
+      "name": "chords target",
+      "ok": true,
+      "class": "style",
+      "detail": "0 chord symbols (plan min 0)"
+    },
+    {
+      "tag": "PASS",
+      "name": "sections",
+      "ok": true,
+      "class": "style",
+      "detail": "intro -> intro vocal -> link -> verse -> build -> chorus -> interlude -> verse -> build -> chorus -> solo -> outro -> final rest"
+    },
+    {
+      "tag": "PASS",
+      "name": "cadence on tonic",
+      "ok": true,
+      "class": "structure",
+      "detail": "final pc 2, tonic 2"
+    },
+    {
+      "tag": "PASS",
+      "name": "final rest",
+      "ok": true,
+      "class": "contract",
+      "detail": "final bar 82: rest in both voices"
+    },
+    {
+      "tag": "PASS",
+      "name": "answer fill length",
+      "ok": true,
+      "class": "style",
+      "detail": "shortest answer 3 notes (plan min 3); lengths [9, 3, 3, 3, 15, 29, 3, 3, 3, 15, 46]"
+    },
+    {
+      "tag": "PASS",
+      "name": "silence",
+      "ok": true,
+      "class": "style",
+      "detail": "32% of the sung span is rest (floor 22%; corpus ~30%)"
+    },
+    {
+      "tag": "PASS",
+      "name": "answer mutation",
+      "ok": true,
+      "class": "style",
+      "detail": "9 fills, 9 shapes, most repeated 3x"
+    },
+    {
+      "tag": "PASS",
+      "name": "deviations",
+      "ok": true,
+      "class": "style",
+      "detail": "4 declared (target 3-4)"
+    },
+    {
+      "tag": "PASS",
+      "name": "chorus lift",
+      "ok": true,
+      "class": "style",
+      "detail": "verse max 75, chorus max 82"
+    },
+    {
+      "tag": "PASS",
+      "name": "chorus lift median",
+      "ok": true,
+      "class": "style",
+      "detail": "chorus median +8.0 semitones vs verse (plan min 5)"
+    },
+    {
+      "tag": "PASS",
+      "name": "unbroken singing",
+      "ok": true,
+      "class": "sanity",
+      "detail": "longest unbroken 8.25s (sanity max 23s; corpus max 22.9s)"
+    },
+    {
+      "tag": "PASS",
+      "name": "unbroken target",
+      "ok": true,
+      "class": "style",
+      "detail": "8.25s (plan max 10s)"
+    },
+    {
+      "tag": "PASS",
+      "name": "repeated notes",
+      "ok": true,
+      "class": "sanity",
+      "detail": "21% of intervals repeat a pitch (sanity min 20%; corpus min 25%)"
+    },
+    {
+      "tag": "PASS",
+      "name": "phrase endings",
+      "ok": true,
+      "class": "sanity",
+      "detail": "5 distinct ending(s) {'F': 4, 'D': 6, 'A': 8, 'G': 7, 'Eb': 1} (sanity min 3; corpus min 4)"
+    },
+    {
+      "tag": "PASS",
+      "name": "phrase endings target",
+      "ok": true,
+      "class": "style",
+      "detail": "5 distinct ending(s) (plan min 3)"
+    },
+    {
+      "tag": "PASS",
+      "name": "phrase plan",
+      "ok": true,
+      "class": "style",
+      "detail": "26 line(s)"
+    },
+    {
+      "tag": "PASS",
+      "name": "maqam fit",
+      "ok": true,
+      "class": "style",
+      "detail": "100% of vocal notes in kurd (min 95%)"
+    },
+    {
+      "tag": "PASS",
+      "name": "maqam tonic",
+      "ok": true,
+      "class": "style",
+      "detail": "K:Dm tonic 2, maqam tonic 2 (D)"
+    }
+  ],
+  "measured": {
+    "bars": 82,
+    "seconds": 246.0,
+    "vocal_notes": 403,
+    "ins_notes": 180,
+    "syllables": 361,
+    "notes_per_syllable": 1.12,
+    "sections": {
+      "intro": 6,
+      "intro vocal": 5,
+      "link": 1,
+      "verse": 39,
+      "build": 4,
+      "chorus": 10,
+      "interlude": 4,
+      "solo": 7,
+      "outro": 4,
+      "final rest": 2
+    },
+    "meters_seen": 1,
+    "answer_rate": {
+      "intro vocal": "1/2",
+      "verse": "8/18",
+      "chorus": "2/4",
+      "outro": "0/1"
+    },
+    "fills": 9,
+    "shapes": 7,
+    "shape_repeats": [
+      3,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "register_vocal": {
+      "intro": "-",
+      "intro vocal": "60-70 mean 65",
+      "link": "-",
+      "verse": "62-75 mean 68",
+      "build": "-",
+      "chorus": "72-82 mean 78",
+      "interlude": "-",
+      "solo": "-",
+      "outro": "62-72 mean 67",
+      "final rest": "-"
+    },
+    "register_mean": 69.7,
+    "register_top": 82,
+    "register_range": "60-82",
+    "chromatic_per_100": 0.0,
+    "chromatic_basis": "maqam:kurd",
+    "maqam": "kurd",
+    "maqam_fit_share": 1.0,
+    "unbroken_seconds_max": 8.25,
+    "phrase_seconds_median": 5.25,
+    "breaths_per_bar": 0.305,
+    "repeated_share": 0.212,
+    "stepwise_share": 0.812,
+    "distinct_phrase_endings": 5,
+    "phrase_endings": {
+      "F": 4,
+      "D": 6,
+      "A": 8,
+      "G": 7,
+      "Eb": 1
+    },
+    "tessitura_share_ge_c5": 0.293,
+    "verse_chorus_semitones": 8.0,
+    "strict_shape": false,
+    "phrases_checked": true,
+    "phrase_violations": [],
+    "simultaneities": 0.0,
+    "ties": 1,
+    "ties_per_10_bars": 0.12,
+    "cadence_pc": 2,
+    "final_rest": true,
+    "silence_share": 0.32,
+    "chords": 0,
+    "chords_per_bar": 0.0,
+    "deviations": 4,
+    "top_duration_share": 0.42,
+    "distinct_durations": 6,
+    "ins_active_share": 0.38,
+    "fill_lengths": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "answer_lengths": [
+      9,
+      3,
+      3,
+      3,
+      15,
+      29,
+      3,
+      3,
+      3,
+      15,
+      46
+    ],
+    "percentiles": {
+      "notes_per_syllable": 4.7,
+      "register_mean": 0.2,
+      "register_top": 25.0,
+      "top_duration_share": 0.0,
+      "distinct_durations": 25.0,
+      "ties_per_10_bars": 2.7,
+      "ins_active_share": 88.1,
+      "silence_share": 60.6,
+      "chromatic_per_100": 0.0,
+      "unbroken_seconds_max": 24.9,
+      "phrase_seconds_median": 93.0,
+      "repeated_share": 0.0,
+      "distinct_phrase_endings": 5.0,
+      "tessitura_share_ge_c5": 0.0,
+      "verse_chorus_semitones": 96.7
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+ "metric_basis": "corpus:n=177 (five_stars, 2026-11-24)",
+ "definitions": "Measure the craft shape of a score: phrase variety, contour, cadence ladder.\n\nThe checker answers \"is this a valid score of the declared shape?\". This script\nanswers a different question: \"is this a *tune*?\" It puts numbers on the things\na listener hears first and the gate cannot see:\n\n- **phrase rhythm variety** — distinct normalised rhythms per phrase. A score\n  that sets every line to the same 2-2-1-2 pattern is a grid even when every\n  duration is \"varied\".\n- **contour** — descending share, phrases that start and end on the same pitch,\n  and where the phrase peak sits. A phrase that always starts on its highest\n  note is a sigh; 26 of them is a tic.\n- **cadence ladder** — the scale degree each phrase ends on, relative to the\n  tonic. The corpus does not end every phrase on the tonic.\n- **literal repetition** — unique vocal bars / bars. A tune reuses *cells*;\n  a loop reuses *bars*.\n- **n-gram recurrence** — how much 4-note pitch and rhythm material returns\n  inside the track. Recurrence is the hook; literal looping is the failure mode.\n- **cadence length** — share of phrases whose last note is a quarter or longer.\n  When it is 100%, every line is closed the same way.\n\nDefinitions follow `analysis/calibrate_177.py` and `analysis/measure_phrasing.py`\nso the numbers are comparable with `references/reference.md` §7. Phrases split\nat a section change or a rest of at least one beat.\n\nProvenance: every distribution below is `corpus:n=177` on the `five_stars`\nSheetSage2 transcripts (2026-11-24). They describe what those takes do. They are\n**not gates** and not a definition of beauty; they are a mirror for a draft.",
+ "rows": [
+  {
+   "bars": 82,
+   "vocal_notes": 414,
+   "phrases": 26,
+   "phrase_notes_median": 14.5,
+   "step_share": 0.8427835051546392,
+   "repeat_share": 0.2603092783505155,
+   "leap4_share": 0.03865979381443299,
+   "leap7_share": 0.01288659793814433,
+   "descending_share": 0.38461538461538464,
+   "same_start_end_share": 0.11538461538461539,
+   "peak_late_share": 0.7307692307692307,
+   "peak_first_share": 0.19230769230769232,
+   "end_long_share": 0.038461538461538464,
+   "rhythm_variety": 0.7692307692307693,
+   "contour_variety": 0.8846153846153846,
+   "shape_variety": 0.23076923076923078,
+   "distinct_bar_share": 0.603448275862069,
+   "n4_recurrence": 0.6785714285714286,
+   "r4_recurrence": 0.9375,
+   "distinct_end_degrees": 5,
+   "end_degrees": {
+    "0": 9,
+    "3": 2,
+    "5": 6,
+    "7": 8,
+    "10": 1
+   },
+   "verse": {
+    "mean": 74.52898550724638,
+    "notes_per_bar": 7.076923076923077,
+    "repeat": 0.27636363636363637,
+    "leap": 0.07636363636363637
+   },
+   "chorus": {
+    "mean": 79.17333333333333,
+    "notes_per_bar": 7.5,
+    "repeat": 0.20270270270270271,
+    "leap": 0.02702702702702703
+   },
+   "verse_chorus_mean": 4.644347826086957,
+   "verse_chorus_leap": -0.04933660933660934,
+   "verse_chorus_repeat": -0.07366093366093365,
+   "file": "../analysis/eval/validation/session-10/08/score.abc"
+  }
+ ],
+ "errors": []
+}

@@ -1,0 +1,12 @@
+{
+  "unbroken_seconds_max": 10.0,
+  "top_duration_share_max": 0.85,
+  "distinct_bar_share_min": 0.50,
+  "tessitura_share_ge_c5_max": 0.90,
+  "pause": {
+    "min_s": 0.0,
+    "section_end_min_s": 0.0,
+    "max_identical_share": 1.0,
+    "min_distinct_values": 1
+  }
+}

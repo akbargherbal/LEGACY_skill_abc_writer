@@ -1,0 +1,4 @@
+FAIL ../analysis/eval/validation/session-10/doctor/bad.abc
+  group 1: voices have different measure counts
+  - block bar counts differ: Vocal line 10 has 2 bars, Ins line 12 has 1
+  - each group must be V: Vocal then V: Ins, with the same bar count

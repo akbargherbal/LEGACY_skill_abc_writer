@@ -94,5 +94,43 @@ python3 scripts/craft.py example/score.abc --json "$tmp/craft.json" > /dev/null
 grep -q '"rows"' "$tmp/craft.json" || { echo "FAIL: craft.json missing rows"; exit 1; }
 echo "craft report ok"
 
+echo "== craft: per-line phrase table"
+python3 scripts/craft.py example/score.abc --phrases example/phrases.json   --json "$tmp/craft_phrases.json" > "$tmp/phrases.out"
+grep -q "per-line phrase table" "$tmp/phrases.out" || { echo "FAIL: no phrase table"; exit 1; }
+grep -q '"phrase_table"' "$tmp/craft_phrases.json" || { echo "FAIL: phrase_table missing"; exit 1; }
+echo "phrase table ok"
+
+echo "== quality: objective layer (the example may fail; it must report)"
+python3 scripts/quality.py example/score.abc --plan example/plan.json   --phrases example/phrases.json --json "$tmp/quality.json" > "$tmp/quality.out" || true
+grep -q '"checks"' "$tmp/quality.json" || { echo "FAIL: quality.json missing checks"; exit 1; }
+echo "quality report ok"
+
+echo "== repair: map without a report"
+python3 scripts/repair.py example/score.abc --plan example/plan.json   --phrases example/phrases.json --json "$tmp/repair.json" > /dev/null
+grep -q '"maps"' "$tmp/repair.json" || { echo "FAIL: repair.json missing maps"; exit 1; }
+echo "repair map ok"
+
+echo "== doctor: example parses, a bad block explains itself"
+python3 scripts/abc_doctor.py example/score.abc > /dev/null
+cat > "$tmp/badblock.abc" <<'ABC'
+X:1
+T:
+M:4/4
+L:1/16
+Q:1/4=80
+V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
+V: Ins clef=treble name="Ins Melody" snm="Inst."
+K:Dm
+V: Vocal
+D4 E4 F4 G4|A4 B4 c4 d4|
+V: Ins
+D4 E4 F4 G4|
+ABC
+if python3 scripts/abc_doctor.py "$tmp/badblock.abc" > "$tmp/doctor.out" 2>&1; then
+  echo "FAIL: doctor accepted a mismatched block"; exit 1
+fi
+grep -q "different measure counts" "$tmp/doctor.out" || { echo "FAIL: doctor did not explain the block"; exit 1; }
+echo "doctor ok"
+
 echo
 echo "selftest: PASS"

@@ -1,0 +1,80 @@
+{
+  "ok": true,
+  "score": "../analysis/eval/validation/session-10/overlap/score.abc",
+  "failures": [
+    {
+      "check": "simultaneity",
+      "tag": "FAIL",
+      "detail": "32 overlapping sixteenths",
+      "bars": {
+        "1": 16.0,
+        "2": 16.0
+      },
+      "total_units": 32.0
+    }
+  ],
+  "maps": {
+    "register": {
+      "target": 70,
+      "tolerance": 3.0,
+      "sections": {
+        "score": 65.4
+      },
+      "sections_out": [
+        {
+          "section": "score",
+          "mean": 65.4,
+          "bars": "1-2"
+        }
+      ],
+      "bars_out": [
+        1,
+        2
+      ]
+    },
+    "simultaneity": {
+      "bars": {
+        "1": 16.0,
+        "2": 16.0
+      },
+      "total_units": 32.0
+    },
+    "repeated": {
+      "bars": []
+    },
+    "distinct_bars": {
+      "duplicates": []
+    },
+    "top_duration": {
+      "duration_quarters": 4.0,
+      "share": 1.0,
+      "bars": [
+        1,
+        2
+      ]
+    },
+    "unbroken": {
+      "longest": {
+        "start_bar": 1,
+        "end_bar": 2,
+        "seconds": 6.0,
+        "notes": 8
+      },
+      "runs": [
+        {
+          "start_bar": 1,
+          "end_bar": 2,
+          "seconds": 6.0,
+          "notes": 8
+        }
+      ]
+    },
+    "tessitura": {
+      "bars": []
+    },
+    "pause": {
+      "lines": []
+    },
+    "phrases": null
+  }
+}

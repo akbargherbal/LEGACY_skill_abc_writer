@@ -1,0 +1,362 @@
+{
+  "ok": true,
+  "score": "../analysis/eval/validation/session-10/09-final/score.abc",
+  "failures": [],
+  "maps": {
+    "register": {
+      "target": 70,
+      "tolerance": 3.0,
+      "sections": {
+        "intro vocal": 65,
+        "verse": 68.3,
+        "chorus": 78.2,
+        "outro": 67.3
+      },
+      "sections_out": [
+        {
+          "section": "intro vocal",
+          "mean": 65,
+          "bars": "7-11"
+        },
+        {
+          "section": "chorus",
+          "mean": 78.2,
+          "bars": "37-69"
+        }
+      ],
+      "bars_out": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        13,
+        14,
+        16,
+        24,
+        27,
+        30,
+        34,
+        37,
+        38,
+        39,
+        40,
+        41,
+        51,
+        56,
+        58,
+        62,
+        65,
+        66,
+        67,
+        68,
+        69,
+        78,
+        80
+      ]
+    },
+    "simultaneity": {
+      "bars": {},
+      "total_units": 0
+    },
+    "repeated": {
+      "bars": [
+        {
+          "bar": 32,
+          "share": 0.5
+        }
+      ]
+    },
+    "distinct_bars": {
+      "duplicates": [
+        {
+          "bars": [
+            20,
+            52
+          ],
+          "count": 2
+        },
+        {
+          "bars": [
+            41,
+            69
+          ],
+          "count": 2
+        }
+      ]
+    },
+    "top_duration": {
+      "duration_quarters": 1.0,
+      "share": 0.424,
+      "bars": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        37,
+        38,
+        39,
+        40,
+        41,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        65,
+        66,
+        67,
+        68,
+        69,
+        77,
+        78,
+        79,
+        80
+      ]
+    },
+    "unbroken": {
+      "longest": {
+        "start_bar": 13,
+        "end_bar": 15,
+        "seconds": 8.25,
+        "notes": 23
+      },
+      "runs": [
+        {
+          "start_bar": 7,
+          "end_bar": 9,
+          "seconds": 7.5,
+          "notes": 23
+        },
+        {
+          "start_bar": 10,
+          "end_bar": 11,
+          "seconds": 4.88,
+          "notes": 19
+        },
+        {
+          "start_bar": 13,
+          "end_bar": 15,
+          "seconds": 8.25,
+          "notes": 23
+        },
+        {
+          "start_bar": 16,
+          "end_bar": 17,
+          "seconds": 4.88,
+          "notes": 15
+        },
+        {
+          "start_bar": 18,
+          "end_bar": 19,
+          "seconds": 5.25,
+          "notes": 14
+        },
+        {
+          "start_bar": 20,
+          "end_bar": 21,
+          "seconds": 4.88,
+          "notes": 14
+        },
+        {
+          "start_bar": 22,
+          "end_bar": 23,
+          "seconds": 5.25,
+          "notes": 15
+        },
+        {
+          "start_bar": 24,
+          "end_bar": 25,
+          "seconds": 4.88,
+          "notes": 14
+        },
+        {
+          "start_bar": 26,
+          "end_bar": 27,
+          "seconds": 5.25,
+          "notes": 14
+        },
+        {
+          "start_bar": 28,
+          "end_bar": 30,
+          "seconds": 7.88,
+          "notes": 20
+        },
+        {
+          "start_bar": 31,
+          "end_bar": 32,
+          "seconds": 5.25,
+          "notes": 15
+        },
+        {
+          "start_bar": 33,
+          "end_bar": 34,
+          "seconds": 4.88,
+          "notes": 13
+        },
+        {
+          "start_bar": 37,
+          "end_bar": 39,
+          "seconds": 8.25,
+          "notes": 24
+        },
+        {
+          "start_bar": 40,
+          "end_bar": 41,
+          "seconds": 5.62,
+          "notes": 13
+        },
+        {
+          "start_bar": 46,
+          "end_bar": 47,
+          "seconds": 5.25,
+          "notes": 12
+        },
+        {
+          "start_bar": 48,
+          "end_bar": 49,
+          "seconds": 4.5,
+          "notes": 13
+        },
+        {
+          "start_bar": 50,
+          "end_bar": 51,
+          "seconds": 4.88,
+          "notes": 11
+        },
+        {
+          "start_bar": 52,
+          "end_bar": 53,
+          "seconds": 4.5,
+          "notes": 13
+        },
+        {
+          "start_bar": 54,
+          "end_bar": 56,
+          "seconds": 8.25,
+          "notes": 21
+        },
+        {
+          "start_bar": 57,
+          "end_bar": 58,
+          "seconds": 4.88,
+          "notes": 11
+        },
+        {
+          "start_bar": 59,
+          "end_bar": 60,
+          "seconds": 5.25,
+          "notes": 11
+        },
+        {
+          "start_bar": 61,
+          "end_bar": 62,
+          "seconds": 4.88,
+          "notes": 13
+        },
+        {
+          "start_bar": 65,
+          "end_bar": 67,
+          "seconds": 8.25,
+          "notes": 23
+        },
+        {
+          "start_bar": 68,
+          "end_bar": 69,
+          "seconds": 5.62,
+          "notes": 13
+        },
+        {
+          "start_bar": 77,
+          "end_bar": 78,
+          "seconds": 5.25,
+          "notes": 13
+        },
+        {
+          "start_bar": 79,
+          "end_bar": 80,
+          "seconds": 6.0,
+          "notes": 13
+        }
+      ]
+    },
+    "tessitura": {
+      "bars": [
+        18,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        28,
+        31,
+        33,
+        37,
+        38,
+        39,
+        40,
+        41,
+        46,
+        47,
+        48,
+        49,
+        50,
+        52,
+        53,
+        54,
+        55,
+        57,
+        59,
+        61,
+        65,
+        66,
+        67,
+        68,
+        69,
+        77,
+        79
+      ]
+    },
+    "pause": {
+      "lines": []
+    },
+    "phrases": 26
+  }
+}

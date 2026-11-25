@@ -1,0 +1,2 @@
+OK ../analysis/eval/validation/session-10/08/score.abc
+  - parse OK; no dialect problem

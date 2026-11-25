@@ -1,0 +1,84 @@
+{
+  "key": "Dm",
+  "tempo": 80,
+  "meter": "4/4",
+  "unit": "1/16",
+  "bars": 82,
+  "syllables": 361,
+  "sections": [
+    "intro",
+    "verse",
+    "chorus",
+    "verse",
+    "chorus",
+    "outro"
+  ],
+  "simultaneity_exception": null,
+  "cadence": "tonic",
+  "melisma_min": 1.1,
+  "melisma_max": 1.45,
+  "register": {
+    "mean": 70,
+    "top": 80,
+    "max_top": 84,
+    "tolerance": 3
+  },
+  "tessitura_share_ge_c5_max": 0.8,
+  "chorus_lift_min": 5,
+  "max_top_duration_share": 0.65,
+  "min_distinct_durations": 5,
+  "ties_min": 1,
+  "min_fill_notes": 3,
+  "ins_active_share_min": 0.2,
+  "chords_min": 0,
+  "max_unbroken_seconds": 10,
+  "min_phrase_endings": 3,
+  "strict_shape": false,
+  "maqam": {
+    "name": "kurd",
+    "tonic": "D",
+    "degrees": [
+      "D",
+      "Eb",
+      "F",
+      "G",
+      "A",
+      "Bb",
+      "C"
+    ],
+    "resting": [
+      "D",
+      "F",
+      "A",
+      "Bb",
+      "C"
+    ]
+  },
+  "maqam_fit_min": 0.95,
+  "deviations": [
+    {
+      "bars": "1-6, 12, 35-36, 42-45, 63-64, 70-76",
+      "channel": "density",
+      "before": "the instrument doubles the voice throughout",
+      "after": "Ins plays an ostinato or solo only in instrumental bars and is silent under every sung phrase"
+    },
+    {
+      "bars": "11, 17, 21, 25, 34, 49, 53, 58, 62",
+      "channel": "gap rate",
+      "before": "an answer after every line",
+      "after": "one three-note instrumental answer in the rest of each even line only"
+    },
+    {
+      "bars": "37-41, 65-69",
+      "channel": "section register",
+      "before": "one verse-level register",
+      "after": "the chorus is transposed up two degrees, an eight-semitone lift, and changes guitar and orchestra texture"
+    },
+    {
+      "bars": "79-80",
+      "channel": "silence / gap placement",
+      "before": "the guitar answers the last line",
+      "after": "guitar and drums drop out; the voice holds the final qafla alone"
+    }
+  ]
+}

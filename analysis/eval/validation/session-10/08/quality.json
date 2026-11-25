@@ -1,0 +1,77 @@
+{
+  "ok": false,
+  "checks": [
+    {
+      "name": "unbroken",
+      "actual": 8.25,
+      "target": 10.0,
+      "ok": true,
+      "detail": "8.25s vs max 10s",
+      "bars": []
+    },
+    {
+      "name": "top_duration_share",
+      "actual": 0.782608695652174,
+      "target": 0.6,
+      "ok": false,
+      "detail": "78% vs max 60%",
+      "bars": []
+    },
+    {
+      "name": "distinct_bar_share",
+      "actual": 0.603448275862069,
+      "target": 0.75,
+      "ok": false,
+      "detail": "60% unique vs min 75%",
+      "bars": []
+    },
+    {
+      "name": "tessitura_share_ge_c5",
+      "actual": 0.935,
+      "target": 0.6,
+      "ok": false,
+      "detail": "94% at/above C5 vs max 60%",
+      "bars": []
+    },
+    {
+      "name": "pause hierarchy",
+      "actual": {
+        "max_identical_share": 0.48,
+        "distinct": 8,
+        "violations": [
+          "line 7: 0.38s < 0.50s"
+        ]
+      },
+      "target": {
+        "min_s": 0.5,
+        "section_end_min_s": 1.0,
+        "max_identical_share": 0.4,
+        "min_distinct_values": 2
+      },
+      "ok": false,
+      "detail": "1 short gap(s); max identical 48%; 8 distinct value(s)",
+      "bars": [
+        "7"
+      ]
+    }
+  ],
+  "targets": {
+    "unbroken_seconds_max": 10.0,
+    "top_duration_share_max": 0.6,
+    "distinct_bar_share_min": 0.75,
+    "tessitura_share_ge_c5_max": 0.6,
+    "pause": {
+      "min_s": 0.5,
+      "section_end_min_s": 1.0,
+      "max_identical_share": 0.4,
+      "min_distinct_values": 2
+    }
+  },
+  "measured": {
+    "unbroken_seconds_max": 8.25,
+    "top_duration_share": 0.782608695652174,
+    "distinct_bar_share": 0.603448275862069,
+    "tessitura_share_ge_c5": 0.935,
+    "phrases": 26
+  }
+}

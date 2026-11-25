@@ -1,0 +1,38 @@
+{
+  "key": "Dm",
+  "tempo": 80,
+  "meter": "4/4",
+  "unit": "1/16",
+  "bars": 82,
+  "syllables": 361,
+  "sections": ["intro", "verse", "chorus", "verse", "chorus", "outro"],
+  "simultaneity_exception": null,
+  "cadence": "tonic",
+  "melisma_min": 1.10,
+  "melisma_max": 1.45,
+  "register": {"mean": 74, "top": 84, "max_top": 86, "tolerance": 3},
+  "tessitura_share_ge_c5_max": 0.80,
+  "chorus_lift_min": 5,
+  "max_top_duration_share": 0.65,
+  "min_distinct_durations": 5,
+  "ties_min": 1,
+  "min_fill_notes": 3,
+  "ins_active_share_min": 0.20,
+  "chords_min": 0,
+  "max_unbroken_seconds": 10,
+  "min_phrase_endings": 3,
+  "strict_shape": false,
+  "maqam": {
+    "name": "kurd",
+    "tonic": "D",
+    "degrees": ["D", "Eb", "F", "G", "A", "Bb", "C"],
+    "resting": ["D", "F", "A", "Bb", "C"]
+  },
+  "maqam_fit_min": 0.95,
+  "deviations": [
+    {"bars": "1-6, 81-82", "channel": "section register", "before": "guitar under the voice", "after": "guitar alone owns the frame; voice silent"},
+    {"bars": "37-41, 65-69", "channel": "chorus register", "before": "chorus repeats the verse contour", "after": "chorus lifts into the upper jins, one c'' peak per chorus"},
+    {"bars": "42-45, 63-64, 70-76", "channel": "second-voice priority", "before": "an answer after every line", "after": "answers stop; guitar takes whole 4- and 7-bar spans"},
+    {"bars": "77-80", "channel": "section register", "before": "outro restates the chorus", "after": "outro drops to the lower jins, clean guitar, drums out"}
+  ]
+}

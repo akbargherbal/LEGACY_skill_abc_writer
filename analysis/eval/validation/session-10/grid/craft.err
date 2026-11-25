@@ -1,0 +1,1 @@
+WARN ../analysis/eval/validation/session-10/grid/score.abc: aggregate craft unavailable (ValueError: fewer than 4 phrases); the per-line table is still authoritative

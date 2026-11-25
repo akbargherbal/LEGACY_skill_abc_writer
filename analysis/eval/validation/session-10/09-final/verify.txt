@@ -1,0 +1,18 @@
+PASS bar count          82 bars
+PASS bar sums           every written bar = 16
+PASS strict_shape       false
+PASS register default   70
+PASS seed bars          82
+PASS seed Vocal         same bars as score
+PASS seed Ins           same bars as score
+PASS seed Drums         82 bars
+PASS drums out          silent 77-82
+PASS drums activity     76 active bars; 54 under the voice
+PASS core length        15 bars
+PASS core Vocal         first 15 bars of score
+PASS core Ins           first 15 bars of score
+PASS seed_sheet.md      10 numbered lines
+PASS notes.md           10 numbered lines
+PASS report.json        ok; measured bars 82
+
+PASS  0 fail, 0 warn; wrote ../analysis/eval/validation/session-10/09-final/verify.json
