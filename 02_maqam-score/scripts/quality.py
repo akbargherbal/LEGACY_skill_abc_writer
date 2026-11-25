@@ -34,6 +34,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import _craft_calibrate as cal  # noqa: E402
 import _craft_measure as cm  # noqa: E402
 import checker  # noqa: E402
+import copies  # noqa: E402
 import phrase_table  # noqa: E402
 
 DEFAULT_TARGETS = {
@@ -101,10 +102,25 @@ def check(score_path: Path, plan_path: Path, phrases_path: Path | None,
     add("top_duration_share", top, t, top is not None and top <= t + 1e-9,
         f"{top:.0%} vs max {t:.0%}")
 
-    distinct = craft.get("distinct_bar_share")
+    copy_bars_1based = copies.declared_copy_bars(plan, max_bars=score.n_bars)
+    copy_bars_0based = {b - 1 for b in copy_bars_1based}
+    if copy_bars_0based:
+        from collections import defaultdict
+        vocal_bars_map: dict[int, list[int]] = defaultdict(list)
+        for note in parsed["voices"]["Vocal"].notes:
+            if note["bar"] not in copy_bars_0based:
+                vocal_bars_map[note["bar"]].append(note["pitch"])
+        if vocal_bars_map:
+            cells = [tuple(p) for p in vocal_bars_map.values()]
+            distinct = len(set(cells)) / len(cells)
+        else:
+            distinct = craft.get("distinct_bar_share")
+    else:
+        distinct = craft.get("distinct_bar_share")
     t = float(targets["distinct_bar_share_min"])
+    excl_note = f" (excluding {len(copy_bars_0based)} copy bar(s))" if copy_bars_0based else ""
     add("distinct_bar_share", distinct, t, distinct is not None and distinct >= t - 1e-9,
-        f"{distinct:.0%} unique vs min {t:.0%}")
+        f"{distinct:.0%} unique vs min {t:.0%}{excl_note}")
 
     tess = shape.get("tessitura_share_ge_c5")
     t = float(targets["tessitura_share_ge_c5_max"])

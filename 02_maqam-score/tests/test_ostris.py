@@ -423,17 +423,29 @@ class OnlineTests(unittest.TestCase):
         folder, _result = self.write_plan()
         score = self.root / "demo.abc"
         write_text(score, DEMO_ABC)
-        report = check(score, folder / "skill_plan.json", out_dir=self.out)
+        report = check(score, folder / "skill_plan.json", out_dir=self.out,
+                       waive_lyrics=True)
         self.assertTrue(report["pass"], report["failures"])
         self.assertIn(report["class"], {"pass", "warn"})
         self.assertFalse(report["maqam_fit"]["available"])
         self.assertIsNotNone(report["skill_report"])
 
+    def test_check_requires_lyrics_or_explicit_waiver(self):
+        """New plans must not be silently auto-waived by the ostris wrapper."""
+        folder, _result = self.write_plan("lyrics-required")
+        score = self.root / "lyrics-demo.abc"
+        write_text(score, DEMO_ABC)
+        report = check(score, folder / "skill_plan.json", out_dir=self.out)
+        self.assertFalse(report["pass"])
+        self.assertTrue(any(item["code"] == "lyrics prosody"
+                            for item in report["failures"]), report["failures"])
+
     def test_check_fails_on_plan_mismatch(self):
         folder, _result = self.write_plan("mismatch", bars=9)
         score = self.root / "demo-mismatch.abc"
         write_text(score, DEMO_ABC)
-        report = check(score, folder / "skill_plan.json", out_dir=self.out)
+        report = check(score, folder / "skill_plan.json", out_dir=self.out,
+                       waive_lyrics=True)
         self.assertFalse(report["pass"])
         self.assertTrue(any(item["code"] == "bars" for item in report["failures"]))
 
@@ -445,7 +457,8 @@ class OnlineTests(unittest.TestCase):
         folder, result = self.write_plan("schema-plan")
         score = self.root / "schema-demo.abc"
         write_text(score, DEMO_ABC)
-        report = check(score, folder / "skill_plan.json", out_dir=self.out)
+        report = check(score, folder / "skill_plan.json", out_dir=self.out,
+                       waive_lyrics=True)
         split = build_split(self.cache, self.out)
         schemas = SKILL / "schemas"
         pairs = [
@@ -483,12 +496,14 @@ class OnlineTests(unittest.TestCase):
                 "check", str(score),
                 "--plan", str(plan_folder / "skill_plan.json"),
                 "--out", str(self.out),
+                "--waive-lyrics",
             ])
             strict = main([
                 "check", str(score),
                 "--plan", str(plan_folder / "skill_plan.json"),
                 "--out", str(self.out),
                 "--require-final-rest",
+                "--waive-lyrics",
             ])
         self.assertEqual(ok, 0)
         self.assertEqual(strict, 1)
@@ -575,7 +590,7 @@ class CanonicalTests(unittest.TestCase):
 
     def test_contract_pins_match_current_skill(self):
         checks = verify()
-        self.assertEqual(SKILL_VERSION, "0.4.0")
+        self.assertEqual(SKILL_VERSION, "0.8.1")
         self.assertTrue(all(check["ok"] for check in checks), checks)
 
 

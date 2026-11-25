@@ -20,7 +20,7 @@ from pathlib import Path
 from .priors import load_priors, plan_targets
 from .sources import SourceError
 
-PLAN_VERSION = "m3-v1"
+PLAN_VERSION = "0.8.0"
 REQUIRED_PLAN_KEYS = (
     "key",
     "tempo",
@@ -241,10 +241,40 @@ def build_plan(manifest: dict, priors: dict, out_dir: str | Path) -> dict:
         "voices": "vocal+ins",
         "cadence": manifest.get("cadence") or "any",
         "deviations": manifest.get("deviations") or [
-            "plan generated from objective corpus priors",
-            "no maqam label is claimed or implied",
-            "section names are structural, not maqam functions",
+            {
+                "bars": f"1-{bars}",
+                "channel": "section register",
+                "before": "flat prior register across sections",
+                "after": "composer to shape section register arc in arrangement",
+                "unverifiable": True,
+                "reason": "skeleton from corpus priors; fill assert after drafting core",
+            },
+            {
+                "bars": f"1-{bars}",
+                "channel": "gap rate",
+                "before": "default answer after every sung line",
+                "after": "composer to thin or vary answer rate by section",
+                "unverifiable": True,
+                "reason": "skeleton from corpus priors; fill assert after drafting core",
+            },
+            {
+                "bars": f"1-{bars}",
+                "channel": "density",
+                "before": "uniform density across the form",
+                "after": "composer to declare density contrast by section",
+                "unverifiable": True,
+                "reason": "skeleton from corpus priors; fill assert after drafting core",
+            },
         ],
+        "copies": manifest.get("copies") if "copies" in manifest else {
+            "status": "unfilled",
+            "entries": [],
+        },
+        "arrangement": manifest.get("arrangement") if "arrangement" in manifest else {
+            "status": "unfilled",
+            "section_plan": [],
+            "ins_entries": [],
+        },
         "maqam": None,
         "maqam_conditioned": False,
         "source": {

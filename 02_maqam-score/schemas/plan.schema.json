@@ -72,12 +72,155 @@
               "bars": { "type": "string" },
               "channel": { "type": "string" },
               "before": { "type": "string" },
-              "after": { "type": "string" }
+              "after": { "type": "string" },
+              "assert": {
+                "type": "object",
+                "required": ["metric", "range", "op", "value"],
+                "properties": {
+                  "metric": {
+                    "type": "string",
+                    "enum": [
+                      "answer_rate",
+                      "ins_notes_per_bar",
+                      "vocal_notes_per_bar",
+                      "vocal_median_pitch",
+                      "ins_active_share",
+                      "silence_share"
+                    ]
+                  },
+                  "range": { "type": "string", "minLength": 1 },
+                  "op": {
+                    "type": "string",
+                    "enum": ["<", "<=", ">", ">=", "==", "=", "!=", "between", "in"]
+                  },
+                  "value": {
+                    "oneOf": [
+                      { "type": "number" },
+                      {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": { "type": "number" }
+                      }
+                    ]
+                  }
+                }
+              },
+              "unverifiable": { "type": "boolean" },
+              "reason": { "type": "string", "minLength": 1 }
             }
           }
         ]
       }
     },
+    "copies": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["status", "entries"],
+          "properties": {
+            "status": { "type": "string", "const": "unfilled" },
+            "entries": { "type": "array" }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "mode": { "type": "string", "const": "independent" },
+              "of_bars": { "type": "string" },
+              "bars": { "type": "string" },
+              "voices": {
+                "oneOf": [
+                  { "type": "string", "enum": ["Vocal", "Ins"] },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "enum": ["Vocal", "Ins"] }
+                  }
+                ]
+              },
+              "changes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["kind"],
+                  "properties": {
+                    "bar": { "type": "integer", "minimum": 1 },
+                    "bars": { "type": "string" },
+                    "voice": { "type": "string", "enum": ["Vocal", "Ins"] },
+                    "kind": {
+                      "type": "string",
+                      "enum": ["octave", "ornament", "cadence", "density", "truncation", "other"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "arrangement": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "const": "unfilled" },
+        "section_plan": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["bars"],
+            "properties": {
+              "bars": { "type": "string" },
+              "role": { "type": "string" },
+              "vocal_notes_per_bar": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": { "type": "number", "minimum": 0 }
+              },
+              "ins_notes_per_bar": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": { "type": "number", "minimum": 0 }
+              },
+              "ins_active_share": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": { "type": "number", "minimum": 0, "maximum": 1 }
+              },
+              "answer_rate": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          }
+        },
+        "ins_entries": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "integer", "minimum": 1 },
+              {
+                "type": "object",
+                "required": ["bar"],
+                "properties": {
+                  "bar": { "type": "integer", "minimum": 1 },
+                  "tolerance_bars": { "type": "integer", "minimum": 0 }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "allow_unmarked": { "type": "array", "items": { "type": "string" } },
+    "max_excess_notes_per_line": { "type": "integer", "minimum": 0 },
     "maqam": {
       "oneOf": [
         { "type": "null" },

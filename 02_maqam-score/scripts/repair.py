@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import _craft_calibrate as cal  # noqa: E402
 import _craft_measure as cm  # noqa: E402
 import checker  # noqa: E402
+import copies  # noqa: E402
 import phrase_table  # noqa: E402
 
 PC_NAME = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
@@ -93,9 +94,12 @@ def _maps(score, parsed, plan: dict, phrases: dict | None) -> dict:
             if share >= 0.5:
                 repeated_bars.append({"bar": bar, "share": round(share, 2)})
 
-    # Literal bar repetition: duplicate (pitch, duration) tuples.
+    # Literal bar repetition: duplicate (pitch, duration) tuples (excluding declared copy bars).
+    copy_bars_1based = copies.declared_copy_bars(plan, max_bars=score.n_bars)
     keys: dict[tuple, list[int]] = defaultdict(list)
     for bar, notes in by_bar.items():
+        if bar in copy_bars_1based:
+            continue
         keys[_bar_key(sorted(notes, key=lambda n: n.onset))].append(bar)
     duplicate_bars = [{"bars": sorted(v), "count": len(v)}
                       for v in keys.values() if len(v) > 1]

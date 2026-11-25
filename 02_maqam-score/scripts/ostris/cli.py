@@ -272,6 +272,8 @@ def cmd_check(args) -> int:
         out_dir=args.out,
         require_final_rest=args.require_final_rest,
         strict_style=args.strict_style,
+        lyrics_path=args.lyrics,
+        waive_lyrics=args.waive_lyrics,
     )
     if args.json:
         _print_json(report)
@@ -427,6 +429,9 @@ def build_parser() -> argparse.ArgumentParser:
     check_parser = sub.add_parser("check", help="run the skill checker, priors, and similarity")
     check_parser.add_argument("score", type=Path)
     check_parser.add_argument("--plan", type=Path, required=True)
+    check_parser.add_argument("--lyrics", type=Path)
+    check_parser.add_argument("--waive-lyrics", action="store_true",
+                              help="explicitly waive lyrics prosody recomputation")
     check_parser.add_argument("--report", type=Path)
     check_parser.add_argument("--out", type=Path, default=_default_out())
     check_parser.add_argument("--require-final-rest", action="store_true")

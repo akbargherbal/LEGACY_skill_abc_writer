@@ -22,7 +22,7 @@ from .sources import SourceError
 from .stats import percentile_of
 
 CHECKER = SKILL_ROOT / "scripts" / "checker.py"
-HARD_CLASSES = {"contract", "sanity", "structure"}
+HARD_CLASSES = {"contract", "sanity", "structure", "exact"}
 PRIOR_METRICS = (
     "chords_per_bar",
     "silence_share",
@@ -36,7 +36,8 @@ PRIOR_METRICS = (
 
 
 def _run_checker(score: Path, plan: Path, *, require_final_rest: bool,
-                 strict_style: bool) -> tuple[dict | None, str]:
+                 strict_style: bool, lyrics_path: Path | None = None,
+                 waive_lyrics: bool = False) -> tuple[dict | None, str]:
     if not CHECKER.is_file():
         raise SourceError(f"missing the skill checker: {CHECKER}")
     with tempfile.TemporaryDirectory(prefix="ostris-check-") as tmp:
@@ -50,6 +51,10 @@ def _run_checker(score: Path, plan: Path, *, require_final_rest: bool,
             "--json",
             str(report),
         ]
+        if lyrics_path is not None:
+            command.extend(["--lyrics", str(lyrics_path)])
+        elif waive_lyrics:
+            command.append("--waive-lyrics")
         if require_final_rest:
             command.append("--require-final-rest")
         if strict_style:
@@ -100,7 +105,9 @@ def check(score_path: str | Path, plan_path: str | Path,
           report_path: str | Path | None = None,
           out_dir: str | Path | None = None, *,
           require_final_rest: bool = False,
-          strict_style: bool = False) -> dict:
+          strict_style: bool = False,
+          lyrics_path: str | Path | None = None,
+          waive_lyrics: bool = False) -> dict:
     score = Path(score_path)
     plan_file = Path(plan_path)
     if not score.is_file():
@@ -131,6 +138,8 @@ def check(score_path: str | Path, plan_path: str | Path,
             plan_file,
             require_final_rest=require_final_rest,
             strict_style=strict_style,
+            lyrics_path=Path(lyrics_path) if lyrics_path else None,
+            waive_lyrics=waive_lyrics,
         )
         if skill_report is None:
             failures.append(

@@ -18,6 +18,8 @@ import checker  # noqa: E402
 EXAMPLE = SKILL / "example" / "score.abc"
 PLAN = SKILL / "example" / "plan.json"
 PHRASES = SKILL / "example" / "phrases.json"
+LYRICS = SKILL / "example" / "lyrics.txt"
+LYRICS_TEXT = LYRICS.read_text(encoding="utf-8")
 
 MULTI_METER = """X:1
 T:
@@ -51,8 +53,15 @@ class CheckerTests(unittest.TestCase):
     def test_example_passes(self):
         score = checker.parse(EXAMPLE.read_text(encoding="utf-8"))
         plan = json.loads(PLAN.read_text(encoding="utf-8"))
-        results, measured = checker.check(score, plan, calibration=self.cal)
+        results, measured = checker.check(
+            score, plan, lyrics_text=LYRICS_TEXT, calibration=self.cal)
         self.assertFalse([r for r in results if r[0] == "FAIL"], results)
+        # example/ is a 16-bar syntax miniature, not a full-length song; the
+        # new padding-risk and bars-budget checks correctly warn on it.
+        self.assertEqual(
+            {r[1] for r in results if r[0] == "WARN"},
+            {"duration cap", "bars budget"},
+        )
         self.assertEqual(measured["bars"], 16)
         self.assertEqual(measured["syllables"], 16)
 
@@ -66,7 +75,8 @@ class CheckerTests(unittest.TestCase):
         score = checker.parse(EXAMPLE.read_text(encoding="utf-8"))
         plan = json.loads(PLAN.read_text(encoding="utf-8"))
         plan["min_fill_notes"] = 99  # impossible style target
-        results, _ = checker.check(score, plan, calibration=self.cal)
+        results, _ = checker.check(score, plan, lyrics_text=LYRICS_TEXT,
+                                   calibration=self.cal)
         self.assertFalse([r for r in results if r[0] == "FAIL"], results)
         self.assertTrue([r for r in results if r[0] == "WARN"
                          and r[1] == "answer fill length"], results)
@@ -94,14 +104,20 @@ class CheckerTests(unittest.TestCase):
         self.assertTrue([r for r in results if r[0] == "FAIL"
                          and r[1] == "final rest"], results)
 
-    def test_example_passes_strict_shape_and_style(self):
+    def test_example_miniature_trips_cap_checks_under_strict_shape(self):
         score = checker.parse(EXAMPLE.read_text(encoding="utf-8"))
         plan = json.loads(PLAN.read_text(encoding="utf-8"))
         phrases = json.loads(PHRASES.read_text(encoding="utf-8"))
         results, measured = checker.check(
             score, plan, strict_style=True, strict_shape=True,
-            phrase_plan=phrases, require_final_rest=True, calibration=self.cal)
-        self.assertFalse([r for r in results if r[0] in ("FAIL", "WARN")], results)
+            phrase_plan=phrases, require_final_rest=True,
+            lyrics_text=LYRICS_TEXT, calibration=self.cal)
+        # The 16-bar miniature is below the corpus cap-min (0.403 < 0.708) and
+        # bars budget (16 vs 35); strict_shape promotes those banded checks
+        # to hard FAIL, while everything else passes.
+        fails = {name for tag, name, _ok, _d, _c in results if tag == "FAIL"}
+        self.assertEqual(fails, {"duration cap", "bars budget"})
+        self.assertEqual([r for r in results if r[0] == "WARN"], [])
         self.assertTrue(measured["phrases_checked"])
 
     def test_strict_shape_is_backward_compatible(self):

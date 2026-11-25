@@ -11,6 +11,7 @@ All times are exact fractions of a quarter note. See references/abc-editing.md.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import re
@@ -289,6 +290,148 @@ def strip_chords(text: str, keep_voice="both") -> str:
     if keep_voice != "both":
         fail(any(v.notes for name, v in result.voices.items() if name != keep_voice), "Unselected voice was not silenced")
     return output
+
+
+def lint_text(text: str) -> list[dict]:
+    """Return every header/group/bar error, not only the first one.
+
+    ``parse`` is fail-closed and stops at the first bad bar. A composer needs
+    the whole list in one pass, with the voice and bar number, so it can fix
+    the file once instead of running the checker five times.
+    """
+    errors: list[dict] = []
+
+    def add(voice: str, bar, message: str, group=None) -> None:
+        errors.append({"voice": voice, "bar": bar, "group": group,
+                       "message": str(message)})
+
+    lines = text.splitlines()
+    if len(lines) < 8:
+        add("header", 0, "incomplete native two-voice ABC (expected an 8-line header)")
+        return errors
+    if lines[0:2] != ["X:1", "T:"]:
+        add("header", 0, "expected native X:1 and blank T: header")
+    meter = None
+    if not lines[2].startswith("M:"):
+        add("header", 0, "missing header M:")
+    else:
+        try:
+            meter = meter_value(lines[2][2:])
+        except AbcError as exc:
+            add("header", 0, str(exc))
+    unit = None
+    unit_match = re.fullmatch(r"L:1/([1-9][0-9]*)", lines[3])
+    if unit_match is None:
+        add("header", 0, "expected L:1/<power of two>")
+    else:
+        denominator = int(unit_match.group(1))
+        if denominator > 1024 or denominator & (denominator - 1) != 0:
+            add("header", 0, "unsupported L: denominator")
+        else:
+            unit = Fraction(1, denominator)
+    if re.fullmatch(r"Q:1/4=([1-9][0-9]*)", lines[4]) is None:
+        add("header", 0, "expected integer quarter-note tempo Q:1/4=<BPM>")
+    expected_voices = ['V: Vocal clef=treble name="Vocal Melody" snm="Vocal"',
+                       'V: Ins clef=treble name="Ins Melody" snm="Inst."']
+    if lines[5:7] != expected_voices:
+        add("header", 0, "preserve the native Vocal and Ins voice definitions")
+    key = None
+    if not lines[7].startswith("K:"):
+        add("header", 0, "missing header K:")
+    else:
+        key = lines[7][2:]
+        try:
+            key_accidentals(key)
+        except AbcError as exc:
+            add("header", 0, str(exc))
+    if meter is None or unit is None or key is None:
+        return errors
+
+    voices = {name: Voice(meter, key, keys=[(Fraction(0), key)]) for name in VOICES}
+    cursor = 8
+    group = 0
+    while cursor < len(lines):
+        while cursor < len(lines) and lines[cursor].startswith("% "):
+            cursor += 1
+        if cursor >= len(lines):
+            add("?", 0, "dangling section comment without music")
+            break
+        group += 1
+        counts = []
+        for name in VOICES:
+            voice = voices[name]
+            if cursor >= len(lines) or lines[cursor] != f"V: {name}":
+                add(name, len(voice.bars) + 1, f"group {group}: expected V: {name}", group)
+                # Skip to the next group header if this one is malformed.
+                while cursor < len(lines) and lines[cursor] != "V: Vocal":
+                    cursor += 1
+                break
+            cursor += 1
+            while cursor < len(lines) and lines[cursor].startswith(("M:", "K:")):
+                field_name, value = lines[cursor].split(":", 1)
+                if field_name == "M":
+                    try:
+                        voice.meter = meter_value(value)
+                    except AbcError as exc:
+                        add(name, len(voice.bars) + 1, str(exc), group)
+                else:
+                    try:
+                        key_accidentals(value)
+                        voice.key = value
+                        voice.keys.append((voice.time, value))
+                    except AbcError as exc:
+                        add(name, len(voice.bars) + 1, str(exc), group)
+                cursor += 1
+            if cursor >= len(lines):
+                add(name, len(voice.bars) + 1, f"group {group}: missing music line", group)
+                break
+            line = lines[cursor]
+            cursor += 1
+            if not line.endswith("|"):
+                add(name, len(voice.bars) + 1, f"group {group}: music line must end with a plain barline", group)
+                continue
+            raw_bars = []
+            for raw in line[:-1].split("|"):
+                raw = raw.strip()
+                if not raw:
+                    add(name, len(voice.bars) + 1, f"group {group}: empty measure", group)
+                    continue
+                rest = re.fullmatch(r"Z([2-4])?", raw)
+                if rest:
+                    raw_bars.extend(["Z"] * int(rest.group(1) or "1"))
+                else:
+                    raw_bars.append(raw)
+            counts.append(len(raw_bars))
+            for body in raw_bars:
+                bar_no = len(voice.bars) + 1
+                trial = copy.deepcopy(voice)
+                try:
+                    parse_bar(body, trial, unit, f"{name} bar {bar_no}")
+                except AbcError as exc:
+                    add(name, bar_no, str(exc), group)
+                    # Keep the bar grid advancing so later bar numbers stay true.
+                    voice.pending = None
+                    voice.bars.append((voice.time, Fraction(4 * voice.meter[0], voice.meter[1]), voice.meter))
+                    voice.time += Fraction(4 * voice.meter[0], voice.meter[1])
+                    continue
+                voices[name] = trial
+        if len(counts) == 2 and counts[0] != counts[1]:
+            add("Vocal+Ins", 0, f"group {group}: voices have different measure counts", group)
+        if cursor >= len(lines):
+            break
+        # A malformed group may have skipped its Ins block; stop rather than
+        # inventing bars.
+        if counts and len(counts) < 2:
+            break
+    if len(errors) == 0:
+        for name, voice in voices.items():
+            if voice.pending is not None:
+                add(name, len(voice.bars), "unresolved tie at end of score")
+        if voices["Vocal"].bars != voices["Ins"].bars:
+            add("Vocal+Ins", 0, "voice meter/time grids differ")
+        if voices["Vocal"].keys != voices["Ins"].keys:
+            add("Vocal+Ins", 0, "voice key-change timelines differ")
+    return errors
 
 
 def main() -> int:

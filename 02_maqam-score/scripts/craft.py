@@ -79,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 f"  {r.get('line', '?'):>4} {str(r.get('section',''))[:12]:<12} "
                 f"{r.get('bars',''):<7} {str(r.get('syllables','-')):>4} "
-                f"{r.get('notes',0):>5} {str(r.get('start_beat','-')):>4} "
+                f"{(r.get('notes') if r.get('notes') is not None else '-'):>5} {str(r.get('start_beat','-')):>4} "
                 f"{str(r.get('rhythm_cell',''))[:22]:<22} "
                 f"{str(r.get('rest_after_s','-')):>10} "
                 f"{str(r.get('unbroken_s','-')):>8} "
@@ -91,6 +91,11 @@ def main(argv: list[str] | None = None) -> int:
         s = table["summary"]
         print(f"  lyric lines {s['lyric_lines']}  detected phrases {s['detected_phrases']}  "
               f"merged {s['merged_lines']}")
+        if s.get("missing_lines"):
+            print(f"  INCOMPLETE: {s['missing_lines']} line(s) have no bars in this file; "
+                  "the endings are not inferred")
+        else:
+            print("  COMPLETE: every lyric line has bars in this file")
 
     target = args.json or (args.out / "craft.json" if args.out else None)
     if target:

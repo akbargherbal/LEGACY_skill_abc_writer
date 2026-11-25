@@ -1,10 +1,10 @@
-.PHONY: test selftest acceptance zip zip-public release check-corpus craft offline-check ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval suno-build suno-check remix-build remix-verify remix-test remix-offline remix-zip remix-zip-public remix-release clean
+.PHONY: test selftest acceptance zip zip-public release check-corpus craft offline-check session12 measure-session ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval suno-build suno-check remix-build remix-verify remix-test remix-offline remix-zip remix-zip-public remix-release clean
 
 CORPUS ?= $(HOME)/Jupyter_Notebooks/OpenCode/arabmaqamrock/datasets/five_stars
 DIST := dist
 SKILL_NAME := abc-score-writer
 VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '02_maqam-score/scripts'); from ostris.contract import SKILL_VERSION; print(SKILL_VERSION)")
-SKILL_RELEASE ?= 0.7.0
+SKILL_RELEASE ?= 0.8.1
 REMIX_VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '03_abc_remixer/scripts'); from remix.shared import REMIX_VERSION; print(REMIX_VERSION)")
 REMIX_DATA := 03_abc_remixer/data/remix
 SUNO_PKL ?= data/SUNO_ABC_SCORE_DATASET.pkl
@@ -52,6 +52,15 @@ check-corpus:
 
 craft:
 	python3 analysis/measure_craft.py --corpus "$(CORPUS)" --out analysis/out
+
+# Build the session-12 drop (skill + input + one-line prompt + agent config).
+session12: zip
+	scripts/package_session.sh "$(DIST)"
+
+# Measure an exported session against the 10x budget.
+SESSION ?= analysis/eval/inbox/deepseek_session_11/opencode_session_11.json
+measure-session:
+	python3 analysis/measure_session.py "$(SESSION)" --score "$(SCORE)"
 
 ostris-sync:
 	@test -n "$(DATA_ROOT)" || { echo "set DATA_ROOT=gs://<bucket> or a local data root"; exit 1; }

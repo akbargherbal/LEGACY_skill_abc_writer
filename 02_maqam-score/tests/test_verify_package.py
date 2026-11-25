@@ -14,6 +14,7 @@ from pathlib import Path
 
 SKILL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SKILL / "scripts"))
+import checker  # noqa: E402
 import verify_package as vp  # noqa: E402
 
 EXAMPLE = SKILL / "example" / "score.abc"
@@ -165,6 +166,48 @@ class ExampleTests(unittest.TestCase):
             payload = json.loads(out.read_text(encoding="utf-8"))
         self.assertEqual(code, 0, payload)
         self.assertTrue(payload["ok"])
+
+    def test_legacy_plan_waivers_do_not_fail_package(self):
+        """A legacy plan warns in checker and passes verify_package via waivers."""
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            plan = json.loads(PLAN.read_text(encoding="utf-8"))
+            for key in ("plan_version", "copies", "arrangement"):
+                plan.pop(key, None)
+            legacy_plan = tmp_path / "legacy_plan.json"
+            legacy_plan.write_text(json.dumps(plan), encoding="utf-8")
+            lyrics = (SKILL / "example" / "lyrics.txt").read_text(encoding="utf-8")
+            results, measured = checker.check(
+                checker.parse(EXAMPLE.read_text(encoding="utf-8")),
+                plan, lyrics_text=lyrics,
+                calibration=checker.load_calibration(),
+            )
+            self.assertFalse([r for r in results if r[0] == "FAIL"], results)
+            self.assertFalse(measured["copies_checked"])
+            self.assertFalse(measured["binding_checked"])
+            report = {
+                "ok": True,
+                "waivers": measured["waivers"],
+                "prosody_checked": measured["prosody_checked"],
+                "copies_checked": measured["copies_checked"],
+                "binding_checked": measured["binding_checked"],
+                "measured": measured,
+            }
+            report_path = tmp_path / "report.json"
+            report_path.write_text(json.dumps(report), encoding="utf-8")
+            out = tmp_path / "verify.json"
+            code = vp.main([
+                "--score", str(EXAMPLE),
+                "--plan", str(legacy_plan),
+                "--report", str(report_path),
+                "--json", str(out),
+            ])
+            payload = json.loads(out.read_text(encoding="utf-8"))
+        self.assertEqual(code, 0, payload)
+        self.assertTrue(any(c["name"] == "copies_checked" and c["tag"] == "WARN"
+                            for c in payload["checks"]), payload["checks"])
+        self.assertTrue(any(c["name"] == "binding_checked" and c["tag"] == "WARN"
+                            for c in payload["checks"]), payload["checks"])
 
     def test_bad_bar_sum_fails(self):
         with tempfile.TemporaryDirectory() as tmp:

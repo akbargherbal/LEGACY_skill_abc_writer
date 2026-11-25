@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "deepseek/deepseek-flash#high",
+  "default_agent": "composer",
+  "skills": ["./skills"],
+  "permissions": [
+    { "action": "skill", "resource": "abc-score-writer", "effect": "allow" }
+  ],
+  "update": "disable",
+  "share": "disabled"
+}

@@ -12,9 +12,18 @@ from pathlib import Path
 SKILL = Path(__file__).resolve().parents[1]
 SYLLABIFY = SKILL / "scripts" / "syllabify.py"
 LYRICS = SKILL / "example" / "lyrics.txt"
+sys.path.insert(0, str(SKILL / "scripts"))
+import syllabify  # noqa: E402
 
 
 class SyllabifyTests(unittest.TestCase):
+    def test_hand_checked_syllable_counts(self):
+        """Known vocalised lines must count exactly as written."""
+        info = syllabify.analyze_lyrics("يَا\nحَبِيبِي\n", tempo=80)
+        self.assertEqual(info["syllables_per_line"], [1, 3])
+        self.assertEqual(info["syllables"], 4)
+        self.assertEqual(info["words"], 2)
+
     def test_phrase_sidecar_has_lines_and_pauses(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "phrases.json"

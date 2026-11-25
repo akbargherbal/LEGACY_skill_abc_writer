@@ -9,12 +9,12 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-SKILL_VERSION = "0.4.0"
+SKILL_VERSION = "0.8.1"
 
 PINNED = {
-    "checker.py": "d344a7631d8aaf9f6733353d66d6a628cd3e25aa85a05952253921f4c8f3aee2",
-    "calibration.json": "9ef8cf61e0b7db4cc2c67b69f1ab4ef8edfa012f65e163f5b09297f73410cd2d",
-    "abc_tools.py": "e99e5cf9dff4647f48322e3319065ba793e7dbc808222e1848bab7aa8c4bd11c",
+    "checker.py": "e047c476ada390405a999deac147d2855ca82f1c6b7aa1023737e7fde17ac981",
+    "calibration.json": "329eaa690879b354af495d7ff20ed2d03a70facae0ca088e91df6707458cf2fa",
+    "abc_tools.py": "d56d281fd78856626129cd0a7aef327de6fc03403d9d0f286b1950fdc1df44a6",
 }
 
 SCRIPTS = Path(__file__).resolve().parents[1]

@@ -76,7 +76,8 @@ class BundledDataTest(unittest.TestCase):
     def test_check_uses_bundled_priors_and_similarity(self):
         score = SKILL / "example" / "score.abc"
         plan = SKILL / "example" / "plan.json"
-        report = check(score, plan, out_dir=BUNDLED_DATA)
+        lyrics = SKILL / "example" / "lyrics.txt"
+        report = check(score, plan, out_dir=BUNDLED_DATA, lyrics_path=lyrics)
         self.assertTrue(report["pass"], report["failures"])
         self.assertIsNotNone(report.get("prior"))
         self.assertIsNotNone(report.get("similarity"))

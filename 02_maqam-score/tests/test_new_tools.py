@@ -95,8 +95,15 @@ class VerifyStateTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.dir = Path(self.tmp.name)
         self.report = self.dir / "report.json"
-        self.report.write_text(json.dumps({"ok": True, "measured": {"bars": 16}}),
-                               encoding="utf-8")
+        self.report.write_text(json.dumps({
+            "ok": True,
+            "measured": {
+                "bars": 16,
+                "prosody_checked": True,
+                "copies_checked": True,
+                "binding_checked": True,
+            },
+        }), encoding="utf-8")
         self.state = self.dir / "state.json"
         self.state.write_text(json.dumps({
             "phase": "checks", "last_artifact": "score.abc",

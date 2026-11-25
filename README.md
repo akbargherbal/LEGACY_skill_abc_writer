@@ -3,7 +3,7 @@
 Source of the **`maqam-score`** skill and the 177-track calibration that
 justifies its numbers.
 
-**Version:** 0.4.0 (skill contract) · tools 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
+**Version:** 0.8.1 (skill) · contract 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
 **Date:** 2026-11-23
 
 ## Layout
@@ -44,6 +44,33 @@ make remix-build     # build the 670-score remixer store
 make remix-test      # remixer unit tests
 make remix-release   # remixer tests + verify + full/public zips + checksums
 ```
+
+## 0.8.1 — the line workflow
+
+The composer no longer writes `score.abc` freehand. `02_maqam-score/scripts/score_cli.py`
+owns the file and the arithmetic:
+
+```bash
+python3 02_maqam-score/scripts/score_cli.py init --tempo 80 --bars 86
+python3 02_maqam-score/scripts/score_cli.py line 1 --vocal "D:4 F:2 G:2 | A:8" --ins "Z|Z"
+python3 02_maqam-score/scripts/score_cli.py check --bars 9-16
+python3 02_maqam-score/scripts/score_cli.py release
+python3 02_maqam-score/scripts/score_cli.py seed
+```
+
+`line` pads the bar tail with rests and lints the whole file before writing;
+`core` gates expansion on a 5-line review; `lint` reports every error in one
+pass; `check` prints the `repair.py` map on a hard failure; `plan refresh`
+re-derives the arrangement. The session package (skill + input + one-line
+prompt + agent/plugin configuration, no `task.md`) is built with:
+
+```bash
+make session12
+python3 analysis/measure_session.py opencode_session_12.json --score score.abc --max-ratio 10
+```
+
+The guard plugin pins `deepseek/deepseek-flash#high` and caps a model call at
+8,000 output tokens; the composer cannot edit `score.abc` directly.
 
 ## Remixer
 

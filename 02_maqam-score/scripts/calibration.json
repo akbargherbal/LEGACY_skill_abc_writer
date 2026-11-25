@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-23c",
+  "version": "2026-11-25",
   "corpus": {
     "name": "five_stars/177",
     "n": 177,
@@ -330,13 +330,126 @@
     "strict_shape_default": false
   },
   "rules": {
-    "hard": "contract + sanity (9: 6 validity + 3 shape)",
+    "hard": "contract + sanity + exact (9 sanity: 6 validity + 3 shape)",
     "style": "warn by default; FAIL only with --strict-style",
     "plan_style_targets": "warn by default; strict_shape makes declared shape targets hard; cadence=tonic is always hard",
+    "banded": "warn by default; FAIL only when strict_shape is true",
+    "unverifiable": "listed as declared, not verifiable; never a pass",
     "final_rest": "warn by default; --require-final-rest makes it a render contract",
     "sections": "normalized subsequence, warn by default"
   },
-  "skill_version": "0.4.0",
+  "cap_check": {
+    "cap_warn_ratio": {
+      "value": 1.0034852782857882,
+      "class": "banded",
+      "basis": "corpus audio_over_cap P95 (five_stars/177)",
+      "n": 177,
+      "validation": "in-sample"
+    },
+    "cap_fail_ratio": {
+      "value": 1.15,
+      "class": "exact",
+      "basis": "margin above corpus max 1.098",
+      "n": 177,
+      "validation": "in-sample/unvalidated"
+    },
+    "cap_min_ratio": {
+      "value": 0.7080330333089541,
+      "class": "banded",
+      "basis": "corpus audio_over_cap min (padding risk)",
+      "n": 177,
+      "validation": "in-sample"
+    },
+    "cap_confirmed": {
+      "value": false,
+      "class": "design",
+      "basis": "moves FAIL threshold to 1.00 once renderer truncation is confirmed",
+      "n": 0,
+      "validation": "unvalidated"
+    },
+    "bars_budget_tolerance": {
+      "value": 0.05,
+      "class": "banded",
+      "basis": "pure-4/4 bar prediction within +/-5% of syllabify budget",
+      "n": 20,
+      "validation": "in-sample"
+    }
+  },
+  "alignment_check": {
+    "max_note_deficit_warn": {
+      "value": 1,
+      "class": "banded",
+      "basis": "design: deficit <=1 warns (elision/merged syllables), >1 fails exact",
+      "n": 0,
+      "validation": "unvalidated"
+    },
+    "max_excess_notes_per_line": {
+      "value": 8,
+      "class": "banded",
+      "basis": "design/plan cap on excess notes over syllables per line",
+      "n": 0,
+      "validation": "unvalidated"
+    },
+    "pace_p5": {
+      "value": 2.2369668246445498,
+      "class": "banded",
+      "basis": "corpus units16_per_syllable_vocal_bars P5 (five_stars/177)",
+      "n": 177,
+      "validation": "in-sample"
+    },
+    "pace_p95": {
+      "value": 4.885714285714286,
+      "class": "banded",
+      "basis": "corpus units16_per_syllable_vocal_bars P95 (five_stars/177)",
+      "n": 177,
+      "validation": "in-sample"
+    },
+    "max_bar_span_delta": {
+      "value": 1,
+      "class": "banded",
+      "basis": "design: line bar span within +/-1 bar of allocated bars",
+      "n": 0,
+      "validation": "unvalidated"
+    },
+    "pickup_beats": {
+      "value": 1,
+      "class": "design",
+      "basis": "skill &-of-4 pickup rule (window starts 1 beat before bar_start)",
+      "n": 0,
+      "validation": "design"
+    },
+    "heavy_outlier_iqr_factor": {
+      "value": 1.5,
+      "class": "banded",
+      "basis": "within-song Tukey IQR outlier for heavy-syllable proxy (partial fix, no corpus)",
+      "n": 0,
+      "validation": "unvalidated"
+    }
+  },
+  "binding_check": {
+    "min_eligible_phrases_for_answer_rate": {
+      "value": 4,
+      "class": "design",
+      "basis": "small-sample guard: <4 eligible phrases gives insufficient sample, no verdict",
+      "n": 0,
+      "validation": "unvalidated"
+    },
+    "ins_entry_silent_bars_min": {
+      "value": 2,
+      "class": "exact",
+      "basis": "design: Ins entry starts after at least 2 silent bars",
+      "n": 0,
+      "validation": "design"
+    },
+    "ins_entry_default_tolerance_bars": {
+      "value": 0,
+      "class": "exact",
+      "basis": "design: deterministic Ins entry bar unless tolerance_bars given",
+      "n": 0,
+      "validation": "design"
+    }
+  },
+  "skill_version": "0.8.0",
   "registry": "references/numbers.md",
   "analysis": "analysis/calibrate_177.py",
   "summary": "analysis/out/summary.json",

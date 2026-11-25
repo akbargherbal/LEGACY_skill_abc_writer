@@ -1,4 +1,5 @@
 {
+  "plan_version": "0.8.0",
   "key": "Am",
   "tempo": 80,
   "meter": "4/4",
@@ -34,24 +35,78 @@
   "strict_shape": false,
   "maqam": null,
   "maqam_fit_min": 0.95,
+  "copies": [],
+  "arrangement": {
+    "section_plan": [
+      {
+        "bars": "1",
+        "role": "intro",
+        "vocal_notes_per_bar": [0, 0],
+        "ins_notes_per_bar": [6, 10],
+        "ins_active_share": [1.0, 1.0]
+      },
+      {
+        "bars": "2-7",
+        "role": "verse",
+        "vocal_notes_per_bar": [1.0, 2.5],
+        "ins_notes_per_bar": [3.0, 6.0],
+        "ins_active_share": [0.5, 0.85],
+        "answer_rate": [0.5, 1.0]
+      },
+      {
+        "bars": "8-14",
+        "role": "chorus",
+        "vocal_notes_per_bar": [1.0, 2.5],
+        "ins_notes_per_bar": [0.3, 1.5],
+        "ins_active_share": [0.1, 0.3],
+        "answer_rate": [0.25, 0.75]
+      },
+      {
+        "bars": "15-16",
+        "role": "outro",
+        "vocal_notes_per_bar": [0, 0],
+        "ins_notes_per_bar": [1.0, 4.0],
+        "ins_active_share": [0.4, 0.6]
+      }
+    ],
+    "ins_entries": [15]
+  },
   "deviations": [
     {
-      "bars": "1-2, 15-16",
-      "channel": "section register",
+      "bars": "1, 15-16",
+      "channel": "density",
       "before": "guitar under the voice",
-      "after": "guitar owns the intro and outro"
+      "after": "guitar owns the intro and outro with no vocal notes",
+      "assert": {
+        "metric": "vocal_notes_per_bar",
+        "range": "1, 15-16",
+        "op": "==",
+        "value": 0
+      }
     },
     {
-      "bars": "3-14",
+      "bars": "8-14",
       "channel": "gap rate",
       "before": "an answer after every line",
-      "after": "answers thin to the first and third lines"
+      "after": "guitar thins out during the chorus",
+      "assert": {
+        "metric": "ins_active_share",
+        "range": "8-14",
+        "op": "<=",
+        "value": 0.25
+      }
     },
     {
-      "bars": "9-14",
+      "bars": "8-14",
       "channel": "section register",
       "before": "one verse-level register",
-      "after": "the chorus lifts the median without sitting above C5 throughout"
+      "after": "the chorus lifts the vocal median pitch",
+      "assert": {
+        "metric": "vocal_median_pitch",
+        "range": "8-14",
+        "op": ">=",
+        "value": 72
+      }
     }
   ]
 }

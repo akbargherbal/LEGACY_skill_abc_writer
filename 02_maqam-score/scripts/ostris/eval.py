@@ -131,7 +131,10 @@ def score_runs(runs_dir: str | Path, out_dir: str | Path) -> dict:
 
     rows = []
     for run_id, score, plan in runs:
-        report = check(score, plan, out_dir=out, require_final_rest=False)
+        # Evaluation runs are supplied scores without lyric files; the caller
+        # already accepted that limitation, so record an explicit waiver.
+        report = check(score, plan, out_dir=out, require_final_rest=False,
+                       waive_lyrics=True)
         text = score.read_text(encoding="utf-8")
         plan_data = json.loads(plan.read_text(encoding="utf-8"))
         measured = report.get("measured", {})

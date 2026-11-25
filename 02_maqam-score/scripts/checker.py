@@ -50,6 +50,10 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 import abc_tools as runtime_abc  # noqa: E402
+import alignment  # noqa: E402
+import binding  # noqa: E402
+import copies  # noqa: E402
+import prosody_check  # noqa: E402
 
 VOICES = ("Vocal", "Ins")
 DURATIONS = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48}
@@ -515,10 +519,17 @@ def _sections_match(want: list[str], got: list[str]) -> bool:
 def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool = True,
           strict_style: bool = False, strict_shape: bool | None = None,
           require_final_rest: bool = False, phrase_plan: dict | None = None,
-          calibration: dict | None = None) -> tuple[list[tuple[str, str, bool, str, str]], dict]:
+          calibration: dict | None = None,
+          *,
+          lyrics_text: str | None = None,
+          lyrics_path: Path | str | None = None,
+          waive_lyrics: bool = False,
+          allow_unmarked: list[str] | set[str] | None = None,
+          cap_confirmed: bool | None = None,
+          score_text: str = "") -> tuple[list[tuple[str, str, bool, str, str]], dict]:
     """Return (checks, measured).
 
-    A check is (tag, name, ok, detail, class). `tag` is PASS, FAIL or WARN.
+    A check is (tag, name, ok, detail, class). `tag` is PASS, FAIL, WARN or INFO.
     `strict_shape` makes the plan's shape targets hard; when omitted it comes
     from ``plan["strict_shape"]``. `phrases` is the optional per-line sidecar.
     """
@@ -531,16 +542,25 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
     ins = score.notes_of("Ins")
     results: list[tuple[str, str, bool, str, str]] = []
 
-    def add(name: str, ok: bool, detail: str, cls: str = "style") -> None:
-        if ok:
+    def add(name: str, ok: bool, detail: str, cls: str = "style",
+            *, tag_override: str | None = None) -> None:
+        if tag_override is not None:
+            tag = tag_override
+        elif ok:
             tag = "PASS"
-        elif cls in ("contract", "sanity", "structure"):
+        elif cls in ("contract", "sanity", "structure", "exact"):
             tag = "FAIL"
+        elif cls == "banded":
+            tag = "FAIL" if strict_shape else "WARN"
         elif strict_style:
             tag = "FAIL"
         else:
             tag = "WARN"
         results.append((tag, name, bool(ok), detail, cls))
+
+    if lyrics_text is None and lyrics_path is not None:
+        lyrics_text = Path(lyrics_path).read_text(encoding="utf-8")
+    lyrics_present = lyrics_text is not None
 
     if runtime_ok:
         add("runtime parse", True, "abc_tools.parse accepted the file", "contract")
@@ -869,6 +889,57 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
                     f"K:{score.key} tonic {tonic_pc(score.key)}, maqam tonic "
                     f"{_pc(str(tonic))} ({tonic})", "style")
 
+    # ---- four mechanical checks: prosody, alignment, copies, binding -----
+    prosody_res = (
+        prosody_check.check_prosody(
+            score, plan,
+            lyrics_text=lyrics_text,
+            lyrics_present=lyrics_present,
+            waive_lyrics=waive_lyrics,
+            allow_unmarked=allow_unmarked,
+            cap_confirmed_override=cap_confirmed,
+            calibration=cal,
+        )
+        if plan_present
+        else {"checks": [], "prosody_checked": False, "waivers": [],
+              "recomputed": None, "cap_confirmed": bool(cap_confirmed)}
+    )
+    for name, ok, detail, cls, tag_ovr in prosody_res["checks"]:
+        add(name, ok, detail, cls, tag_override=tag_ovr)
+
+    align_res = (
+        alignment.check_alignment(
+            score, plan, phrase_plan,
+            score_text=score_text,
+            recomputed_prosody=prosody_res["recomputed"],
+            calibration=cal,
+        )
+        if phrase_plan is not None
+        else {"checks": [], "alignment_checked": False, "lines": [], "orphans": [],
+              "mid_line_ties": [], "line_end_ties": [], "ambiguities": [],
+              "heavy_outliers": [], "vocalise_bars": []}
+    )
+    for name, ok, detail, cls, tag_ovr in align_res["checks"]:
+        add(name, ok, detail, cls, tag_override=tag_ovr)
+
+    copies_res = (
+        copies.check_copies(score, plan)
+        if plan_present
+        else {"checks": [], "copies_checked": False, "declared_copy_bars": [],
+              "undeclared_repeats": [], "waivers": []}
+    )
+    for name, ok, detail, cls, tag_ovr in copies_res["checks"]:
+        add(name, ok, detail, cls, tag_override=tag_ovr)
+
+    binding_res = (
+        binding.check_binding(score, plan, calibration=cal)
+        if plan_present
+        else {"checks": [], "binding_checked": False, "table": [],
+              "ins_entries": None, "unverifiable": [], "waivers": []}
+    )
+    for name, ok, detail, cls, tag_ovr in binding_res["checks"]:
+        add(name, ok, detail, cls, tag_override=tag_ovr)
+
     # ---- measured ------------------------------------------------------
     sec_bars: dict[str, int] = {}
     for sec in score.bar_sections:
@@ -932,6 +1003,32 @@ def check(score: Score, plan: dict, runtime_ok: bool = True, plan_present: bool 
         "ins_active_share": round(ins_active, 2),
         "fill_lengths": [len(f) for f in fills],
         "answer_lengths": answer_lengths,
+        "prosody_checked": prosody_res["prosody_checked"],
+        "copies_checked": copies_res["copies_checked"],
+        "binding_checked": binding_res["binding_checked"],
+        "alignment_checked": align_res["alignment_checked"],
+        "waivers": (prosody_res.get("waivers", [])
+                    + align_res.get("waivers", [])
+                    + copies_res.get("waivers", [])
+                    + binding_res.get("waivers", [])),
+        "cap_confirmed": prosody_res["cap_confirmed"],
+        "raw_cap_s": round(prosody_res["recomputed"]["raw_cap_s"], 1) if prosody_res["recomputed"] else None,
+        "cap_ratio": prosody_res["recomputed"].get("cap_ratio") if prosody_res["recomputed"] else None,
+        "syllabify_budget_bars": prosody_res["recomputed"]["bars"] if prosody_res["recomputed"] else None,
+        "recomputed_syllables": prosody_res["recomputed"]["syllables"] if prosody_res["recomputed"] else None,
+        "copies_declared": copies_res["declared_copy_bars"],
+        "undeclared_repeats": copies_res["undeclared_repeats"],
+        "alignment": {
+            "lines": align_res["lines"],
+            "orphans": align_res["orphans"],
+            "mid_line_ties": align_res["mid_line_ties"],
+            "line_end_ties": align_res["line_end_ties"],
+            "ambiguities": align_res["ambiguities"],
+            "heavy_outliers": align_res["heavy_outliers"],
+            "vocalise_bars": align_res["vocalise_bars"],
+        } if align_res["alignment_checked"] else None,
+        "binding_table": binding_res["table"],
+        "unverifiable_deviations": binding_res["unverifiable"],
     }
     stats = cal.get("metrics", {})
     measured["percentiles"] = {
@@ -953,11 +1050,21 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", type=Path, default=None)
     ap.add_argument("--calibration", type=Path, default=None)
     ap.add_argument("--strict-style", action="store_true",
-                    help="turn style warnings into failures")
+                    help="turn style warnings into failures (release alias: --release)")
+    ap.add_argument("--release", action="store_true",
+                    help="strict style + final rest; use this only for the release run")
     ap.add_argument("--strict-shape", action="store_true", default=None,
                     help="override the plan's strict_shape flag")
     ap.add_argument("--phrases", type=Path, default=None,
                     help="per-line phrase sidecar from syllabify.py --phrases")
+    ap.add_argument("--lyrics", type=Path, default=None,
+                    help="vocalised Arabic lyrics file for prosody recomputation")
+    ap.add_argument("--waive-lyrics", action="store_true",
+                    help="loudly waive --lyrics recomputation (recorded in report.json)")
+    ap.add_argument("--allow-unmarked", nargs="+", action="extend", default=[],
+                    help="explicit Arabic words allowed without vowel marks")
+    ap.add_argument("--cap-confirmed", action="store_true", default=None,
+                    help="promote raw duration cap FAIL threshold to 1.00")
     ap.add_argument("--require-final-rest", action="store_true",
                     help="treat the final full-bar rest as a render contract")
     args = ap.parse_args(argv)
@@ -994,23 +1101,51 @@ def main(argv: list[str] | None = None) -> int:
         except (OSError, json.JSONDecodeError) as exc:
             print(f"FAIL  [contract] phrases  {exc}")
             return 1
+    lyrics_text = None
+    if args.lyrics:
+        try:
+            lyrics_text = args.lyrics.read_text(encoding="utf-8")
+        except OSError as exc:
+            print(f"FAIL  [contract] lyrics  {exc}")
+            return 1
     strict_shape = (args.strict_shape if args.strict_shape is not None
                     else bool(plan.get("strict_shape", False)))
     results, measured = check(score, plan, plan_present=plan_present,
-                              strict_style=args.strict_style,
+                              strict_style=args.strict_style or args.release,
                               strict_shape=strict_shape,
-                              require_final_rest=args.require_final_rest,
+                              require_final_rest=args.require_final_rest or args.release,
                               phrase_plan=phrases,
-                              calibration=calibration)
+                              calibration=calibration,
+                              lyrics_text=lyrics_text,
+                              waive_lyrics=args.waive_lyrics,
+                              allow_unmarked=args.allow_unmarked,
+                              cap_confirmed=args.cap_confirmed,
+                              score_text=text)
     width = max(len(name) for _, name, _, _, _ in results)
     failed = warned = 0
     for tag, name, _, detail, cls in results:
-        print(f"{tag:<4}  [{cls:<8}]  {name:<{width}}  {detail}")
+        print(f"{tag:<4}  [{cls:<12}]  {name:<{width}}  {detail}")
         failed += tag == "FAIL"
         warned += tag == "WARN"
 
+    if measured.get("waivers"):
+        print("\nWAIVERS")
+        for w in measured["waivers"]:
+            print(f"  {w.get('flag', w.get('check'))}: {w.get('detail', '')}")
+
+    if measured.get("binding_table"):
+        print("\nPLANNED VS MEASURED")
+        print(f"  {'scope':<14} {'metric':<20} {'planned':<18} {'measured':<22} verdict")
+        for row in measured["binding_table"]:
+            print(
+                f"  {str(row['scope']):<14} {str(row['metric']):<20} "
+                f"{str(row['planned']):<18} {str(row['measured']):<22} {row['verdict']}"
+            )
+
     print("\nMEASURED")
     for key, value in measured.items():
+        if key in ("binding_table", "alignment", "waivers", "unverifiable_deviations"):
+            continue
         if isinstance(value, dict):
             value = " | ".join(f"{k} {v}" for k, v in value.items())
         print(f"  {key:<18} {value}")
@@ -1021,10 +1156,17 @@ def main(argv: list[str] | None = None) -> int:
              "strict_style": args.strict_style,
              "strict_shape": strict_shape,
              "phrases_checked": bool(phrases),
+             "prosody_checked": measured["prosody_checked"],
+             "copies_checked": measured["copies_checked"],
+             "binding_checked": measured["binding_checked"],
+             "alignment_checked": measured["alignment_checked"],
+             "waivers": measured["waivers"],
+             "cap_confirmed": measured["cap_confirmed"],
              "require_final_rest": args.require_final_rest,
              "calibration_version": calibration.get("version"),
              "checks": [{"tag": t, "name": n, "ok": o, "class": c, "detail": d}
                         for t, n, o, d, c in results],
+             "binding_table": measured["binding_table"],
              "measured": measured}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(f"\nwrote {args.json}")
     print(f"\n{'PASS' if failed == 0 else 'FAIL'}  {failed} hard check(s) failed, "

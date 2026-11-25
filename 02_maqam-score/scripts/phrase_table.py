@@ -123,11 +123,19 @@ def build(parsed: dict, phrases: dict | None = None) -> dict:
         defs = _defs_from_score(vocal, bars)
 
     rows: list[dict] = []
+    n_bars = len(bars)
+    missing = 0
     for d in defs:
         start, end = d["bar_start"], d["bar_end"]
+        if start > n_bars or end > n_bars:
+            missing += 1
+            rows.append({**d, "notes": None, "status": "not written",
+                         "bars": f"{start}-{end}", "end_name": None})
+            continue
         notes = [n for n in vocal if start - 1 <= n["bar"] <= end - 1]
         if not notes:
-            rows.append({**d, "notes": 0, "bars": f"{start}-{end}"})
+            rows.append({**d, "notes": 0, "status": "empty",
+                         "bars": f"{start}-{end}", "end_name": None})
             continue
         first, last = notes[0], notes[-1]
         bar0 = bars[min(len(bars) - 1, start - 1)]
@@ -181,5 +189,7 @@ def build(parsed: dict, phrases: dict | None = None) -> dict:
             "merged_lines": max(0, len(rows) - len(detected)),
             "bars": len(bars),
             "tempo": tempo,
+            "missing_lines": missing,
+            "complete": missing == 0,
         },
     }

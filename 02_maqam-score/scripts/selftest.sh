@@ -9,9 +9,10 @@ out=$(python3 scripts/syllabify.py example/lyrics.txt --tempo 80)
 echo "$out" | head -12
 grep -q "syllables        16" <<<"$out" || { echo "FAIL: example syllables != 16"; exit 1; }
 
-echo "== checker: example must pass strict shape and strict style"
+echo "== checker: example must pass strict style"
 python3 scripts/checker.py example/score.abc --plan example/plan.json \
-  --phrases example/phrases.json --require-final-rest --strict-style
+  --phrases example/phrases.json --lyrics example/lyrics.txt \
+  --require-final-rest --strict-style
 
 echo "== checker: a short bar must fail"
 tmp=$(mktemp -d)
@@ -31,12 +32,14 @@ lines = Path("example/score.abc").read_text(encoding="utf-8").splitlines()
 lines[-1] = lines[-1].replace("|Z|", "|D,16|")
 print("\n".join(lines))
 PY
-if ! python3 scripts/checker.py "$tmp/noend.abc" --plan example/plan.json > "$tmp/out" 2>&1; then
+if ! python3 scripts/checker.py "$tmp/noend.abc" --plan example/plan.json \
+     --lyrics example/lyrics.txt > "$tmp/out" 2>&1; then
   echo "FAIL: the default checker rejected a score for the final rest alone"; cat "$tmp/out"; exit 1
 fi
 grep -q "WARN.*final rest" "$tmp/out" || {
   echo "FAIL: the missing final rest did not warn"; cat "$tmp/out"; exit 1; }
-if python3 scripts/checker.py "$tmp/noend.abc" --plan example/plan.json --require-final-rest > "$tmp/out" 2>&1; then
+if python3 scripts/checker.py "$tmp/noend.abc" --plan example/plan.json \
+     --lyrics example/lyrics.txt --require-final-rest > "$tmp/out" 2>&1; then
   echo "FAIL: --require-final-rest accepted a score without a final rest"; cat "$tmp/out"; exit 1
 fi
 grep -q "FAIL.*final rest" "$tmp/out" || {
@@ -64,21 +67,26 @@ echo "correctly rejected: $(grep -m1 'runtime parse' "$tmp/out")"
 
 echo "== checker: a two-note answer warns by default, fails with --strict-style"
 sed 's/Z|A,2 A,2 C2 A,2 G,2 F,2 G,2 A,2|Z|/Z|A,4 C4 z8|Z|/' example/score.abc > "$tmp/shortfill.abc"
-if ! python3 scripts/checker.py "$tmp/shortfill.abc" --plan example/plan.json > "$tmp/out" 2>&1; then
+if ! python3 scripts/checker.py "$tmp/shortfill.abc" --plan example/plan.json \
+     --lyrics example/lyrics.txt > "$tmp/out" 2>&1; then
   echo "FAIL: the default checker rejected a two-note answer"; cat "$tmp/out"; exit 1
 fi
 grep -q "WARN.*answer fill length" "$tmp/out" || {
   echo "FAIL: the two-note answer did not warn"; cat "$tmp/out"; exit 1; }
-if python3 scripts/checker.py "$tmp/shortfill.abc" --plan example/plan.json --strict-style > "$tmp/out" 2>&1; then
+if python3 scripts/checker.py "$tmp/shortfill.abc" --plan example/plan.json \
+     --lyrics example/lyrics.txt --strict-style > "$tmp/out" 2>&1; then
   echo "FAIL: --strict-style accepted a two-note answer"; cat "$tmp/out"; exit 1
 fi
 grep -q "FAIL.*answer fill length" "$tmp/out" || {
   echo "FAIL: wrong error for a two-note answer"; cat "$tmp/out"; exit 1; }
 echo "correctly warned then rejected: $(grep -m1 'answer fill length' "$tmp/out")"
 
-echo "== verify_package: example score + plan"
+echo "== verify_package: example score + plan + report"
+python3 scripts/checker.py example/score.abc --plan example/plan.json \
+  --phrases example/phrases.json --lyrics example/lyrics.txt \
+  --require-final-rest --json "$tmp/report.json" > /dev/null
 python3 scripts/verify_package.py --score example/score.abc --plan example/plan.json \
-  --json "$tmp/verify.json"
+  --report "$tmp/report.json" --json "$tmp/verify.json"
 
 echo "== verify_package: a short bar must fail"
 if python3 scripts/verify_package.py --score "$tmp/broken.abc" --plan example/plan.json \
@@ -131,6 +139,29 @@ if python3 scripts/abc_doctor.py "$tmp/badblock.abc" > "$tmp/doctor.out" 2>&1; t
 fi
 grep -q "different measure counts" "$tmp/doctor.out" || { echo "FAIL: doctor did not explain the block"; exit 1; }
 echo "doctor ok"
+
+echo "== score_cli: lint the example"
+python3 scripts/score_cli.py lint --score example/score.abc \
+  --plan example/plan.json --phrases example/phrases.json
+
+echo "== score_cli: section report"
+python3 scripts/score_cli.py check --bars 2-3 --score example/score.abc \
+  --plan example/plan.json --phrases example/phrases.json > /dev/null
+echo "section report ok"
+
+echo "== score_cli: plan lint"
+python3 scripts/score_cli.py plan lint --plan example/plan.json \
+  --phrases example/phrases.json
+
+echo "== score_cli: seed + seed-check on a copy"
+cp example/score.abc "$tmp/seedscore.abc"
+cp example/plan.json "$tmp/seedplan.json"
+python3 scripts/score_cli.py seed --score "$tmp/seedscore.abc" \
+  --plan "$tmp/seedplan.json" --seed "$tmp/seed.abc" \
+  --skill-state "$tmp/state.json" > /dev/null
+python3 scripts/score_cli.py seed-check --score "$tmp/seedscore.abc" \
+  --plan "$tmp/seedplan.json" --seed "$tmp/seed.abc"
+echo "seed ok"
 
 echo
 echo "selftest: PASS"

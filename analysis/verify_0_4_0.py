@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0.4.0 acceptance harness.
+"""0.8.1 acceptance harness.
 
 Checks the things the release notes claim, without listening:
 
@@ -63,11 +63,14 @@ def check_example() -> tuple[bool, str]:
         str(EXAMPLE_PLAN),
         "--phrases",
         str(EXAMPLE_PHRASES),
+        "--lyrics",
+        str(SKILL / "example" / "lyrics.txt"),
         "--require-final-rest",
         "--strict-style",
     )
-    ok = result.returncode == 0 and "0 warning(s)" in result.stdout
-    return ok, "example strict shape/style + phrases"
+    # The 16-bar example is a miniature; the cap/bars checks warn by design.
+    ok = result.returncode == 0 and "FAIL" not in result.stdout
+    return ok, "example strict shape/style + phrases (miniature warnings allowed)"
 
 
 def check_phrase_failure() -> tuple[bool, str]:
@@ -86,6 +89,7 @@ def check_phrase_failure() -> tuple[bool, str]:
             "--phrases",
             path,
             "--strict-shape",
+            "--waive-lyrics",
         )
     finally:
         Path(path).unlink(missing_ok=True)
@@ -118,14 +122,17 @@ def check_mediocre() -> tuple[bool, str]:
 
 def check_template() -> tuple[bool, str]:
     text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
-    start = text.index("### 3.2 Plan")
-    end = text.index("### 3.3 Compose", start)
-    block = text[start:end]
-    forbidden = ('"bars": 78', '"tempo": 74', "361", "5-58", "34-38", "66-78")
-    hits = [item for item in forbidden if item in block]
-    return not hits, "plan template has no session-01 frame" + (
-        f" (found {hits})" if hits else ""
-    )
+    required = ("score_cli.py", "init", "core", "line", "check", "release", "seed")
+    missing = [item for item in required if item not in text]
+    plan_ref = (SKILL / "references" / "plan.md")
+    cli_ref = (SKILL / "references" / "cli.md")
+    ok = not missing and plan_ref.is_file() and cli_ref.is_file()
+    detail = "one-screen CLI contract + plan.md/cli.md"
+    if missing:
+        detail += f" (missing {missing})"
+    if not plan_ref.is_file() or not cli_ref.is_file():
+        detail += " (missing reference)"
+    return ok, detail
 
 
 def check_corpus() -> tuple[bool, str]:

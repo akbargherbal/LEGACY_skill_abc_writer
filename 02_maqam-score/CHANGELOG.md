@@ -1,5 +1,56 @@
 # Changelog
 
+## 0.8.1 — the line is the unit; the CLI owns the file
+
+**Evidence:** session 11 spent 219,533 generated tokens for a 1,941-token score
+(113x). 42% was three whole-score reasoning messages (92,348 tokens), 13 checker
+runs replaced a 4-run budget, and the composer wrote seven throwaway scripts
+while never calling `repair.py`, `quality.py` or `abc_doctor.py`.
+
+**Why:** the contract told the model to write a 86-bar score, but the only
+write path was free-text ABC. Counting, block alignment and bar sums lived in
+the model's head; the checker measured after the fact; the first run used
+`--strict-style`; and the 0.8.0 plan fields (`copies`, `arrangement`,
+`ins_entries`, `assert`) were undocumented enough to force source-reading.
+
+### Instructions
+- **The line is the unit.** `score_cli.py init` scaffolds the form; `line N`
+  writes one lyric line (2-4 bars); `patch B` replaces one bar. `score.abc` is
+  never written directly.
+- **The CLI pads the bar tail** with rests, so the model writes notes, not
+  arithmetic. The whole file is linted before each write; a bad bar changes
+  nothing.
+- **Core first is mechanical:** `core --snapshot`, `core_review.md` (5 lines),
+  `core --check`; expansion is refused until the review exists.
+- **All errors in one pass:** `abc_tools.lint_text` returns every header/group/
+  bar error with voice and bar; `lint` replaces fail-fast parser loops and
+  home-made `barsum.py`.
+- **Checker at section ends:** `check --bars` is the early report; `check` is
+  the full gate and prints the `repair.py` map on failure; `release` is the only
+  strict run. Stop after a pass.
+- **Plan is generated, not reverse-engineered:** `init` writes a complete
+  0.8.1 plan; `plan lint` names what is missing; `plan refresh` re-derives
+  `section_plan` and `ins_entries` from the score. One page: `references/plan.md`.
+- **Seed is generated:** `seed` copies the melody, adds one chord per Vocal bar
+  and a `V: Drums` groove/fill/close; `seed-check` proves bar alignment.
+
+### Tools
+- `scripts/score_cli.py`: `init`, `core`, `line`, `patch`, `lint`, `check`,
+  `release`, `seed`, `seed-check`, `plan`, `status`, `explain`.
+- `scripts/abc_tools.py`: adds `lint_text` (all errors); the runtime parser is
+  unchanged.
+- `scripts/phrase_table.py`: marks unwritten lines `notes: null`; `craft.py`
+  no longer infers endings for bars that do not exist.
+- `references/plan.md`, `references/cli.md`; `SKILL.md` shrunk from 967 lines
+  to a one-screen contract.
+- Session template: `.opencode/agents/{composer,verifier,packager}.md` and a
+  guard plugin that pins `deepseek/deepseek-flash#high` and caps a model call
+  at 8,000 output tokens. No `task.md`.
+
+### Not changed
+- `checker.py`, `calibration.json`, and the runtime parser's fail-closed
+  `parse`. No new taste gate; no threshold change.
+
 ## 0.7.0 — root repair: core first, three layers, one tool per question
 
 **Evidence:** session 09 spent 232,396 generated tokens for a 2,082-token score

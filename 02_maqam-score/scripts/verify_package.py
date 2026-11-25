@@ -319,6 +319,39 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 add("FAIL", "report.json", f"ok={report.get('ok')}; bars={measured.get('bars')}")
 
+            waivers = report.get("waivers")
+            if waivers is None:
+                waivers = measured.get("waivers") or []
+            if waivers:
+                summary["waivers"] = waivers
+                waiver_text = "; ".join(
+                    f"{w.get('flag') or w.get('check')}: {w.get('detail', '')}"
+                    for w in waivers
+                )
+                add("WARN", "waivers", waiver_text)
+
+            has_plan_ver = bool(plan.get("plan_version"))
+            for flag_key, waiver_key in (
+                ("prosody_checked", "prosody"),
+                ("copies_checked", "copies"),
+                ("binding_checked", "binding"),
+            ):
+                val = report.get(flag_key, measured.get(flag_key))
+                if val is True:
+                    add("PASS", flag_key, "true")
+                elif val is False:
+                    waived = any(
+                        w.get("check") == waiver_key
+                        or (waiver_key == "prosody" and (w.get("check") == "lyrics" or w.get("flag") == "--waive-lyrics"))
+                        for w in waivers
+                    )
+                    if waived:
+                        add("WARN", flag_key, "false (waived)")
+                    else:
+                        add("FAIL", flag_key, "false without a waiver")
+                elif has_plan_ver:
+                    add("FAIL", flag_key, "missing in report.json for plan_version plan")
+
     if args.state:
         try:
             state = json.loads(Path(args.state).read_text(encoding="utf-8"))
