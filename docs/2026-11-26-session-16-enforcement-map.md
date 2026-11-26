@@ -109,6 +109,10 @@ mechanism was not.
   A re-run built from `session_template` tests 0.9, not 1.0.
 - **Verdict:** the experiment's files exist only in the zip; the repo's runnable template is a different
   workflow.
+- **Resolved (2026-11-26):** 1.0 is now the default. `02_maqam-score/SKILL.md` is 1.0.0, the default
+  `session_template` composer is the whole-draft agent, and `make session16` builds from the defaults.
+  The 0.9 workflow is archived as `SKILL-v0.9.md` / `composer-v0.9.md` and excluded from packages;
+  `make session13`/`session14` pin those archives for reproducibility.
 
 ---
 

@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.0.0 — whole drafts, one scorecard
+
+**Change of process, not of the gates.** The composer writes the whole score
+(one pass, or at most three large sections), then `scorecard.py` reports KEY
+BANDS, BLOCKING, POLISH and SEAMS. Fix blocking first and rewrite the whole
+file; at most four drafts before stopping.
+
+### Tools
+- `scripts/scorecard.py` is the measurement surface of the loop: the checker's
+  numbers, hard failures, warnings, and line-to-line seams, in one card.
+- `init` is the only scaffolding step; `release` closes the run after the card
+  has no blocking.
+- `line`, `patch`, `core` and the live meter remain for emergency repair only.
+  They are not part of 1.0 composition.
+
+### Packaging
+- `SKILL.md` is 1.0.0; the 0.9 line workflow is archived as `SKILL-v0.9.md`
+  and excluded from packages.
+- `session_template` default composer is the whole-draft agent; the 0.9 agent
+  is kept as `composer-v0.9.md` and excluded from session drops.
+- `make zip` and `make session16` build 1.0.0; `session13`/`session14` are
+  pinned to the archived 0.9 docs for reproducibility.
+
 ## 0.9.0 — measurement at the line, not at the gate
 
 **Evidence:** session 13 wrote all 26 lines through the CLI (0 hand scripts,

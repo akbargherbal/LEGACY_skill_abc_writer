@@ -4,7 +4,7 @@ CORPUS ?= $(HOME)/Jupyter_Notebooks/OpenCode/arabmaqamrock/datasets/five_stars
 DIST := dist
 SKILL_NAME := abc-score-writer
 VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '02_maqam-score/scripts'); from ostris.contract import SKILL_VERSION; print(SKILL_VERSION)")
-SKILL_RELEASE ?= 0.9.0
+SKILL_RELEASE ?= 1.0.0
 SESSION_STEPS ?= 40
 REMIX_VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '03_abc_remixer/scripts'); from remix.shared import REMIX_VERSION; print(REMIX_VERSION)")
 REMIX_DATA := 03_abc_remixer/data/remix
@@ -57,17 +57,20 @@ craft:
 	python3 analysis/measure_craft.py --corpus "$(CORPUS)" --out analysis/out
 
 # Build the session drops (skill + input + one-line prompt + agent config).
-# session-14 is the 0.9.0 meter pilot: same lyrics/model as 13, steps 40.
+# session-13/14 are the 0.9.0 line-workflow pilots, pinned to the archived docs
+# so they stay reproducible after 1.0 became the default.
 session13: zip
+	SKILL_DOC=SKILL-v0.9.md COMPOSER_DOC=composer-v0.9.md \
 	SESSION_NAME=session-13 SESSION_STEPS=40 scripts/package_session.sh "$(DIST)"
 
 session14: zip
+	SKILL_DOC=SKILL-v0.9.md COMPOSER_DOC=composer-v0.9.md \
 	SESSION_NAME=session-14 SESSION_STEPS=$(SESSION_STEPS) scripts/package_session.sh "$(DIST)"
 
 # Session 16: the 1.0 whole-draft loop in a clean room, low thinking.
 session16:
-	SKILL_DOC=SKILL-v1.md COMPOSER_DOC=composer-v1.md SESSION_VARIANT=low \
-	SESSION_NAME=session-16 SESSION_STEPS=100 scripts/package_session.sh "$(DIST)"
+	SESSION_VARIANT=low SESSION_NAME=session-16 SESSION_STEPS=100 \
+	scripts/package_session.sh "$(DIST)"
 
 # Build the offline phrase-level asset index from the 670-score SUNO store.
 asset-build:

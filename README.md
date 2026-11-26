@@ -3,7 +3,7 @@
 Source of the **`maqam-score`** skill and the 177-track calibration that
 justifies its numbers.
 
-**Version:** 0.9.0 (skill) · contract 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
+**Version:** 1.0.0 (skill) · contract 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
 **Asset layer:** unreleased (see `docs/DECISIONS.md`, `docs/ASSET-BANK.md`) · **Date:** 2026-11-25
 
 ## Layout
@@ -49,6 +49,26 @@ make remix-build     # build the 670-score remixer store
 make remix-test      # remixer unit tests
 make remix-release   # remixer tests + verify + full/public zips + checksums
 ```
+
+## 1.0.0 — whole drafts, one scorecard
+
+The composer writes `score.abc` in whole drafts, never bar by bar. The loop is:
+
+```text
+init -> draft (whole) -> scorecard -> rewrite (whole) -> scorecard
+     -> polish seams -> release
+```
+
+```bash
+python3 02_maqam-score/scripts/score_cli.py init --tempo 80
+python3 02_maqam-score/scripts/scorecard.py score.abc --plan plan.json --phrases phrases.json
+python3 02_maqam-score/scripts/score_cli.py release
+```
+
+At most **4 drafts**; if the same blocking issue survives two full rewrites,
+stop and report. `line`, `patch`, `core` and the live meter remain for emergency
+repair but are **not** this workflow. The 0.9 line-by-line document is archived
+as `02_maqam-score/SKILL-v0.9.md`; `make zip` and `make session16` now build 1.0.
 
 ## 0.8.1 — the line workflow
 

@@ -47,7 +47,7 @@ EXCLUDES=(
   --exclude '.mypy_cache'
   --exclude 'CHANGELOG.md'
   --exclude 'data/README.md'
-  --exclude 'SKILL-v1.md'
+  --exclude 'SKILL-v*.md'
 )
 if [ "$PUBLIC" -eq 1 ]; then
   EXCLUDES+=(--exclude 'data/')
@@ -58,7 +58,7 @@ fi
 
 rsync -a "${EXCLUDES[@]}" "$SRC"/ "$STAGE/$NAME"/
 # Build a preview from an alternate SKILL document, still named SKILL.md in
-# the package (the session-15/16 1.0 previews use SKILL-v1.md).
+# the package (historical versions are kept in-tree as SKILL-v<version>.md).
 if [ "$DOC" != "SKILL.md" ]; then
   cp "$SRC/$DOC" "$STAGE/$NAME/SKILL.md"
 fi

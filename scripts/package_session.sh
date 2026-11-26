@@ -41,6 +41,8 @@ if [ "$COMPOSER_DOC" != "composer.md" ]; then
   cp "$STAGE/$NAME/.opencode/agents/$COMPOSER_DOC" "$STAGE/$NAME/.opencode/agents/composer.md"
   rm -f "$STAGE/$NAME/.opencode/agents/$COMPOSER_DOC"
 fi
+# Archived workflow agents never ship in a session drop.
+rm -f "$STAGE/$NAME/.opencode/agents/"*-v0.9.md
 sed -i "s/^steps: [0-9][0-9]*\$/steps: $STEPS/" "$STAGE/$NAME/.opencode/agents/composer.md"
 # Pin the requested thinking variant in the config, every agent, and the guard.
 sed -i "s|deepseek/deepseek-flash#[a-z]*|deepseek/deepseek-flash#$VARIANT|g" \
