@@ -6,7 +6,8 @@ files around it, because the score is not the whole delivery:
 
 - seed.abc has the same Vocal/Ins bars as score.abc (chords stripped);
 - seed.abc has a V: Drums voice, one bar per score bar, silent on the last line;
-- core_draft.abc is the first 8-16 bars of score.abc;
+- core_draft.abc, when supplied, is the first 8-16 bars of score.abc
+  (optional; the 1.0 workflow has no core);
 - seed_sheet.md and notes.md are exactly 10 numbered lines;
 - plan.json is complete, strict_shape is false, the register default is 70;
 - report.json says ok and its bar count matches.

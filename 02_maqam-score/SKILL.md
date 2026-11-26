@@ -1,6 +1,6 @@
 ---
 name: abc-score-writer
-version: "1.0.1"
+version: "1.0.2"
 description: >-
   Write a complete two-voice ABC score from Arabic lyrics and an arabmaqamrock
   style prompt in whole drafts, then validate it with one scorecard. The model
@@ -117,8 +117,8 @@ a musical verdict.
   only score write is a whole-file rewrite. If the card says "rewrite the whole
   score", the next write must be a complete file.
 - Do not lower the checker or `calibration.json`; do not add taste gates.
-- Stop when the card has no blocking or release-blocking and the ear is satisfied. Do not keep
-  editing after a pass.
+- Stop when the card has no `BLOCKING` and no `RELEASE-BLOCKING` and the ear is
+  satisfied. Do not keep editing after a pass.
 - If the same blocking issue survives two full rewrites, stop and report.
 
 ## ABC contract (short)

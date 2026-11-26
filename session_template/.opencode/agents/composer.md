@@ -2,7 +2,7 @@
 description: Composes a whole ABC score in whole drafts; the scorecard validates
 mode: primary
 model: deepseek/deepseek-flash#high
-steps: 24
+steps: 100
 permissions:
   - action: edit
     resource: score.abc
@@ -10,6 +10,12 @@ permissions:
   - action: edit
     resource: "seed.abc"
     effect: allow
+  - action: edit
+    resource: "plan.json"
+    effect: deny
+  - action: edit
+    resource: "phrases.json"
+    effect: deny
   - action: read
     resource: "skills/abc-score-writer/scripts/**"
     effect: deny
@@ -52,7 +58,9 @@ python3 skills/abc-score-writer/scripts/scorecard.py score.abc \
 Read the card:
 
 - `BLOCKING` — hard failures. Fix all of them.
-- `POLISH` — warnings and taste risks.
+- `RELEASE-BLOCKING` — pass the card but fail `release` (strict style and the
+  final rest). Fix them in the same rewrite as `BLOCKING`.
+- `POLISH` — warnings that stay non-blocking at release. Fix what the ear hears.
 - `SEAMS` — line-to-line joints: cadence -> start, rest, register, overlap.
 
 Rewrite the **whole score** (or a whole section), not one bar. A 3k rewrite is
@@ -60,7 +68,9 @@ cheaper and safer than 45 patches. At most four drafts. If the same blocking
 issue survives two full rewrites, stop and report.
 
 The next score write after a "rewrite the whole score" card must be a complete
-file. Do not use `sed`, Python, or piecemeal `edit` calls on `score.abc`.
+file. Do not use `sed`, Python, or piecemeal `edit` calls on `score.abc`. Do not
+edit `plan.json` or `phrases.json` by hand; rerun `init --force` if the form is
+wrong.
 
 `section plan metrics` is a known false band from the auto plan (the `[0,3]`
 vocal density is too low for dense verse). Do not chase it.
@@ -70,10 +80,11 @@ write a parser or a composition compiler. Do not lower `checker.py` or
 `calibration.json`. Do not read the skill's scripts: the card, `init`'s table
 and `explain-metric` are the measurement.
 
-When the card has no blocking, polish the flagged seams and run `release` once.
-Then hand the frozen score to the `packager` subagent for `seed.abc`,
-`seed_sheet.md`, `notes.md` and `CHANGES.txt`. If the packager returns without
-the files, do the packaging yourself and say so.
+When `BLOCKING` and `RELEASE-BLOCKING` are both empty, polish the flagged seams
+and run `release` once. If `release --dry-run` still fails, the card was read
+wrong: fix the named check, not the threshold. Then hand the frozen score to the
+`packager` subagent for `seed.abc`, `seed_sheet.md`, `notes.md` and `CHANGES.txt`.
+If the packager returns without the files, do the packaging yourself and say so.
 
-Stop when the card has no blocking and the score is released. Do not keep
-editing after a pass.
+Stop when the card has no blocking, release passes and the score is packaged. Do
+not keep editing after a pass.

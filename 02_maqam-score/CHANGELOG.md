@@ -1,5 +1,42 @@
 # Changelog
 
+## 1.0.2 — session layer aligned with 1.0
+
+The skill was fixed to 1.0.1 in the previous entry, but the runnable template
+still described 0.9 in its subagents. No checker rule or threshold changed.
+
+### Agents and permissions
+- `composer.md`: five-part card with `RELEASE-BLOCKING`; stop only when both
+  blocks are empty; deny hand edits of `plan.json`/`phrases.json`; steps 100
+  (the value session 16 used).
+- `packager.md`: dropped the `core --snapshot` / `core_review.md` step and the
+  `--core` argument; `verify_package.py` now runs with score, plan, seed,
+  sheet, notes and report only.
+- `verifier.md`: runs `scorecard.py` and `score_cli.py release --dry-run`
+  instead of the legacy `lint` / `check --bars` path.
+- Permission arrays now follow OpenCode's last-match rule: broad allow first,
+  then specific denies (`score.abc`, `plan.json`, `phrases.json` for the
+  packager; `scripts/**` read for the verifier). Shell allowlists add
+  `scorecard.py`, `ls` and `pwd`.
+- `abc-guard.js`: the comment now explains the 1.0 reason for the 8,000-token
+  per-call cap. The cap itself is unchanged.
+
+### CLI and docs
+- `status` reports bars, phase, last check and next action only; it no longer
+  presents "next line" / core as the workflow.
+- Legacy `line`, `patch` and `core` state text is prefixed `legacy:`; a passing
+  non-release `check` points at `scorecard.py`, not "write the next line".
+- `references/cli.md` documents `scorecard` and `release` first and groups
+  `core`, `line`, `patch`, `lint`, `check --bars` under "Legacy 0.9 commands".
+- `verify_package.py` documents `core_draft.abc` as optional legacy input.
+- `SKILL.md`: stop rule now says no `BLOCKING` and no `RELEASE-BLOCKING`.
+
+### Sweep
+Checked every `must` / `never` / `do not` / `at most` statement in `SKILL.md`,
+the three active agents, `templates/STATE.md` and `opencode.json`. The one
+constraint that cannot move into permissions is "whole-file writes only":
+OpenCode's `edit` action covers `write`, `edit` and `patch`, so it stays prose.
+
 ## 1.0.1 — release parity and state hygiene
 
 Bug-fix pass on 1.0.0. No checker rule, calibration constant or threshold was

@@ -3,7 +3,7 @@
 Source of the **`maqam-score`** skill and the 177-track calibration that
 justifies its numbers.
 
-**Version:** 1.0.1 (skill) · contract 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
+**Version:** 1.0.2 (skill) · contract 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
 **Asset layer:** unreleased (see `docs/DECISIONS.md`, `docs/ASSET-BANK.md`) · **Date:** 2026-11-25
 
 ## Layout
@@ -49,6 +49,32 @@ make remix-build     # build the 670-score remixer store
 make remix-test      # remixer unit tests
 make remix-release   # remixer tests + verify + full/public zips + checksums
 ```
+
+## 1.0.2 — the session layer catches up with 1.0
+
+The skill was 1.0.1 while the runnable session template still carried 0.9
+instructions. This release aligns the whole layer and finishes the fix pass:
+
+- `composer.md` reads the five-part card (`RELEASE-BLOCKING` included), stops
+  only when both blocks are empty, and never edits `plan.json`/`phrases.json`.
+- `packager.md` no longer asks for `core --snapshot` / `core_review.md`;
+  `verify_package.py` runs without `--core`, which is optional legacy.
+- `verifier.md` runs `scorecard.py` and `release --dry-run`, not the 0.9
+  `lint` / `check --bars` path.
+- Permission order follows OpenCode's "last match wins": the broad allow comes
+  first, then the specific denies (`score.abc`, `plan.json`, `phrases.json` in
+  the packager; `scripts/**` read in the verifier). Shell allowlists gain
+  `scorecard.py`, `ls` and `pwd`.
+- Decisions: the per-call cap stays **8,000 output tokens** (a 2–4k draft fits,
+  runaway output is cut); the template composer runs **100 steps**, matching the
+  value session 16 actually used.
+- `references/cli.md` documents `scorecard` and `release` first and marks
+  `core`/`line`/`patch`/`lint`/`check --bars` as legacy 0.9. `status` and the
+  legacy state text no longer present line/core as the 1.0 next step.
+
+Remaining prose-only constraint: OpenCode's `edit` permission covers `write`,
+`edit` and `patch`, so "whole-file writes only" cannot be enforced by the
+permission table; it stays a rule in `SKILL.md` and the composer prompt.
 
 ## 1.0.1 — release parity and state hygiene
 

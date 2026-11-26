@@ -2,9 +2,10 @@ import fs from "node:fs"
 import path from "node:path"
 import { Plugin } from "@opencode/plugin"
 
-// The experiment pins one model and one per-call ceiling. A 32k reasoning
-// burst cannot happen: the request is cut to 8k and the composer's step limit
-// forces a tool call. The log makes the model in use auditable.
+// The 1.0 loop writes a whole score per call and validates it with the
+// scorecard. Pin one model/variant, cap output per request at 8k tokens so a
+// 2-4k-token draft fits and a runaway burst is cut, and log the resolved model
+// so a run can be audited.
 const PIN = { providerID: "deepseek", id: "deepseek-flash", variant: "high" }
 const MAX_TOKENS = 8000
 

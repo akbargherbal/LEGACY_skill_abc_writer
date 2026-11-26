@@ -1,26 +1,33 @@
 #!/usr/bin/env python3
-"""ABC score workflow: scaffold, write by line, lint, check, release.
+"""ABC score workflow: scaffold, whole drafts, scorecard, release.
 
 This is the single entry point the composer uses. It owns the file; the model
 owns the notes. Nothing here writes music: it writes bars the model supplies,
 checks their arithmetic, and reports errors in one pass.
 
+The 1.0 path is ``init`` -> write the whole score -> ``scorecard.py`` ->
+rewrite whole -> ``release``. The line-based commands below are **legacy 0.9**:
+they exist for emergency repair and auditing old runs, not for composition.
+
 Commands
 --------
     init      lyrics + style -> prosody.json, phrases.json, plan.json, score scaffold
+    scorecard whole-draft card (separate script: scorecard.py)
+    release   strict check + final rest (1.0 close)
+    seed      build seed.abc (chords + drums) from the frozen score
+    plan      plan init/lint/set/refresh/show
+    status    bars, phase, last check and next action
+    explain   plain-language parser diagnosis (abc_doctor.py)
+    explain-metric  definition and pitfalls for one measured number
+    align     positional syllable -> note projection (report only)
+    view      ASCII piano roll or per-line contour (report only)
+
+Legacy 0.9 commands (emergency repair only):
     core      snapshot/check the 8-16 bar core before expansion
     line N    write one lyric line's bars (Vocal + Ins), auto-pad the bar tail
     patch B   replace one bar in both voices
     lint      report every parse/sum error in one pass
     check     checker.py; --bars for a section report; --release for strict
-    release   strict check + final rest
-    seed      build seed.abc (chords + drums) from the frozen score
-    plan      plan init/lint/set/refresh/show
-    status    bars written, next line, core state, last check
-    explain   plain-language parser diagnosis (abc_doctor.py)
-    explain-metric  definition and pitfalls for one measured number
-    align     positional syllable -> note projection (report only)
-    view      ASCII piano roll or per-line contour (report only)
 
 The dialect is the bundled runtime parser's, not a general ABC parser.
 """
@@ -694,7 +701,10 @@ def cmd_core(args) -> int:
         Path(args.core).write_text(render_groups(header, keep), encoding="utf-8")
         state["core_bars"] = count
         state["phase"] = "core"
-        state["next_action"] = "write core_review.md (5 numbered lines), then core --check"
+        state["next_action"] = (
+            "legacy: write core_review.md (5 numbered lines), then core --check; "
+            "a 1.0 run writes the whole score and runs scorecard.py"
+        )
         write_json(Path(args.state), state)
         print(f"wrote {args.core}: {count} bars; now write core_review.md (5 numbered lines)")
         return 0
@@ -720,7 +730,10 @@ def cmd_core(args) -> int:
         state["core_reviewed"] = True
         state["core_bars"] = len(core_bars)
         state["phase"] = "expand"
-        state["next_action"] = "write the next lyric line: score_cli.py line <n> --vocal ... --ins ..."
+        state["next_action"] = (
+            "legacy: write the next lyric line (score_cli.py line <n>); "
+            "a 1.0 run rewrites the whole score, then scorecard.py"
+        )
         write_json(Path(args.state), state)
         update_skill_state(Path(args.skill_state), phase="expand",
                            last_artifact="core_review.md",
@@ -773,8 +786,9 @@ def cmd_line(args) -> int:
     core_bars = int(state.get("core_bars") or 0)
     core_limit = core_bars or 16
     if not state.get("core_reviewed") and start > core_limit:
-        die("core not reviewed; write the first 16 bars, then core --snapshot, "
-            "write core_review.md, and run core --check")
+        die("legacy core not reviewed; write the first 16 bars, then core --snapshot, "
+            "write core_review.md, and run core --check. A 1.0 run does not use core: "
+            "write the whole score and run scorecard.py")
     try:
         vocal = split_spec(args.vocal, count) if args.vocal is not None else ["Z"] * count
         ins = split_spec(args.ins, count) if args.ins is not None else ["Z"] * count
@@ -812,7 +826,11 @@ def cmd_line(args) -> int:
     state["written_bars"] = written
     state["written_lines"] = proposed["written_lines"]
     state["phase"] = "expand"
-    state["next_action"] = f"write line {next_line}" if next_line != "check" else "check"
+    state["next_action"] = (
+        f"legacy: write line {next_line}; a 1.0 run rewrites the whole score, then scorecard.py"
+        if next_line != "check"
+        else "legacy: check the next bars; a 1.0 run runs scorecard.py"
+    )
     write_json(Path(args.state), state)
     update_skill_state(Path(args.skill_state), phase="expand",
                        last_artifact=f"score.abc (line {args.line})",
@@ -971,7 +989,11 @@ def cmd_check(args) -> int:
         state["phase"] = "done" if args.release else "expand"
         state["last_check"] = {"pass": True, "release": bool(args.release),
                                "report": str(report)}
-        state["next_action"] = "seed" if args.release else "write the next line"
+        state["next_action"] = (
+            "seed"
+            if args.release
+            else "run scorecard.py on the whole score; rewrite whole if blocking"
+        )
         write_json(Path(args.state), state)
         update_skill_state(Path(args.skill_state),
                            phase="done" if args.release else "expand",
@@ -1222,28 +1244,18 @@ def cmd_plan(args) -> int:
 
 def cmd_status(args) -> int:
     plan = load_plan(Path(args.plan))
-    phrases = load_phrases(Path(args.phrases))
+    load_phrases(Path(args.phrases))  # validate the scaffold is present
     state = load_state(Path(args.state))
     total = int(plan.get("bars", 0))
-    lines = phrases.get("lines", [])
-    written = set(int(x) for x in state.get("written_lines", []))
-    nxt = next((l for l in lines if int(l.get("line", -1)) not in written), None)
     try:
         text = Path(args.score).read_text(encoding="utf-8")
         bars = score_bars(text)
     except (OSError, ValueError) as exc:
         bars = f"? ({exc})"
-    print(f"bars {bars}/{total}; lines {len(written)}/{len(lines)}; "
-          f"core {state.get('core_bars', 0)} bars "
-          f"({'reviewed' if state.get('core_reviewed') else 'not reviewed'})")
-    if nxt:
-        print(f"next line {nxt.get('line')}: bars {nxt.get('bar_start')}-{nxt.get('bar_end')}, "
-              f"{nxt.get('syllables')} syllables")
-    else:
-        print("all lyric lines written")
     last = state.get("last_check")
-    print(f"phase {state.get('phase')}; last check {last or 'none'}")
-    print(f"next: {state.get('next_action')}")
+    print(f"bars {bars}/{total}; phase {state.get('phase')}; "
+          f"last check {last or 'none'}")
+    print(f"next: {state.get('next_action') or 'none'}")
     return 0
 
 

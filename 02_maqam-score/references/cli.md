@@ -28,6 +28,45 @@ from the syllabify budget. The form is baked into `plan.json`/`phrases.json`;
 keep the compact form and accept the warning, or rerun with `--force --bars N`
 **and** `--sections` to place the extra bars. It is an advisor, not a gate.
 
+`--sections` takes `name=start_bar`, one entry per sung section in lyric order,
+repeating the name for a repeat: `chorus=37,...,chorus=65`, not `chorus2`.
+
+## scorecard
+
+```bash
+python3 <skill>/scripts/scorecard.py score.abc --plan plan.json --phrases phrases.json
+python3 <skill>/scripts/scorecard.py score.abc --plan plan.json --phrases phrases.json --json card.json
+```
+
+The measurement for the whole-draft loop (1.0). It reuses `checker.py` and
+prints five parts:
+
+- `KEY BANDS` — measured value, band and verdict (`FAIL` hard, `WARN`).
+- `BLOCKING` — hard failures. Fix all of them in the next draft.
+- `RELEASE-BLOCKING` — passes the card but fails `release` (strict style and
+  the final rest). Fix them in the same rewrite as `BLOCKING`.
+- `POLISH` — warnings that stay non-blocking at release.
+- `SEAMS` — line-to-line joints: cadence -> start, rest, register, overlap.
+
+Exit 1 when `BLOCKING` or `RELEASE-BLOCKING` is non-empty; exit 2 on a parse
+error. `NEXT` names the next action; it never says "No blocking" while release
+would fail.
+
+## release
+
+```bash
+score_cli.py release              # strict style + final rest, writes report.json
+score_cli.py release --dry-run    # same verdicts, score_state.json unchanged
+```
+
+`release` is the 1.0 close and agrees with the card's `RELEASE-BLOCKING` block.
+
+## Legacy 0.9 commands
+
+`core`, `line`, `patch`, `lint`, `check --bars` and plain `check` (without
+`--release`) belong to the 0.9 line-by-line workflow. They remain for emergency
+repair and auditing old runs; a 1.0 score is never composed with them.
+
 ## core
 
 ```bash
@@ -111,14 +150,13 @@ Exit 1 when any bar is over the cap; the full checker still owns the verdict.
 ```bash
 score_cli.py check --bars 9-16     # section report: sums, per-line table, register, rests, cadence
 score_cli.py check                 # full checker.py, non-strict, writes report.json
-score_cli.py check --release       # strict-style + final rest
-score_cli.py release               # same as check --release
-score_cli.py release --dry-run     # strict verdicts; score_state.json unchanged
+score_cli.py check --release       # same verdicts as `release`
 ```
 
 On a hard failure, `check` prints the `repair.py` bar/phrase map and writes
-`repair.json`. Fix only the named bars with `patch`, then check once. Stop
-after a pass. `--bars` does not run the full gate; it is for early feedback.
+`repair.json`. In 1.0, rewrite the **whole** score from the card; using the map
+to `patch` named bars is the legacy 0.9 repair loop. `--bars` does not run the
+full gate; it is for early feedback.
 
 ## seed
 
@@ -150,7 +188,7 @@ ranges.
 ## status / explain
 
 ```bash
-score_cli.py status                 # bars written, next line, core, last check
+score_cli.py status                 # bars, phase, last check, next action
 score_cli.py explain                # abc_doctor.py: plain-language parse diagnosis
 score_cli.py explain-metric --list  # names of the measured values
 score_cli.py explain-metric end     # definition, formula and known pitfall

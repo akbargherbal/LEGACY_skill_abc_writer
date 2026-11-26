@@ -46,3 +46,23 @@ Claim: each defect below is gone. Nothing here claims better musical output (one
 - Out of scope per section 4: pre-write lint, draft counters, generating notes/CHANGES from report.json, maqam check in `seed-check`, threshold retuning, `measure_session.py`.
 - Pre-existing, unrelated: `scripts/selftest.sh` exits 1 because `asset_bank.py stats | head -3` hits BrokenPipe. Same result on the untouched files.
 - Legacy `check` (non-release) still writes "write the next line" on pass; it is the 0.9 path.
+
+---
+
+## Second pass: B2, B4 and the consistency sweep (1.0.2)
+
+Claude's own note said the fixed zip was **not final** because it did not carry
+the session layer. This pass closes those items in the repository:
+
+| Item | Resolution |
+|---|---|
+| B2 (guard comment) | `abc-guard.js` comment now states the 1.0 reason for the 8,000-token cap; the code is unchanged |
+| B4 (permissions) | agents now follow the last-match rule: broad allow first, specific denies last; packager denies `score.abc`/`plan.json`/`phrases.json`, verifier denies reading `scripts/**`; shell allowlists gain `scorecard.py`, `ls`, `pwd` |
+| B4 (content) | packager has no `core` step and calls `verify_package.py` without `--core`; verifier uses `scorecard.py` + `release --dry-run`; composer reads `RELEASE-BLOCKING` |
+| Template version | `session_template` was already promoted to 1.0 in `6a2e015`; this pass removes its remaining 0.9 instructions |
+| Sweep | every `must` / `never` / `do not` / `at most` line in `SKILL.md`, the three active agents, `templates/STATE.md` and `opencode.json` was checked; the only prose-only rule left is "whole-file writes only", because OpenCode's `edit` action covers `write`, `edit` and `patch` |
+| Decision: token cap | **8,000** output tokens per call kept: a 2-4k-token draft fits, a runaway burst is cut |
+| Decision: composer steps | **100** in the template, matching the value session 16 ran with (`package_session.sh` still overrides it per session) |
+
+Still outside this pass by design: `composer-v0.9.md` and `SKILL-v0.9.md` are
+archives and are excluded from every package and session drop.
