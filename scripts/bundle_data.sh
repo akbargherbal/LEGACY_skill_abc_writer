@@ -8,9 +8,11 @@
 # no flags.  Regenerating those artifacts still happens under analysis/out; this
 # script snapshots the result into the skill package.
 #
-# Source text is limited to the ABC/manifest cache the tools actually read.  The
-# 2.95 GiB audio bundle is never copied, and work/canonical is omitted because
-# it is a second copy of the ABC text and is reproducible with `make ostris-build`.
+# Only derived artifacts are copied.  The raw inputs in analysis/out/.../source
+# are fetched on demand (make ostris-sync) and must never enter the package:
+# they are the largest part of the bundle, are reproducible, and carry unclear
+# upstream terms.  The 2.95 GiB audio bundle is never copied either, and
+# work/canonical is omitted because it is a second copy of the ABC text.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
@@ -28,7 +30,6 @@ files=(
   idioms.jsonl
 )
 dirs=(
-  source
   priors
   eval
 )
@@ -55,6 +56,9 @@ for name in "${dirs[@]}"; do
 done
 cp -a "$SRC/similarity/index.json" "$DST/similarity/index.json"
 cp -a "$SRC/similarity/similarity.json" "$DST/similarity/similarity.json"
+
+# Drop a raw cache left by an older bundle or a local rebuild.
+rm -rf "${DST:?}/source"
 
 # Generated Markdown reports are developer documentation, not skill output.
 rm -f "$DST/priors/priors.md"

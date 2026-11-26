@@ -74,7 +74,7 @@ def main(argv: list[str] | None = None) -> int:
         table = phrase_table.build(parsed, phrases)
         payload["phrase_table"] = table
         print("\nper-line phrase table")
-        print("  line section      bars    syl  notes beat cell                    rest_after  unbroken  mean  rep   leap  end")
+        print("  line section      bars    syl  notes beat cell                    rest_after  unbroken  mean  rep   leap  end° pitch")
         for r in table["rows"]:
             print(
                 f"  {r.get('line', '?'):>4} {str(r.get('section',''))[:12]:<12} "
@@ -86,7 +86,8 @@ def main(argv: list[str] | None = None) -> int:
                 f"{str(r.get('register_mean','-')):>5} "
                 f"{str(r.get('repeated','-')):>5} "
                 f"{str(r.get('leaps','-')):>5} "
-                f"{str(r.get('end_name','-')):>3}"
+                f"{str(r.get('end_name','-')):>4} "
+                f"{str(r.get('end_pitch_name','-')):>5}"
             )
         s = table["summary"]
         print(f"  lyric lines {s['lyric_lines']}  detected phrases {s['detected_phrases']}  "

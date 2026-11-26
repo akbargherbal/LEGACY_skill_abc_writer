@@ -3,6 +3,9 @@ __pycache__/
 dist/*.tmp
 analysis/out/ostris/source/
 analysis/out/ostris/work/
+# Raw OSTRIS corpus inputs: fetched on demand with `make ostris-sync`,
+# never shipped inside the skill bundle (see 02_maqam-score/data/README.md).
+02_maqam-score/data/ostris/source/
 
 # Agent evaluation payloads (transcripts, lyrics, artifacts)
 analysis/eval/runs/

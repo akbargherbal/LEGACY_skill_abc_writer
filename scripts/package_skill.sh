@@ -15,6 +15,7 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 NAME=abc-score-writer
 SRC="$ROOT/02_maqam-score"
+DOC=${SKILL_MD:-SKILL.md}
 PUBLIC=0
 OUT="$ROOT/dist"
 
@@ -26,9 +27,9 @@ for arg in "$@"; do
   esac
 done
 
-test -f "$SRC/SKILL.md" || { echo "package: missing $SRC/SKILL.md" >&2; exit 1; }
-grep -q "^name: $NAME$" "$SRC/SKILL.md" || {
-  echo "package: SKILL.md must declare 'name: $NAME'" >&2
+test -f "$SRC/$DOC" || { echo "package: missing $SRC/$DOC" >&2; exit 1; }
+grep -q "^name: $NAME$" "$SRC/$DOC" || {
+  echo "package: $DOC must declare 'name: $NAME'" >&2
   exit 1
 }
 
@@ -41,8 +42,12 @@ mkdir -p "$STAGE/$NAME"
 EXCLUDES=(
   --exclude '__pycache__'
   --exclude '*.pyc'
+  --exclude '.pytest_cache'
+  --exclude '.ruff_cache'
+  --exclude '.mypy_cache'
   --exclude 'CHANGELOG.md'
   --exclude 'data/README.md'
+  --exclude 'SKILL-v1.md'
 )
 if [ "$PUBLIC" -eq 1 ]; then
   EXCLUDES+=(--exclude 'data/')
@@ -52,6 +57,11 @@ else
 fi
 
 rsync -a "${EXCLUDES[@]}" "$SRC"/ "$STAGE/$NAME"/
+# Build a preview from an alternate SKILL document, still named SKILL.md in
+# the package (the session-15/16 1.0 previews use SKILL-v1.md).
+if [ "$DOC" != "SKILL.md" ]; then
+  cp "$SRC/$DOC" "$STAGE/$NAME/SKILL.md"
+fi
 # Reproducible archive: fixed mtimes and no host-specific extra attributes.
 # Two builds of the same source produce the same sha256.
 EPOCH="${SOURCE_DATE_EPOCH:-0}"

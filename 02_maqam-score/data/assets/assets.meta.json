@@ -1,0 +1,34 @@
+{
+ "index": "02_maqam-score/data/assets/assets.jsonl.gz",
+ "songs": 670,
+ "songs_indexed": 644,
+ "assets": 38601,
+ "clean": 30725,
+ "raw": 7876,
+ "kinds": {
+  "phrase": 32487,
+  "cadence": 970,
+  "cell": 5144
+ },
+ "roles": {
+  "verse": 22013,
+  "chorus": 15136,
+  "interlude": 473,
+  "intro": 453,
+  "outro": 145,
+  "bridge": 247,
+  "pre-chorus": 133,
+  "silence": 1
+ },
+ "functions": {
+  "opening": 1388,
+  "phrase": 35102,
+  "cadence": 2111
+ },
+ "dedupe_groups": 30268,
+ "section_mismatches": 0,
+ "errors": [],
+ "error_count": 0,
+ "per_song_median": 57.0,
+ "bytes": 2634862
+}

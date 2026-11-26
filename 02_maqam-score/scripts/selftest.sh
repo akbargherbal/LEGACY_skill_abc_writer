@@ -163,5 +163,10 @@ python3 scripts/score_cli.py seed-check --score "$tmp/seedscore.abc" \
   --plan "$tmp/seedplan.json" --seed "$tmp/seed.abc"
 echo "seed ok"
 
+echo "== asset bank: shipped index"
+python3 scripts/asset_bank.py stats | head -3
+python3 scripts/verify_loans.py --help > /dev/null
+echo "asset bank ok"
+
 echo
 echo "selftest: PASS"

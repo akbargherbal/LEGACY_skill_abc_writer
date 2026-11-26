@@ -1,16 +1,19 @@
-.PHONY: test selftest acceptance zip zip-public release check-corpus craft offline-check session12 measure-session ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval suno-build suno-check remix-build remix-verify remix-test remix-offline remix-zip remix-zip-public remix-release clean
+.PHONY: test selftest acceptance zip zip-public release check-corpus craft offline-check session13 session14 session16 asset-build asset-stats asset-test measure-session ostris-sync ostris-audit ostris-build ostris-features ostris-priors ostris-idioms ostris-similarity ostris-online ostris-bundle ostris-plan ostris-check ostris-eval suno-build suno-check remix-build remix-verify remix-test remix-offline remix-zip remix-zip-public remix-release clean
 
 CORPUS ?= $(HOME)/Jupyter_Notebooks/OpenCode/arabmaqamrock/datasets/five_stars
 DIST := dist
 SKILL_NAME := abc-score-writer
 VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '02_maqam-score/scripts'); from ostris.contract import SKILL_VERSION; print(SKILL_VERSION)")
-SKILL_RELEASE ?= 0.8.1
+SKILL_RELEASE ?= 0.9.0
+SESSION_STEPS ?= 40
 REMIX_VERSION := $(shell python3 -c "import sys; sys.path.insert(0, '03_abc_remixer/scripts'); from remix.shared import REMIX_VERSION; print(REMIX_VERSION)")
 REMIX_DATA := 03_abc_remixer/data/remix
 SUNO_PKL ?= data/SUNO_ABC_SCORE_DATASET.pkl
 SUNO_DATA ?= data/suno
 REMIX_ZIP := $(DIST)/abc_remixer.zip
 ZIP := $(DIST)/$(SKILL_NAME).zip
+# Raw corpus inputs: fetched on demand with `make ostris-sync`, git-ignored,
+# and never copied into the skill bundle (see 02_maqam-score/data/README.md).
 OSTRIS_CACHE ?= analysis/out/ostris/source
 OSTRIS_OUT ?= analysis/out/ostris
 MANIFEST ?= song.json
@@ -38,7 +41,7 @@ zip-public:
 
 # Build, verify, and archive a versioned release. The unversioned zips stay as
 # the "current" aliases; dist/releases/ keeps every version, including 0.2.0.
-release: test selftest acceptance offline-check zip zip-public
+release: asset-build test selftest acceptance offline-check zip zip-public
 	@test -n "$(VERSION)" || { echo "release: cannot read SKILL_VERSION"; exit 1; }
 	@mkdir -p "$(DIST)/releases"
 	@cp "$(DIST)/$(SKILL_NAME).zip" "$(DIST)/releases/$(SKILL_NAME)-$(SKILL_RELEASE).zip"
@@ -53,9 +56,31 @@ check-corpus:
 craft:
 	python3 analysis/measure_craft.py --corpus "$(CORPUS)" --out analysis/out
 
-# Build the session-12 drop (skill + input + one-line prompt + agent config).
-session12: zip
-	scripts/package_session.sh "$(DIST)"
+# Build the session drops (skill + input + one-line prompt + agent config).
+# session-14 is the 0.9.0 meter pilot: same lyrics/model as 13, steps 40.
+session13: zip
+	SESSION_NAME=session-13 SESSION_STEPS=40 scripts/package_session.sh "$(DIST)"
+
+session14: zip
+	SESSION_NAME=session-14 SESSION_STEPS=$(SESSION_STEPS) scripts/package_session.sh "$(DIST)"
+
+# Session 16: the 1.0 whole-draft loop in a clean room, low thinking.
+session16:
+	SKILL_DOC=SKILL-v1.md COMPOSER_DOC=composer-v1.md SESSION_VARIANT=low \
+	SESSION_NAME=session-16 SESSION_STEPS=100 scripts/package_session.sh "$(DIST)"
+
+# Build the offline phrase-level asset index from the 670-score SUNO store.
+asset-build:
+	python3 02_maqam-score/scripts/asset_bank.py build \
+		--songs 03_abc_remixer/data/remix/songs \
+		--out 02_maqam-score/data/assets/assets.jsonl.gz \
+		--meta 02_maqam-score/data/assets/assets.meta.json --cells
+
+asset-stats:
+	python3 02_maqam-score/scripts/asset_bank.py stats
+
+asset-test:
+	cd 02_maqam-score && python3 -m unittest tests.test_asset_bank tests.test_verify_loans -v
 
 # Measure an exported session against the 10x budget.
 SESSION ?= analysis/eval/inbox/deepseek_session_11/opencode_session_11.json

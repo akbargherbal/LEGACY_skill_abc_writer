@@ -155,6 +155,7 @@ def build(parsed: dict, phrases: dict | None = None) -> dict:
             "leaps": round(sum(1 for i in intervals if abs(i) >= 5) / len(intervals), 3) if intervals else None,
             "start_pitch": first["pitch"],
             "end_pitch": last["pitch"],
+            "end_pitch_name": f"{PC_NAME[last['pitch'] % 12]}{last['pitch'] // 12 - 1}",
             "end_degree": (last["pitch"] - tonic) % 12,
             "end_name": PC_NAME[(last["pitch"] - tonic) % 12],
         })

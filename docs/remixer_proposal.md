@@ -44,7 +44,7 @@ transformed it" measurable.
 | Records with `exclude_from_priors: true` | 10 |
 | Records' `maqam` | `null` / `maqam_source: "unlabelled"` for **all 482** |
 | Record fields useful for search | `title, artist, key, keys, meter, meters, tempo, bars, section_count, density, silence, range{vocal,ins}, notes{vocal,ins}, chords, quality_score, flags, duplicate_of, duplicate_group, mode_hypothesis, features` |
-| Full ABC text | inside shard JSONs: `data/ostris/source/TRANSCRIPTS/YT500/YT500/abc/shard-NN.json` (25 shards, `tracks[]`), `.../FADL_SHAKER/abc/*.json` (15 albums, `tracks[]`), plus loose `.abc` in `source/DATASET/fadhl_shaker_instrumental_18/abc/` and `source/TRANSCRIPTS/fadhl_shaker_selected_scores/*/score.abc` |
+| Full ABC text | not bundled; lives in the `sync` cache (`analysis/out/ostris/source/`): shard JSONs `TRANSCRIPTS/YT500/YT500/abc/shard-NN.json` (25 shards, `tracks[]`), `TRANSCRIPTS/FADL_SHAKER/abc/*.json` (15 albums, `tracks[]`), plus loose `.abc` in `DATASET/fadhl_shaker_instrumental_18/abc/` and `TRANSCRIPTS/fadhl_shaker_selected_scores/*/score.abc` |
 | Tracks found in transcript JSONs | 635 entries, 623 carry ABC text (check exact key names: `abc`, `abc_melody` seen on Fadl entries) |
 | Total ABC size | ~2.49 M chars (~0.8-1.0 M tokens). Mean song ~4.0 k chars (~1.3-1.6 k tokens), max ~9 k chars |
 | `idioms.jsonl` | 1304 rows (481 opening / 476 cadence / 347 phrase), 2-4 bars, **Vocal only**, interval + duration sequences, `degree_start/end`, contour; no absolute pitches, no ABC, `reviewed: false` |

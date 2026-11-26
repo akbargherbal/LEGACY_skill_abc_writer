@@ -590,7 +590,7 @@ class CanonicalTests(unittest.TestCase):
 
     def test_contract_pins_match_current_skill(self):
         checks = verify()
-        self.assertEqual(SKILL_VERSION, "0.8.1")
+        self.assertEqual(SKILL_VERSION, "0.9.0")
         self.assertTrue(all(check["ok"] for check in checks), checks)
 
 

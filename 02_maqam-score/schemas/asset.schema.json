@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill.local/maqam-score/asset.schema.json",
+  "title": "Asset bank record",
+  "description": "One phrase, cadence or cell from the stock library. The composer sees a query result, never the whole index.",
+  "type": "object",
+  "required": [
+    "id", "source", "start_bar", "end_bar", "bars", "section", "role",
+    "function", "kind", "meter", "tempo", "unit", "key", "tonic_pc",
+    "notes", "intervals", "durations", "contour", "degree_start", "degree_end",
+    "low", "high", "range", "mean_pitch", "density", "cadence_degree",
+    "syllables_min", "syllables_max", "quality", "dedupe_group", "tags"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^a-" },
+    "source": { "type": "string", "minLength": 1 },
+    "start_bar": { "type": "integer", "minimum": 1 },
+    "end_bar": { "type": "integer", "minimum": 1 },
+    "bars": { "type": "integer", "minimum": 1, "maximum": 4 },
+    "section": { "type": "string" },
+    "role": { "type": "string" },
+    "function": { "enum": ["opening", "phrase", "cadence"] },
+    "kind": { "enum": ["phrase", "cadence", "cell"] },
+    "meter": { "type": "string", "pattern": "^[0-9]+/[0-9]+$" },
+    "tempo": { "type": "number", "exclusiveMinimum": 0 },
+    "unit": { "type": "string", "pattern": "^1/[0-9]+$" },
+    "key": { "type": "string", "minLength": 1 },
+    "tonic_pc": { "type": "integer", "minimum": 0, "maximum": 11 },
+    "notes": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "array",
+        "minItems": 4,
+        "maxItems": 4,
+        "items": { "type": "number" }
+      }
+    },
+    "intervals": { "type": "array", "items": { "type": "integer" } },
+    "durations": { "type": "array", "items": { "type": "number", "exclusiveMinimum": 0 } },
+    "contour": { "enum": ["up", "down", "wave", "flat"] },
+    "degree_start": { "type": "integer", "minimum": 0, "maximum": 11 },
+    "degree_end": { "type": "integer", "minimum": 0, "maximum": 11 },
+    "low": { "type": "integer", "minimum": 0, "maximum": 127 },
+    "high": { "type": "integer", "minimum": 0, "maximum": 127 },
+    "range": { "type": "integer", "minimum": 0 },
+    "mean_pitch": { "type": "number" },
+    "density": { "type": "number", "exclusiveMinimum": 0 },
+    "rest_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "cadence_degree": { "type": "integer", "minimum": 0, "maximum": 11 },
+    "syllables_min": { "type": "integer", "minimum": 1 },
+    "syllables_max": { "type": "integer", "minimum": 1 },
+    "quality": {
+      "type": "object",
+      "required": ["top_dur", "distinct_durations", "longest_run", "leap_max",
+                   "register_ok", "vocal_activity", "ins_activity",
+                   "monotone", "repetitive", "clean"],
+      "properties": {
+        "top_dur": { "type": "number", "minimum": 0, "maximum": 1 },
+        "distinct_durations": { "type": "integer", "minimum": 1 },
+        "longest_run": { "type": "integer", "minimum": 1 },
+        "leap_max": { "type": "integer", "minimum": 0 },
+        "register_ok": { "type": "boolean" },
+        "vocal_activity": { "type": "number", "minimum": 0 },
+        "ins_activity": { "type": "number", "minimum": 0 },
+        "monotone": { "type": "boolean" },
+        "repetitive": { "type": "boolean" },
+        "clean": { "type": "boolean" }
+      }
+    },
+    "dedupe_group": { "type": "string", "minLength": 6 },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

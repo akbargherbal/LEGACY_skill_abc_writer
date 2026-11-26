@@ -201,9 +201,11 @@ Entry point: `python3 02_maqam-score/scripts/ostris_cli.py <command>`.
 
 ## Artifacts
 
-The shippable artifacts are bundled under `02_maqam-score/data/ostris/` and
-included in `dist/abc_score_writer.zip`; `analysis/out/ostris/` is the
-regeneration workspace. The reader commands default to the bundle.
+The shippable (derived) artifacts are bundled under
+`02_maqam-score/data/ostris/` and included in `dist/abc_score_writer.zip`;
+`analysis/out/ostris/` is the regeneration workspace, including the raw
+`source/` cache that `sync` fetches. The reader commands default to the bundle;
+the rebuild commands need `source/` and say so when it is absent.
 
 | Artifact | Status |
 |---|---|

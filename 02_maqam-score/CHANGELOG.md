@@ -1,5 +1,66 @@
 # Changelog
 
+## 0.9.0 — measurement at the line, not at the gate
+
+**Evidence:** session 13 wrote all 26 lines through the CLI (0 hand scripts,
+0 direct writes) and still failed six hard checks at the first full `check`:
+notes/syllable 0.86, simultaneity 176 units, register mean 68, 3 distinct
+durations, repeated share 4.5 %, and a 4-line note deficit. Every number was
+already computed by `checker.py`; none was printed when the line was written.
+Generated tokens were 57,075 for a 1,427-token score (40×).
+
+**Why:** the composer writes one line at a time against whole-score gates, and
+the only feedback arrived after the form existed. The cost was a late repair
+loop, not a lack of tool discipline.
+
+### Tools
+- `scripts/live_meter.py`: after every `line`/`patch`, print the line's note
+  deficit, projected score ratio, repeated share, duration inventory, register
+  mean, ties, gap and overlaps. It reuses `checker.check(...)["measured"]`; it
+  does not reimplement a metric.
+- `line`/`patch --dry-run`: print the padded bars and meter; write nothing.
+- `line`/`patch --guard`: refuse the write when the current line has a deficit
+  over 1, overlaps over the cap, or (on the last line) a whole-score sanity band
+  is outside. Off by default.
+- `lint` reports per-bar simultaneity and exits 1 over the cap.
+- `explain-metric NAME` + `references/metrics.md`: the documented metric
+  surface, including why `end°` is tonic-relative (`C` in Dm prints `Bb`).
+- `release --dry-run`: strict verdicts without changing `score_state.json`.
+- `init` prints a **FORM BUDGET** warning when the form is more than ±5 % from
+  the syllabify budget.
+- `align`: positional syllable→note projection; surplus notes are a named tail.
+- `view --roll` / `view --contour`: ASCII piano roll and per-line contour.
+- Corpus bundle: the raw `data/ostris/source/` inputs (7.5 MB, 92 files) no
+  longer ship. `audit`, `build`, `features` and `eval --build-split` fetch them
+  with `sync` and print that recipe (exit 2) when the cache is absent; the
+  bundle script drops any stale `source/`. Rebuild steps:
+  `02_maqam-score/data/README.md`, "Regenerating `source/`".
+
+### Not changed
+- `checker.py`, `calibration.json` and `abc_tools.py` are byte-identical; their
+  pinned hashes still verify.
+- No new workflow, no new hard gate, no `w:` lines, no automatic composition.
+- `plan_version` stays `0.8.1`; the plan schema did not change.
+
+## Unreleased — phrase asset bank (stock pass)
+
+**Purpose:** make the 670-score SUNO store usable as stock: a phrase, cadence or
+cell is a reference the composer may borrow and transform, not a template.
+
+- `asset_bank.py build` indexes 644 vocal songs into 38,601 assets (32,487
+  phrases, 970 cadences, 5,144 cells); 30,725 are clean; the gzipped index is
+  2.5 MiB.
+- `asset_bank.py query` returns 3–5 compact candidates with role, bars, contour,
+  cadence, register, syllable range and quality flags.
+- `asset_bank.py apply` previews a transposed/maqam-remapped/transformed
+  fragment; it never writes `score.abc`.
+- `loans.json` + `verify_loans.py` make every borrowing declared: asset, source,
+  bars, borrowed fields, fit, transform and reason.
+- Binding rules: `docs/DECISIONS.md` (10× score budget, ear final, no `w:`, one
+  workflow, no checker/calibration edits). Design: `docs/ASSET-BANK.md`.
+- The composer workflow is unchanged: `score_cli.py line` still writes every
+  line. The stock pass is optional; no reason, no loan.
+
 ## 0.8.1 — the line is the unit; the CLI owns the file
 
 **Evidence:** session 11 spent 219,533 generated tokens for a 1,941-token score

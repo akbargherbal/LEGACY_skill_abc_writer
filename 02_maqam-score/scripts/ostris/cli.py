@@ -1,19 +1,24 @@
 """Command line for the OSTRIS corpus tools.
 
-The corpus artifacts ship with the skill under ``<skill>/data/ostris/``, so the
-reader commands below work offline with no flags::
+The derived corpus artifacts ship with the skill under ``<skill>/data/ostris/``,
+so the reader commands below work offline with no flags::
+
+    python3 scripts/ostris_cli.py priors   [--out ...]
+    python3 scripts/ostris_cli.py idioms   [--out ...]
+    python3 scripts/ostris_cli.py similarity [--out ...] --build
+    python3 scripts/ostris_cli.py contract
+
+The raw inputs (``source/``) are **not shipped**: they are fetched on demand and
+are only needed to rebuild the derived artifacts::
 
     python3 scripts/ostris_cli.py audit    [--cache ...] [--out ...]
     python3 scripts/ostris_cli.py build    [--cache ...] [--out ...]
     python3 scripts/ostris_cli.py features [--cache ...] [--out ...]
-    python3 scripts/ostris_cli.py priors   [--out ...]
-    python3 scripts/ostris_cli.py idioms   [--out ...]
-    python3 scripts/ostris_cli.py similarity [--out ...] --build
     python3 scripts/ostris_cli.py eval     [--cache ...] [--out ...] --build-split
-    python3 scripts/ostris_cli.py contract
 
-``sync`` is only needed to refresh the bundle from the project data root; it is
-never required to read or compose::
+``sync`` populates that cache from the project data root; it is never required
+to read or compose.  The rebuild commands print this recipe instead of a
+traceback when the cache is missing::
 
     python3 scripts/ostris_cli.py sync --data-root gs://... [--cache ...]
 
@@ -57,11 +62,35 @@ BUNDLED_DATA = SKILL_ROOT / "data" / "ostris"
 
 
 def _default_cache() -> Path:
+    """Conventional location for the on-demand raw inputs (not bundled)."""
     return BUNDLED_DATA / "source"
 
 
 def _default_out() -> Path:
     return BUNDLED_DATA
+
+
+def _require_cache(cache: Path) -> bool:
+    """Explain how to fetch ``source/`` when a rebuild command needs it.
+
+    The cache is not bundled, so a missing directory is the normal state of a
+    fresh install; it must not surface as a ``FileNotFoundError`` traceback.
+    """
+    if Path(cache).is_dir():
+        return True
+    print(
+        f"cache not found: {cache}\n"
+        "Raw corpus inputs are not shipped; only derived artifacts are.  Fetch\n"
+        "them once into a writable directory, then rerun with --cache:\n"
+        "  python3 scripts/ostris_cli.py sync --data-root gs://<bucket> "
+        "--cache analysis/out/ostris/source\n"
+        "  python3 scripts/ostris_cli.py <audit|build|features|eval> "
+        "--cache analysis/out/ostris/source ...\n"
+        f"(or place the cache at {cache}; it is git-ignored — delete it before packaging.)\n"
+        "Details: data/README.md, section 'Regenerating source/'.",
+        file=sys.stderr,
+    )
+    return False
 
 
 def _print_json(data) -> None:
@@ -75,6 +104,8 @@ def cmd_sync(args) -> int:
 
 
 def cmd_audit(args) -> int:
+    if not _require_cache(args.cache):
+        return 2
     summary = audit(args.cache, args.out)
     if args.json:
         _print_json(summary)
@@ -104,6 +135,8 @@ def cmd_audit(args) -> int:
 
 
 def cmd_build(args) -> int:
+    if not _require_cache(args.cache):
+        return 2
     summary = build(args.cache, args.out, require_contract=args.require_contract)
     if args.json:
         _print_json(summary)
@@ -125,6 +158,8 @@ def cmd_build(args) -> int:
 
 
 def cmd_features(args) -> int:
+    if not _require_cache(args.cache):
+        return 2
     summary = build_features(
         args.cache, args.out, require_contract=args.require_contract
     )
@@ -303,6 +338,8 @@ def cmd_check(args) -> int:
 
 def cmd_eval(args) -> int:
     if args.build_split:
+        if not _require_cache(args.cache):
+            return 2
         summary = build_split(args.cache, args.out)
         if args.json:
             _print_json(summary)

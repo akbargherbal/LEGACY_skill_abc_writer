@@ -9,7 +9,7 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-SKILL_VERSION = "0.8.1"
+SKILL_VERSION = "0.9.0"
 
 PINNED = {
     "checker.py": "e047c476ada390405a999deac147d2855ca82f1c6b7aa1023737e7fde17ac981",

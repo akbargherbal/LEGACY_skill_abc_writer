@@ -23,6 +23,11 @@ Runs `syllabify.py`, writes `prosody.json`, `phrases.json`, a complete
 starts, in lyric order; repeat a name for a repeat. Without it, bars are
 allocated by syllable weight. `--force` rebuilds existing files.
 
+`init` prints a **FORM BUDGET** line when the chosen form is more than ±5% away
+from the syllabify budget. The form is baked into `plan.json`/`phrases.json`;
+keep the compact form and accept the warning, or rerun with `--force --bars N`
+**and** `--sections` to place the extra bars. It is an advisor, not a gate.
+
 ## core
 
 ```bash
@@ -52,6 +57,13 @@ score_cli.py line 1 \
 - The whole file is linted before writing; a bad bar changes nothing.
 - `--ins` defaults to rests. The guitar answers in the vocal gaps; a whole bar
   of `Z` is a floor, not a part.
+- After the write, a meter block prints the line's note deficit, the projected
+  score ratio, repeated share, duration inventory, register mean, ties, gap and
+  overlaps. Read it before the next line.
+- `--dry-run` prints the padded bars and the meter and writes nothing.
+- `--guard` refuses the write if the current line has a deficit over 1, its gap
+  is below the target, or an overlap is over the cap, or, on the last line, a
+  whole-score sanity band is outside. Off by default.
 
 ## patch
 
@@ -60,7 +72,23 @@ score_cli.py patch 26 --vocal "D4 F2 G2 A4 G2 z2" --ins "z4 A,2 c2 A,2"
 ```
 
 Replaces one bar in both voices atomically and lints the file. Use this for a
-named fix from `check`/`repair`, not a rewrite.
+named fix from `check`/`repair`, not a rewrite. `--dry-run` and `--guard` work
+the same as on `line`; the meter covers that bar.
+
+## asset_bank / verify_loans
+
+```bash
+python3 <skill>/scripts/asset_bank.py query --role chorus --bars 2 --syllables 14 --contour up --limit 3
+python3 <skill>/scripts/asset_bank.py apply --id <asset> --to-key Dm --maqam kurd
+python3 <skill>/scripts/verify_loans.py --loans loans.json --plan plan.json
+```
+
+`query` returns 3–5 compact references with `fit` and `why`; it never dumps the
+library. `apply` returns a standalone ABC fragment, not a score write. If you
+use an asset, record it in `loans.json` with `asset`, `source`, `bars`,
+`borrowed`, `fit`, `transform` and `why`. A loan without a reason or a
+transformation is rejected. `verify_loans.py` is separate; it does not touch
+`checker.py`.
 
 ## lint
 
@@ -70,7 +98,13 @@ score_cli.py lint
 
 Reports **every** header/group/bar error in one pass: voice, bar, token,
 expected/actual. Exit 1 if any. This replaces the fail-fast parser and the
-home-made `barsum.py`.
+home-made `barsum.py`. It also reports the existing simultaneity guard per bar:
+
+```text
+lint: bar 30 Ins overlaps Vocal 14 units (max 4)
+```
+
+Exit 1 when any bar is over the cap; the full checker still owns the verdict.
 
 ## check
 
@@ -79,6 +113,7 @@ score_cli.py check --bars 9-16     # section report: sums, per-line table, regis
 score_cli.py check                 # full checker.py, non-strict, writes report.json
 score_cli.py check --release       # strict-style + final rest
 score_cli.py release               # same as check --release
+score_cli.py release --dry-run     # strict verdicts; score_state.json unchanged
 ```
 
 On a hard failure, `check` prints the `repair.py` bar/phrase map and writes
@@ -114,7 +149,21 @@ ranges.
 ```bash
 score_cli.py status                 # bars written, next line, core, last check
 score_cli.py explain                # abc_doctor.py: plain-language parse diagnosis
+score_cli.py explain-metric --list  # names of the measured values
+score_cli.py explain-metric end     # definition, formula and known pitfall
 ```
+
+## align / view (read only)
+
+```bash
+score_cli.py align --lines 3-6      # positional syllable -> note projection
+score_cli.py view --roll --bars 3-5 # ASCII piano roll, 1 column per L-unit
+score_cli.py view --contour         # one line per lyric phrase
+```
+
+`align` assigns one note per syllable in order and prints any surplus notes as
+a cadence tail. It is a heuristic, not a text alignment. `view --roll` caps at
+32 bars; `view --contour` covers every line.
 
 ## Error recovery
 

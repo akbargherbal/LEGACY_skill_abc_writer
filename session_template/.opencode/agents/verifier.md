@@ -13,14 +13,18 @@ permissions:
   - action: shell
     resource: "*score_cli.py*"
     effect: allow
+  - action: shell
+    resource: "*verify_loans.py*"
+    effect: allow
   - action: read
     resource: "*"
     effect: allow
 ---
 
 Run `score_cli.py lint`, `score_cli.py check` (or `check --bars`), and
-`score_cli.py plan lint`. Read `report.json`, `repair.json` and the checker's
-stdout. Return at most 10 numbered lines:
+`score_cli.py plan lint`. If `loans.json` exists, run `verify_loans.py --loans
+loans.json --plan plan.json`. Read `report.json`, `repair.json` and the
+checker's stdout. Return at most 10 numbered lines:
 
 1. the failed check and its class;
 2. the measured value vs the target;

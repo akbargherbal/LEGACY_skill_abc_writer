@@ -18,6 +18,9 @@ Commands
     plan      plan init/lint/set/refresh/show
     status    bars written, next line, core state, last check
     explain   plain-language parser diagnosis (abc_doctor.py)
+    explain-metric  definition and pitfalls for one measured number
+    align     positional syllable -> note projection (report only)
+    view      ASCII piano roll or per-line contour (report only)
 
 The dialect is the bundled runtime parser's, not a general ABC parser.
 """
@@ -40,7 +43,10 @@ if str(SCRIPT_DIR) not in sys.path:
 
 import abc_tools  # noqa: E402
 import checker as checker_mod  # noqa: E402
+import live_meter  # noqa: E402
 import phrase_table  # noqa: E402
+import projection  # noqa: E402
+import view_score  # noqa: E402
 import _craft_calibrate as craft_cal  # noqa: E402
 
 HEADER = [
@@ -607,6 +613,18 @@ def cmd_init(args) -> int:
 
     style_text = style.read_text(encoding="utf-8")
     key, maqam = infer_maqam(style_text, args.key)
+    # The form length is baked into plan.json and phrases.json; warn before the
+    # scaffold exists. This is an advisor, not a gate.
+    recommended = int(prosody.get("bars") or 0)
+    if recommended > 0 and abs(bars - recommended) / recommended > 0.05:
+        delta = (bars - recommended) / recommended
+        print(f"FORM BUDGET: {bars} bars vs syllabify {recommended} "
+              f"({delta:+.0%}, tol ±5%)")
+        print(f"  the form is baked into plan.json/phrases.json. Accepting "
+              f"{bars} keeps a compact form and expects a bars-budget warning. "
+              f"To use {recommended}, rerun with --force --bars {recommended} "
+              f"and place the extra bars with --sections; otherwise they all "
+              f"land in the outro.")
     plan = default_plan({"bars": bars, "tempo": args.tempo, "meter": args.meter,
                          "unit": args.unit}, phrases, prosody, key, maqam)
     if args.sections:
@@ -719,6 +737,30 @@ def _line_by_number(phrases: dict, number: int) -> dict:
     die(f"line {number} not in phrases.json (lines 1-{len(phrases.get('lines', []))})")
 
 
+def _measure(text: str, plan: dict, phrases: dict, state: dict, *,
+             line_no: int | None = None, bars: list[int] | None = None) -> dict:
+    lyrics = Path("input/lyrics.txt")
+    return live_meter.measure(text, plan, phrases, state=state, line_no=line_no,
+                              bars=bars, lyrics_path=lyrics if lyrics.exists() else None)
+
+
+def _print_write_meter(payload: dict, *, guard: bool) -> bool:
+    """Print the meter. Return False when --guard refuses the write."""
+    try:
+        print(live_meter.format_meter(payload))
+        if not guard:
+            return True
+        problems = live_meter.guard_violations(payload)
+    except Exception as exc:  # noqa: BLE001 - never break a write on a diagnostic
+        print(f"meter unavailable: {type(exc).__name__}: {exc}")
+        return True
+    if not problems:
+        return True
+    for problem in problems:
+        print(f"REFUSED (--guard): {problem}", file=sys.stderr)
+    return False
+
+
 def cmd_line(args) -> int:
     score = Path(args.score)
     plan = load_plan(Path(args.plan))
@@ -751,20 +793,30 @@ def cmd_line(args) -> int:
     except ValueError as exc:
         print(f"FAIL {exc}", file=sys.stderr)
         return 1
-    score.write_text(new_text, encoding="utf-8")
-    written = sorted(set(state["written_bars"]) | set(range(start, end + 1)))
-    state["written_bars"] = written
-    state["written_lines"] = sorted(set(state["written_lines"]) | {args.line})
-    state["phase"] = "expand"
-    state["next_action"] = f"write line {args.line + 1}" if args.line < len(phrases["lines"]) else "check"
-    write_json(Path(args.state), state)
-    update_skill_state(Path(args.skill_state), phase="expand",
-                       last_artifact=f"score.abc (line {args.line})",
-                       next_action=state["next_action"])
     print(f"line {args.line}: bars {start}-{end} ({count} bars), {line.get('syllables', '?')} syllables")
     for i in range(count):
         print(f"  {start + i:>3} V: {pad_bar(vocal[i], plan)}")
         print(f"      I: {pad_bar(ins[i], plan)}")
+    written = sorted(set(state["written_bars"]) | set(range(start, end + 1)))
+    next_line = args.line + 1 if args.line < len(phrases["lines"]) else "check"
+    proposed = dict(state)
+    proposed["written_bars"] = written
+    proposed["written_lines"] = sorted(set(state["written_lines"]) | {args.line})
+    payload = _measure(new_text, plan, phrases, proposed, line_no=args.line)
+    if not _print_write_meter(payload, guard=args.guard):
+        return 1
+    if args.dry_run:
+        print("dry run: score.abc and score_state.json unchanged")
+        return 0
+    score.write_text(new_text, encoding="utf-8")
+    state["written_bars"] = written
+    state["written_lines"] = proposed["written_lines"]
+    state["phase"] = "expand"
+    state["next_action"] = f"write line {next_line}" if next_line != "check" else "check"
+    write_json(Path(args.state), state)
+    update_skill_state(Path(args.skill_state), phase="expand",
+                       last_artifact=f"score.abc (line {args.line})",
+                       next_action=state["next_action"])
     print(f"written lines: {len(state['written_lines'])}/{len(phrases['lines'])}; next: {state['next_action']}")
     return 0
 
@@ -772,6 +824,8 @@ def cmd_line(args) -> int:
 def cmd_patch(args) -> int:
     score = Path(args.score)
     plan = load_plan(Path(args.plan))
+    phrases = load_phrases(Path(args.phrases))
+    state = load_state(Path(args.state))
     try:
         text = score.read_text(encoding="utf-8")
         new_text = set_bars(text, {args.bar: (args.vocal, args.ins)}, plan)
@@ -784,8 +838,14 @@ def cmd_patch(args) -> int:
     except ValueError as exc:
         print(f"FAIL {exc}", file=sys.stderr)
         return 1
-    score.write_text(new_text, encoding="utf-8")
     print(f"patched bar {args.bar}: V {pad_bar(args.vocal, plan)} | I {pad_bar(args.ins, plan)}")
+    payload = _measure(new_text, plan, phrases, state, bars=[args.bar])
+    if not _print_write_meter(payload, guard=args.guard):
+        return 1
+    if args.dry_run:
+        print("dry run: score.abc and score_state.json unchanged")
+        return 0
+    score.write_text(new_text, encoding="utf-8")
     return 0
 
 
@@ -808,6 +868,20 @@ def cmd_lint(args) -> int:
             print(f"FAIL {e.get('voice', '?')} bar {e.get('bar', '?')}: {e.get('message', e)}")
         print(f"{len(errors)} error(s)")
         return 1
+    # The existing hard sanity guard, surfaced before the full check.
+    try:
+        parsed = checker_mod.parse(text)
+        overlaps = live_meter.overlap_by_bar(parsed)
+        cal = checker_mod.load_calibration()
+        cap = float((cal.get("sanity", {}).get("simultaneity_le4", {}) or {}).get("max", 4))
+        bad = {b: v for b, v in overlaps.items() if v > cap}
+        if bad:
+            for b in sorted(bad):
+                print(f"lint: bar {b} Ins overlaps Vocal {bad[b]:g} units (max {cap:g})")
+            print(f"lint: simultaneity {sum(overlaps.values()):g} units in {len(bad)} bar(s) over cap")
+            return 1
+    except Exception:  # noqa: BLE001 - overlap is diagnostic; parse/sum already passed
+        pass
     print("lint PASS: every bar parses and sums to its meter")
     return 0
 
@@ -826,7 +900,7 @@ def _partial_rows(args, plan: dict, phrases: dict) -> int:
     except Exception as exc:  # noqa: BLE001
         die(f"craft table failed: {exc}")
     print(f"section report bars {lo}-{hi}")
-    print("  line section      bars    syl  notes rest_after  unbroken  mean  rep   end")
+    print("  line section      bars    syl  notes rest_after  unbroken  mean  rep  end° pitch")
     for row in table["rows"]:
         b = str(row.get("bars", ""))
         m = re.match(r"(\d+)(?:-(\d+))?", b)
@@ -839,7 +913,7 @@ def _partial_rows(args, plan: dict, phrases: dict) -> int:
               f"{b:<7} {str(row.get('syllables', '-')):>4} {row.get('notes', 0):>5} "
               f"{str(row.get('rest_after_s', '-')):>10} {str(row.get('unbroken_s', '-')):>8} "
               f"{str(row.get('register_mean', '-')):>5} {str(row.get('repeated', '-')):>5} "
-              f"{str(row.get('end_name', '-')):>3}")
+              f"{str(row.get('end_name', '-')):>4} {str(row.get('end_pitch_name', '-')):>5}")
     return 0
 
 
@@ -885,10 +959,14 @@ def cmd_check(args) -> int:
         argv += ["--waive-lyrics"]
     if args.release:
         argv += ["--release"]
+    dry_run = bool(getattr(args, "dry_run", False))
     rc = checker_mod.main(argv)
     if rc == 0:
         data = read_json(report, {}) or {}
         print(f"\nCHECK PASS: {len(data.get('checks', []))} checks; report {report}")
+        if dry_run:
+            print("dry run: score_state.json and skill state unchanged")
+            return 0
         state = load_state(Path(args.state))
         state["phase"] = "done" if args.release else "expand"
         state["last_check"] = {"pass": True, "release": bool(args.release),
@@ -903,6 +981,11 @@ def cmd_check(args) -> int:
                            report_sha=hashlib.sha256(report.read_bytes()).hexdigest(),
                            next_action=state["next_action"])
         return 0
+    if dry_run:
+        print("\ndry run: score_state.json and skill state unchanged")
+        if report.exists():
+            _run_repair(args.score, str(plan_path), str(phrases_path), str(report))
+        return rc
     update_skill_state(Path(args.skill_state), **{"pass": False},
                        last_check={"pass": False, "report": str(report)},
                        next_action="fix the named bars with patch; then check once")
@@ -1158,6 +1241,60 @@ def cmd_explain(args) -> int:
     return proc.returncode
 
 
+def cmd_explain_metric(args) -> int:
+    path = SKILL_DIR / "references" / "metrics.md"
+    if not path.exists():
+        die(f"missing {path}")
+    text = path.read_text(encoding="utf-8")
+    sections: dict[str, str] = {}
+    current = None
+    body: list[str] = []
+    for line in text.splitlines():
+        if line.startswith("## "):
+            if current:
+                sections[current] = "\n".join(body).strip()
+            current = line[3:].strip()
+            body = []
+        elif current:
+            body.append(line)
+    if current:
+        sections[current] = "\n".join(body).strip()
+    if args.list or not args.name:
+        print("metrics: " + ", ".join(sorted(sections)))
+        return 0
+    if args.name not in sections:
+        die(f"unknown metric {args.name!r}; use --list")
+    print(f"## {args.name}\n\n{sections[args.name]}")
+    return 0
+
+
+def cmd_align(args) -> int:
+    text = Path(args.score).read_text(encoding="utf-8")
+    phrases = load_phrases(Path(args.phrases))
+    plan = load_plan(Path(args.plan))
+    try:
+        payload = projection.project(text, plan, phrases, args.lines)
+    except Exception as exc:  # noqa: BLE001
+        die(f"align: {exc}")
+    print(projection.format_projection(payload))
+    return 0
+
+
+def cmd_view(args) -> int:
+    text = Path(args.score).read_text(encoding="utf-8")
+    if args.roll == args.contour:
+        die("view: pass exactly one of --roll or --contour")
+    try:
+        if args.roll:
+            print(view_score.roll(text, args.bars))
+        else:
+            phrases = load_phrases(Path(args.phrases))
+            print(view_score.contour(text, phrases))
+    except ValueError as exc:
+        die(f"view: {exc}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -1205,6 +1342,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("line", type=int)
     p.add_argument("--vocal", default=None, help="bars separated by |; pitch:dur tokens")
     p.add_argument("--ins", default=None, help="bars separated by |; defaults to rests")
+    p.add_argument("--dry-run", action="store_true", help="measure and print; write nothing")
+    p.add_argument("--guard", action="store_true",
+                   help="refuse the write when a measured target is already broken")
     common(p)
     p.set_defaults(func=cmd_line)
 
@@ -1212,6 +1352,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("bar", type=int)
     p.add_argument("--vocal", required=True)
     p.add_argument("--ins", required=True)
+    p.add_argument("--dry-run", action="store_true", help="measure and print; write nothing")
+    p.add_argument("--guard", action="store_true",
+                   help="refuse the write when a measured target is already broken")
     common(p)
     p.set_defaults(func=cmd_patch)
 
@@ -1231,6 +1374,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--report", default="report.json")
     p.add_argument("--lyrics", default="input/lyrics.txt")
     p.add_argument("--bars", default=None)
+    p.add_argument("--dry-run", action="store_true",
+                   help="run the strict verdicts without changing score_state.json")
     common(p)
     p.set_defaults(func=cmd_release)
 
@@ -1256,6 +1401,23 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("explain", help="plain-language parser diagnosis")
     p.add_argument("--score", default="score.abc")
     p.set_defaults(func=cmd_explain)
+
+    p = sub.add_parser("explain-metric", help="definition and pitfalls for one measured number")
+    p.add_argument("name", nargs="?", default="")
+    p.add_argument("--list", action="store_true")
+    p.set_defaults(func=cmd_explain_metric)
+
+    p = sub.add_parser("align", help="positional syllable -> note projection (report only)")
+    p.add_argument("--lines", default=None, help="e.g. 3-6 or 1,4,7")
+    common(p)
+    p.set_defaults(func=cmd_align)
+
+    p = sub.add_parser("view", help="ASCII piano roll or per-line contour (report only)")
+    p.add_argument("--roll", action="store_true")
+    p.add_argument("--contour", action="store_true")
+    p.add_argument("--bars", default=None, help="roll range, e.g. 3-5")
+    common(p)
+    p.set_defaults(func=cmd_view)
     return ap
 
 

@@ -2,7 +2,8 @@
 """Tests for the corpus artifacts bundled with the skill.
 
 These assert the promise in ``SKILL.md`` §8: the reader commands work offline
-from ``<skill>/data/ostris/`` with no flags, and the bundle contains no audio.
+from ``<skill>/data/ostris/`` with no flags, and the bundle contains no audio
+and no raw ``source/`` inputs (those are fetched on demand with ``sync``).
 """
 from __future__ import annotations
 
@@ -30,8 +31,6 @@ REQUIRED = (
     "idioms.jsonl",
     "similarity/index.json",
     "eval/split.json",
-    "source/TRANSCRIPTS/YT500/_manifest.jsonl",
-    "source/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset_manifest.json",
 )
 
 
@@ -82,6 +81,14 @@ class BundledDataTest(unittest.TestCase):
         self.assertIsNotNone(report.get("prior"))
         self.assertIsNotNone(report.get("similarity"))
 
+    def test_raw_source_is_not_bundled(self):
+        # The raw inputs are regenerated on demand (data/README.md,
+        # "Regenerating source/"); only derived artifacts ship.
+        self.assertFalse(
+            (BUNDLED_DATA / "source").exists(),
+            "source/ must not be bundled: run `make ostris-sync` outside the skill",
+        )
+
     def test_bundle_has_no_audio_and_is_small(self):
         audio = [
             path
@@ -104,12 +111,14 @@ class BundledDataTest(unittest.TestCase):
                 self.assertTrue(path.name.isascii(), path)
                 self.assertNotIn(" ", path.name, path)
 
-    def test_album_filenames_match_sync_normalisation(self):
-        folder = BUNDLED_DATA / "source/TRANSCRIPTS/FADL_SHAKER/abc"
-        files = sorted(folder.glob("*.json"))
-        self.assertGreater(len(files), 0)
-        for path in files:
-            self.assertEqual(path.name, _zip_safe_name(path.name))
+    def test_album_filenames_use_sync_normalisation(self):
+        # The rule that renames FADL album JSONs at sync time; kept as a unit
+        # test because the album files themselves are no longer bundled.
+        self.assertEqual(
+            _zip_safe_name("01.Walla Zaman.1998.json"), "01.Walla_Zaman.1998.json"
+        )
+        self.assertEqual(_zip_safe_name("R & B (Live).json"), "R_and_B_Live_.json")
+        self.assertEqual(_zip_safe_name("Ma'a Allah.json"), "Maa_Allah.json")
 
     def test_example_plan_and_phrases_match_schemas(self):
         try:
@@ -127,6 +136,10 @@ class BundledDataTest(unittest.TestCase):
                 schema = json.loads(schema_path.read_text(encoding="utf-8"))
                 jsonschema.validate(instance, schema)
 
+    @unittest.skipUnless(
+        (BUNDLED_DATA / "source").is_dir(),
+        "source/ is not bundled; run `make ostris-sync` to check provenance",
+    )
     def test_record_source_paths_resolve(self):
         records = [
             json.loads(line)

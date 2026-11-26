@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0.8.1 acceptance harness.
+"""0.9.0 acceptance harness.
 
 Checks the things the release notes claim, without listening:
 

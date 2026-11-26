@@ -1,11 +1,12 @@
 ---
 name: abc-score-writer
-version: "0.8.1"
+version: "0.9.0"
 description: >-
   Compose a NEW ABC score from Arabic lyrics and an arabmaqamrock style prompt:
   a small, declared set of deviations from the LoRA's own default arrangement.
-  Ships its own scaffolder, line writer, linter, checker and corpus snapshot, so
-  the composer writes one lyric line at a time and never sums a bar by hand.
+  Ships its own scaffolder, line writer, linter, checker, corpus snapshot and
+  phrase asset bank, so the composer writes one lyric line at a time and never
+  sums a bar by hand.
   Use when asked to write, compose, generate or design a score, melody, or ABC
   file from lyrics and a style. Do NOT use for editing an existing SheetSage2
   transcription.
@@ -37,13 +38,17 @@ python3 <skill>/scripts/score_cli.py init --tempo 80 \
 `--sections` is the absolute start bar of each sung section, in lyric order;
 repeat a name for a repeat. The numbers above are an example: derive your own
 from the lyric, or omit `--sections` and let the tool allocate the form from
-the body bars. Do not copy 7/13/37 onto a different lyric.
+the body bars. Do not copy 7/13/37 onto a different lyric. If `init` prints
+`FORM BUDGET`, decide before the first line: keep the compact form and accept
+the warning, or rerun with `--force --bars N` **and** `--sections` to place the
+extra bars; a bare `--bars` puts them all in the outro.
 
 Then follow the one order:
 
 ```text
-init → core (first 8-16 bars) → core_review.md → expand line by line
-     → check at section ends → release → seed → seed_sheet.md / notes.md
+init → stock pass (optional, declared) → core (first 8-16 bars)
+     → core_review.md → expand line by line → check at section ends
+     → release → seed → seed_sheet.md / notes.md
 ```
 
 ## The one unit: a lyric line
@@ -72,6 +77,50 @@ python3 <skill>/scripts/score_cli.py line 1 \
 
 `patch B --vocal ... --ins ...` replaces one bar atomically. Use it for a
 named fix; do not rewrite the score.
+
+### The meter is part of the write
+
+Every successful `line`/`patch` prints a four-line measurement block before the
+write is committed:
+
+```text
+line 5 (bars 13-14): 10 notes / 13 syllables — deficit 3
+score  75/80 notes → projected 271/361 (need 398-523)
+       repeats 3%  durations 2:5 4:2 6:1 (3 of 5)  register 68.1  ties 0/1
+       gap after 0.38s (target 0.50s)  overlaps 0 this line / 0 total (max 4)
+```
+
+Read it before the next line. A deficit means the line is short of its own
+syllables: add passing notes, a repeated note, or a tie now, not at the gate. A
+projection below `need` means the whole score is running short. A gap below
+target means the breath is too small; add `z1` or a longer tail. An overlap
+means the guitar is sounding under the voice too long; shorten or move it.
+These are the same numbers the checker uses, printed at the decision.
+
+- `line ... --dry-run` / `patch ... --dry-run` prints the padded bars and the
+  meter and writes nothing.
+- `--guard` refuses the write when a hard sanity rule is already broken: the
+  current line has a deficit over 1, its gap is shorter than the target, the
+  current line overlaps over the cap, or (on the last line) a whole-score sanity
+  band is outside. Use it deliberately; it is off by default.
+- `lint` also reports per-bar overlap, so the whole-file sum is visible before
+  the full check.
+
+### Stock pass (optional, declared)
+
+Before the first line of a section, you may query the asset bank for a
+rhythm/contour starting point:
+
+```bash
+python3 <skill>/scripts/asset_bank.py query \
+  --role chorus --bars 2 --syllables 14 --contour up --limit 3
+```
+
+It returns 3–5 compact references, not a score. You still write the line with
+`score_cli.py line`. If you use an asset, declare it in `loans.json` and run
+`verify_loans.py`; no reason, no loan; no transform, no loan. If nothing fits,
+compose. The query is optional; the line workflow is not. See
+`references/assets.md`.
 
 ### Core first
 
@@ -111,9 +160,10 @@ The core uses the cell/period method in `references/craft.md`:
    the median about five semitones; it does not add notes.
 
 Read `references/craft.md` before the core, `references/rhythm.md` before the
-guitar and the seed, `references/critic.md` before the review.
-`references/plan.md` is the one-page plan contract; `references/cli.md` is the
-command and error-recovery reference. Do not read the scripts.
+guitar and the seed, `references/critic.md` before the review, and
+`references/assets.md` before the first declared stock pass. `references/plan.md`
+is the one-page plan contract; `references/cli.md` is the command and
+error-recovery reference. Do not read the scripts.
 
 ## The file contract
 
@@ -186,7 +236,21 @@ python3 <skill>/scripts/score_cli.py release               # strict + final rest
 for that range; it does not run the full gate. `check` runs `checker.py` and, on
 a hard failure, prints the `repair.py` bar/phrase map. Fix only the named bars
 with `patch`, then check once. `release` is strict-style plus final-rest; it is
-the only run that should treat style warnings as failures.
+the only run that should treat style warnings as failures. `release --dry-run`
+prints the strict verdicts without changing `score_state.json`.
+
+Three read-only tools answer the questions the numbers cannot:
+
+```bash
+python3 <skill>/scripts/score_cli.py explain-metric end     # what a metric means
+python3 <skill>/scripts/score_cli.py align --lines 3-6      # syllable -> note (heuristic)
+python3 <skill>/scripts/score_cli.py view --roll --bars 3-5 # ASCII piano roll
+python3 <skill>/scripts/score_cli.py view --contour         # one line per phrase
+```
+
+`align` is positional: one note per syllable, surplus notes printed as a tail.
+It shows where a melisma possibly lands; it cannot prove the word alignment.
+`view` is for sight-reading contour and repeated cells, not for scoring.
 
 The checker has four classes:
 
@@ -289,5 +353,6 @@ plan's deviations plus the checker's `MEASURED` block plus any open warnings.
 The score is about 2,000 tokens. The budget is 10x generated tokens. The CLI
 makes the cheap path the correct one: one line per step, the tool pads the
 bars, the linter reports all errors once, and the checker runs at section ends.
+The stock query is capped at 3–5 assets per section; never dump the index.
 Do not spend the budget on parsers, source reading, or a second full write.
 Spend it on the cell, the period, the cadence ladder, the riff and the arc.

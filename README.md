@@ -3,8 +3,8 @@
 Source of the **`maqam-score`** skill and the 177-track calibration that
 justifies its numbers.
 
-**Version:** 0.8.1 (skill) · contract 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
-**Date:** 2026-11-23
+**Version:** 0.9.0 (skill) · contract 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
+**Asset layer:** unreleased (see `docs/DECISIONS.md`, `docs/ASSET-BANK.md`) · **Date:** 2026-11-25
 
 ## Layout
 
@@ -13,14 +13,19 @@ justifies its numbers.
 | `02_maqam-score/` | Skill source: `SKILL.md`, scripts, references, example, tests | **active source** |
 | `03_abc_remixer/` | Sibling skill source: library-aware remixer CLI, prebuilt 670-score SUNO store, tests | **active source** |
 | `02_maqam-score/scripts/ostris/` | OSTRIS corpus tools (M0–M6: sync, audit, build, features, priors, plan, idioms, similarity, check, eval) | **active** |
-| `02_maqam-score/data/ostris/` | Packaged corpus artifacts: source cache, records, priors, idiom bank, similarity index, eval split | **bundled, ships in the zip** |
-| `02_maqam-score/schemas/` | JSON contracts for records, priors, plans, phrases, reports, eval | **active** |
-| `dist/abc-score-writer.zip` | Current built skill package (post-0.4.0 craft build) | **build artifact** |
+| `02_maqam-score/data/ostris/` | Packaged corpus artifacts: records, priors, idiom bank, similarity index, eval split (raw `source/` is fetched on demand) | **bundled, ships in the zip** |
+| `02_maqam-score/data/assets/` | Phrase-level stock index built from the 670 SUNO store | **bundled, unreleased** |
+| `02_maqam-score/scripts/asset_bank.py` | Build/query/apply phrase assets; read-only, never writes `score.abc` | **active, unreleased** |
+| `02_maqam-score/scripts/verify_loans.py` | Structural check of `loans.json` | **active, unreleased** |
+| `02_maqam-score/schemas/` | JSON contracts for records, priors, plans, phrases, reports, eval, assets, loans | **active** |
+| `dist/abc-score-writer.zip` | Current built skill package (includes the unreleased asset layer) | **build artifact** |
 | `dist/releases/` | Versioned archives: 0.2.0, 0.3.0, 0.4.0 (full + public) and checksums | **release history** |
 | `dist/RELEASE-0.4.0.md` | Release notes, compatibility, hashes | **release notes** |
 | `analysis/` | Calibration scripts (`calibrate_177.py`, `test_checker_corpus.py`, `measure_phrasing.py`, `measure_craft.py`) | **active** |
 | `analysis/out/` | Regeneration workspace: `summary.json`, `tracks.jsonl`, `ostris/` | **generated, reproducible** |
 | `docs/` | Reports, plans, baseline inventory | **active docs** |
+| `docs/DECISIONS.md` | The implementation constitution (wins over conflicting prose) | **active** |
+| `docs/ASSET-BANK.md` | Asset bank design, query/apply, loan contract | **active** |
 | `docs/archive/` | Inputs that served their purpose | **frozen** |
 
 The skill source is the truth; `dist/abc-score-writer.zip` is rebuilt with
@@ -65,12 +70,52 @@ re-derives the arrangement. The session package (skill + input + one-line
 prompt + agent/plugin configuration, no `task.md`) is built with:
 
 ```bash
-make session12
-python3 analysis/measure_session.py opencode_session_12.json --score score.abc --max-ratio 10
+make session13
+python3 analysis/measure_session.py opencode_session_13.json --score score.abc --max-ratio 10
 ```
 
 The guard plugin pins `deepseek/deepseek-flash#high` and caps a model call at
 8,000 output tokens; the composer cannot edit `score.abc` directly.
+
+## 0.9.0 — measurement at the line
+
+Session 13 repeated the 0.8.1 workflow but still learned six hard failures only
+at the final `check`. 0.9.0 prints the checker's own numbers at the write call:
+
+```bash
+python3 02_maqam-score/scripts/score_cli.py line 5 --vocal "..." --ins "..." --dry-run
+python3 02_maqam-score/scripts/score_cli.py line 5 --vocal "..." --ins "..." --guard
+python3 02_maqam-score/scripts/score_cli.py lint          # per-bar overlap, exits 1 over cap
+python3 02_maqam-score/scripts/score_cli.py release --dry-run
+python3 02_maqam-score/scripts/score_cli.py explain-metric end
+python3 02_maqam-score/scripts/score_cli.py align --lines 3-6
+python3 02_maqam-score/scripts/score_cli.py view --roll --bars 3-5
+```
+
+The meter reports the line deficit, projected score ratio, repeated share,
+duration inventory, register mean, ties, gap and overlaps. `--guard` is opt-in
+and refuses only when a measured rule is already broken. `init` prints
+a `FORM BUDGET` warning when the form is more than ±5% from the syllabify
+budget. `checker.py`, `calibration.json` and `abc_tools.py` are unchanged.
+
+### Asset bank (unreleased)
+
+`asset_bank.py` turns the 670-score SUNO store into a compact phrase index:
+phrases, cadences and cells with contour, cadence degree, register and syllable
+range. The composer may query 3–5 references before a section, then write the
+line normally through `score_cli.py`. A used asset is declared in `loans.json`;
+`verify_loans.py` checks the declaration. The tool never writes `score.abc` and
+never dumps the library.
+
+```bash
+make asset-build
+python3 02_maqam-score/scripts/asset_bank.py query --role chorus --bars 2 --syllables 14 --contour up
+python3 02_maqam-score/scripts/asset_bank.py apply --id <asset> --to-key Dm --maqam kurd
+python3 02_maqam-score/scripts/verify_loans.py --loans loans.json --plan plan.json
+```
+
+The binding decisions (10× score-only budget, ear final, no `w:`, one workflow)
+are in `docs/DECISIONS.md`; the asset design is in `docs/ASSET-BANK.md`.
 
 ## Remixer
 
@@ -135,8 +180,10 @@ Outputs under `analysis/out/ostris/`: `audit.json`, `audit.md`,
 `canonical.md`, `features.json`, `features.md`, `priors/`, `idioms.jsonl`,
 `similarity/`, `eval/`, plus the gitignored `work/canonical/abc/` set. The
 source cache (`analysis/out/ostris/source/`) and `work/` are regeneration
-scratch. `make ostris-bundle` snapshots the shippable subset into
-`02_maqam-score/data/ostris/`. Only lightweight manifests, YT500 ABC shards,
+scratch. `make ostris-bundle` snapshots the derived subset into
+`02_maqam-score/data/ostris/` and drops `source/`, so the raw inputs never ship
+(see [Regenerating `source/`](02_maqam-score/data/README.md#regenerating-source)).
+Only lightweight manifests, YT500 ABC shards,
 FADL album JSONs, and reference ABCs are pulled; the 2.95 GiB audio bundle is
 never downloaded.
 

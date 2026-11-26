@@ -26,6 +26,9 @@ permissions:
 
 The score is frozen. Build the delivery:
 
+0. If `core_draft.abc` or `core_review.md` is missing, run
+   `score_cli.py core --snapshot` and write `core_review.md` as 5 numbered
+   lines about the first 16 bars. Do not edit the score.
 1. `score_cli.py seed` then `score_cli.py seed-check`.
 2. Edit `seed.abc` only for orchestration: chords, `%%MIDI`, drums. Never change
    the melody.

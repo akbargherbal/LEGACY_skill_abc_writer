@@ -69,7 +69,7 @@ make ostris-bundle      # snapshot analysis/out into the skill
 
 Generated evidence lives in `analysis/out/ostris/`; the shippable snapshot lives
 in `02_maqam-score/data/ostris/` and is what `make zip` packages. The source
-cache and canonical work directory are regeneration scratch.
+cache and canonical work directory are regeneration scratch and are not bundled.
 
 ## Known limits
 
