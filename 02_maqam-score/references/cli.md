@@ -140,6 +140,9 @@ score_cli.py plan set register.mean=72
 score_cli.py plan refresh           # re-derive arrangement + ins_entries from the score
 ```
 
+`plan set` takes a dotted path to an existing key (`arrangement.ins_entries=[15]`);
+an unknown top-level key is rejected.
+
 `plan lint` fails while a deviation is a placeholder. `plan refresh` never
 invents a deviation, a copy or a section; it only re-derives the structural
 ranges.

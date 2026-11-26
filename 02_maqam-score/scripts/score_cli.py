@@ -656,8 +656,8 @@ def cmd_init(args) -> int:
         "phase": "init", "bars": plan["bars"], "written_lines": [],
         "written_bars": [], "core_bars": 0, "core_reviewed": False,
         "last_check": None,
-        "next_action": "write the first 16 bars (line 1..), then core --snapshot, "
-                        "core_review.md, core --check",
+        "next_action": "write the whole score.abc (one pass, or at most three "
+                        "sections), then run scorecard.py",
     }
     write_json(Path(args.state), state)
     update_skill_state(Path(args.skill_state), phase="start", last_artifact="score.abc",
@@ -667,7 +667,7 @@ def cmd_init(args) -> int:
     print(f"\nplan: {args.plan}: {plan['bars']} bars, {plan['syllables']} syllables, "
           f"key {plan['key']}, maqam {plan['maqam']['name'] if plan['maqam'] else 'none'}")
     print(f"score: {args.score}: {plan['bars']} bars of rests (scaffold)")
-    print(f"lines: {len(phrases.get('lines', []))}; next: write the core (first 8-16 bars)")
+    print(f"lines: {len(phrases.get('lines', []))}; next: write the whole score.abc, then scorecard.py")
     return 0
 
 
@@ -988,7 +988,7 @@ def cmd_check(args) -> int:
         return rc
     update_skill_state(Path(args.skill_state), **{"pass": False},
                        last_check={"pass": False, "report": str(report)},
-                       next_action="fix the named bars with patch; then check once")
+                       next_action="rewrite the whole score from the card (no patch); then scorecard.py")
     if not report.exists():
         print("\nCHECK FAILED before measurement; run `lint` or `explain` for the parse error")
         return rc
@@ -1005,13 +1005,15 @@ def cmd_release(args) -> int:
 def _chord_for_bar(body: str, key: str) -> str | None:
     if body.strip() == "Z":
         return None
-    m = re.search(r"([_=^]?[A-Ga-g])", body)
+    m = re.search(r"([_=^]?)([A-Ga-g])", body)
     if not m:
         return None
-    name = m.group(1).upper().replace("^", "#")
-    name = {"_E": "Eb", "_B": "Bb", "_A": "Ab", "_D": "Db", "_G": "Gb"}.get(name, name)
+    accidental, letter = m.group(1), m.group(2).upper()
+    if accidental in ("_", "^"):
+        # a flat or sharp root keeps its accidental: _e -> Eb, ^f -> F#
+        return letter + ("b" if accidental == "_" else "#")
     table = {"C": "C", "D": "Dm", "E": "Em", "F": "F", "G": "G", "A": "Am", "B": "Bdim"}
-    return table.get(name[0], "C")
+    return table.get(letter, "C")
 
 
 DRUM_VERSE = ["B,2 D2 C2 D2 B,2 D2 C2 D2",
@@ -1135,6 +1137,17 @@ def _dotted_set(plan: dict, path: str, value) -> None:
         cur[parts[-1]] = value
 
 
+def _check_plan_path(plan: dict, path: str) -> None:
+    """Refuse a top-level key that plan.json does not have (silent typo/wrong path)."""
+    top = path.split(".")[0]
+    schema = read_json(SKILL_DIR / "schemas" / "plan.schema.json", {}) or {}
+    if top in plan or top in (schema.get("properties") or {}):
+        return
+    nested = [f"{k}.{top}" for k, v in plan.items() if isinstance(v, dict) and top in v]
+    hint = f"; did you mean {nested[0]}?" if nested else ""
+    die(f"plan set: unknown plan key {top!r}{hint} (run `plan show` for the keys)")
+
+
 def cmd_plan(args) -> int:
     plan_path = Path(args.plan)
     plan = load_plan(plan_path)
@@ -1146,6 +1159,7 @@ def cmd_plan(args) -> int:
         if "=" not in args.value:
             die("plan set expects path=value, e.g. register.mean=72")
         path, value = args.value.split("=", 1)
+        _check_plan_path(plan, path)
         _dotted_set(plan, path, value)
         write_json(plan_path, plan)
         print(f"plan: {path} = {_dotted_get(plan, path)}")

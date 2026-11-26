@@ -114,5 +114,54 @@ class ScoreCliTest(unittest.TestCase):
             score_cli.pad_bar("D:20", plan)
 
 
+    def test_plan_set_rejects_unknown_top_level_key(self):
+        """B6: `plan set ins_entries` used to be accepted and did nothing."""
+        with tempfile.TemporaryDirectory() as tmp:
+            cwd = Path(tmp)
+            (cwd / "plan.json").write_text(
+                (EXAMPLE / "plan.json").read_text(encoding="utf-8"), encoding="utf-8")
+            (cwd / "phrases.json").write_text(
+                (EXAMPLE / "phrases.json").read_text(encoding="utf-8"), encoding="utf-8")
+            bad = run(cwd, "plan", "set", "ins_entries=[15]")
+            self.assertNotEqual(bad.returncode, 0)
+            self.assertIn("arrangement.ins_entries", bad.stderr)
+            good = run(cwd, "plan", "set", "arrangement.ins_entries=[15]")
+            self.assertEqual(good.returncode, 0, good.stderr)
+            self.assertEqual(
+                json.loads((cwd / "plan.json").read_text(encoding="utf-8"))
+                ["arrangement"]["ins_entries"], [15])
+            self.assertEqual(run(cwd, "plan", "set", "register.mean=72").returncode, 0)
+
+    def test_seed_chord_keeps_accidental(self):
+        """B7: a flat/sharp root used to map to the natural letter's chord."""
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import score_cli
+        self.assertEqual(score_cli._chord_for_bar("_e4 c4 A8", "Am"), "Eb")
+        self.assertEqual(score_cli._chord_for_bar("^f4 A12", "Am"), "F#")
+        self.assertEqual(score_cli._chord_for_bar("=e8 a8", "Am"), "Em")
+        self.assertEqual(score_cli._chord_for_bar("A,16", "Am"), "Am")
+        self.assertIsNone(score_cli._chord_for_bar("Z", "Am"))
+
+    def test_init_next_action_is_the_whole_draft_workflow(self):
+        """B5: init must not tell the agent to use the 0.9 core/line workflow."""
+        with tempfile.TemporaryDirectory() as tmp:
+            cwd = Path(tmp)
+            (cwd / "input").mkdir()
+            (cwd / "input" / "lyrics.txt").write_text(
+                (EXAMPLE / "lyrics.txt").read_text(encoding="utf-8"), encoding="utf-8")
+            (cwd / "input" / "style.md").write_text(
+                "Maqam Kurd\n[Intro | clean guitar]\n[Verse | voice]\n[Chorus | band]\n",
+                encoding="utf-8")
+            proc = run(cwd, "init", "--lyrics", "input/lyrics.txt", "--style",
+                       "input/style.md", "--tempo", "80", "--bars", "8",
+                       "--sections", "verse=2,chorus=4")
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            blob = (proc.stdout + (cwd / "score_state.json").read_text(encoding="utf-8")
+                    + (cwd / "STATE.md").read_text(encoding="utf-8"))
+            self.assertNotIn("core --snapshot", blob)
+            self.assertNotIn("first 16 bars", blob)
+            self.assertIn("scorecard.py", blob)
+
+
 if __name__ == "__main__":
     unittest.main()

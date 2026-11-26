@@ -1,7 +1,7 @@
 # STATE
 
 ## Phase
-<!-- start | core | critic | score | checks | package | done -->
+<!-- start | draft | score | release | package | done -->
 - start
 
 ## Done
@@ -9,16 +9,16 @@
 - 
 
 ## Verified
-<!-- one line per check: checker run N, PASS/WARN, report hash; verify_package; quality/craft -->
+<!-- one line per check: scorecard N (blocking / release-blocking), release --dry-run, report hash; verify_package -->
 - 
 
 ## Decisions
-<!-- the cell, cadence rule, the three events, any declared deviation -->
+<!-- the cell, cadence rule, any declared deviation -->
 - 
 
 ## Next
 <!-- one item; "none" when the package is complete -->
-- syllabify
+- write the whole score.abc, then run scorecard.py
 
 > `state.json` is the machine-readable twin. Update both after each artifact
 > and each check; after a compaction, read `state.json` before anything else.

@@ -11,7 +11,7 @@ This is the validator for the whole-draft workflow, not a composer. It reuses
 Output:
 
     SCORE  82 bars | 406 notes | 361 syllables | 1.12 notes/syll
-    CHECKS 48 pass | 3 blocking | 2 polish
+    CHECKS 48 pass | 3 blocking | 0 release-blocking | 2 polish
 
     KEY BANDS (FAIL = hard, WARN = plan/polish)
       register mean   mean 68.2 vs sanity 74 +/- 5          FAIL
@@ -25,8 +25,8 @@ Output:
       4->5  bars 13-14->15-16  A4->A4 (0)  rest 0.19/0.50  reg +0.4  ovl 0  REST SAME
 
 It never writes a note, never changes checker.py or calibration.json, and
-never fails a score by itself. Exit codes: 0 no blocking, 1 blocking, 2 parse
-error.
+never fails a score by itself. Exit codes: 0 nothing blocks, 1 BLOCKING or
+RELEASE-BLOCKING (the strict pass `release` runs), 2 parse error.
 """
 from __future__ import annotations
 
@@ -232,7 +232,8 @@ def build(score_path: Path, plan_path: Path, phrases_path: Path | None = None,
         return {"error": f"{type(exc).__name__}: {exc}",
                 "parse_errors": lint or [{"message": str(exc)}],
                 "score": str(score_path), "bars": None, "vocal_notes": None,
-                "syllables": None, "bands": [], "blocking": [], "polish": [],
+                "syllables": None, "bands": [], "blocking": [],
+                "release_blocking": [], "polish": [],
                 "seams": [], "summary": {}}
 
     try:
@@ -240,8 +241,8 @@ def build(score_path: Path, plan_path: Path, phrases_path: Path | None = None,
     except Exception as exc:  # noqa: BLE001
         return {"error": f"plan: {type(exc).__name__}: {exc}",
                 "parse_errors": lint, "score": str(score_path),
-                "bands": [], "blocking": [], "polish": [], "seams": [],
-                "summary": {}}
+                "bands": [], "blocking": [], "release_blocking": [],
+                "polish": [], "seams": [], "summary": {}}
 
     phrases = None
     if phrases_path is not None and Path(phrases_path).exists():
@@ -261,18 +262,35 @@ def build(score_path: Path, plan_path: Path, phrases_path: Path | None = None,
         score_text=text,
     )
 
+    # The release run is stricter (style warnings -> FAIL, final rest is a
+    # contract). Run the same pass here so the card and `release` agree.
+    strict_checks, _ = checker.check(
+        score, plan, phrase_plan=phrases, calibration=calibration,
+        lyrics_text=lyrics_text, waive_lyrics=lyrics_text is None,
+        score_text=text, strict_style=True, require_final_rest=True,
+    )
+    hard_keys = {(name, detail) for tag, name, _ok, detail, _cls in checks
+                 if tag == "FAIL"}
+
     by_name = _check_map(checks)
     blocking = [
         {"tag": tag, "name": name, "detail": detail, "class": cls,
          "hint": _hint(name, cls)}
         for tag, name, _ok, detail, cls in checks if tag == "FAIL"
     ]
+    release_blocking = [
+        {"tag": "FAIL", "name": name, "detail": detail, "class": cls,
+         "hint": HINTS.get(name, "fails at release; fix it in the next whole rewrite")}
+        for tag, name, _ok, detail, cls in strict_checks
+        if tag == "FAIL" and (name, detail) not in hard_keys
+    ]
     polish = [
         {"tag": tag, "name": name, "detail": detail, "class": cls,
          "hint": _hint(name, cls)}
-        for tag, name, _ok, detail, cls in checks if tag == "WARN"
+        for tag, name, _ok, detail, cls in strict_checks if tag == "WARN"
     ]
     blocking.sort(key=lambda x: (CLASS_ORDER.get(x["class"], 9), x["name"]))
+    release_blocking.sort(key=lambda x: (CLASS_ORDER.get(x["class"], 9), x["name"]))
     polish.sort(key=lambda x: (CLASS_ORDER.get(x["class"], 9), x["name"]))
 
     bands: list[dict] = []
@@ -315,8 +333,9 @@ def build(score_path: Path, plan_path: Path, phrases_path: Path | None = None,
             "syllables": syllables,
             "notes_per_syllable": measured.get("notes_per_syllable"),
             "pass": counts.get("PASS", 0),
-            "warn": counts.get("WARN", 0),
+            "warn": len(polish),
             "fail": counts.get("FAIL", 0),
+            "release_fail": len(release_blocking),
             "checks": len(checks),
             "seams": len(seams),
             "flagged_seams": len(flagged),
@@ -333,6 +352,7 @@ def build(score_path: Path, plan_path: Path, phrases_path: Path | None = None,
         },
         "bands": bands,
         "blocking": blocking,
+        "release_blocking": release_blocking,
         "polish": polish,
         "seams": seams,
         "flagged_seams": flagged,
@@ -373,8 +393,10 @@ def format_card(payload: dict, *, max_issues: int = 10,
     syll_txt = f"{syll} syllables" if syll is not None else "syllables -"
     out = [
         f"SCORE  {s['bars']} bars | {s['vocal_notes']} notes | {syll_txt}{nps_txt}",
-        f"CHECKS {s['pass']} pass | {s['fail']} blocking | {s['warn']} polish",
-        "FAIL = hard | WARN = plan/polish | INFO = small sample",
+        f"CHECKS {s['pass']} pass | {s['fail']} blocking | "
+        f"{s.get('release_fail', 0)} release-blocking | {s['warn']} polish",
+        "FAIL = hard | RELEASE-BLOCKING = fails only in `release` | "
+        "WARN = plan/polish | INFO = small sample",
         "",
         "KEY BANDS",
     ]
@@ -393,6 +415,19 @@ def format_card(payload: dict, *, max_issues: int = 10,
             out.append(f"  ... {left} more blocking check(s)")
     else:
         out.append("BLOCKING  none")
+
+    out.append("")
+    if payload.get("release_blocking"):
+        out.append("RELEASE-BLOCKING  (pass the card, fail `release`; fix before release)")
+        for i, item in enumerate(payload["release_blocking"][:max_issues], 1):
+            out.append(f"  {i}. [{item['class']}] {item['name']}: {item['detail']}")
+            if item.get("hint"):
+                out.append(f"     fix: {item['hint']}")
+        left = len(payload["release_blocking"]) - max_issues
+        if left > 0:
+            out.append(f"  ... {left} more release-blocking check(s)")
+    else:
+        out.append("RELEASE-BLOCKING  none")
 
     out.append("")
     if payload.get("polish"):
@@ -418,6 +453,10 @@ def format_card(payload: dict, *, max_issues: int = 10,
         n = min(len(payload["blocking"]), max_issues)
         out.append(f"NEXT  Rewrite the whole score once, fixing BLOCKING 1-{n}. "
                    "Do not patch bar by bar.")
+    elif payload.get("release_blocking"):
+        n = min(len(payload["release_blocking"]), max_issues)
+        out.append(f"NEXT  No hard failures, but release would fail: fix "
+                   f"RELEASE-BLOCKING 1-{n} in one whole rewrite, then rescore.")
     else:
         out.append("NEXT  No blocking. Polish the flagged seams, then release.")
     return "\n".join(out)
@@ -449,7 +488,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\nwrote {args.json}")
     if payload.get("error"):
         return 2
-    return 1 if payload.get("blocking") else 0
+    return 1 if payload.get("blocking") or payload.get("release_blocking") else 0
 
 
 if __name__ == "__main__":

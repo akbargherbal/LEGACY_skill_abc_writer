@@ -31,6 +31,8 @@ class ScorecardTests(unittest.TestCase):
         card = scorecard.format_card(payload)
         self.assertIn("KEY BANDS", card)
         self.assertIn("BLOCKING  none", card)
+        self.assertIn("RELEASE-BLOCKING  none", card)
+        self.assertEqual(payload["release_blocking"], [])
         self.assertIn("SEAMS", card)
 
     def test_blocking_band_is_reported(self):
@@ -47,6 +49,24 @@ class ScorecardTests(unittest.TestCase):
             card = scorecard.format_card(payload)
             self.assertIn("BLOCKING", card)
             self.assertIn("fix:", card)
+
+    def test_release_only_failure_is_not_hidden(self):
+        """B1: a score the card passes but `release` fails must say so."""
+        text = (EXAMPLE / "score.abc").read_text(encoding="utf-8").rstrip("\n")
+        self.assertTrue(text.endswith("F,2 F,2 A,2 G,2 F,8|Z|"))
+        with tempfile.TemporaryDirectory() as tmp:
+            bad = Path(tmp) / "bad_end.abc"
+            bad.write_text(text[:-2] + "A,16|\n", encoding="utf-8")
+            payload = scorecard.build(bad, EXAMPLE / "plan.json",
+                                      EXAMPLE / "phrases.json",
+                                      EXAMPLE / "lyrics.txt")
+            self.assertEqual(payload["blocking"], [])
+            names = {i["name"] for i in payload["release_blocking"]}
+            self.assertIn("final rest", names)
+            self.assertNotIn("final rest", {i["name"] for i in payload["polish"]})
+            card = scorecard.format_card(payload)
+            self.assertIn("RELEASE-BLOCKING  (", card)
+            self.assertNotIn("NEXT  No blocking", card)
 
     def test_parse_error_is_reported(self):
         with tempfile.TemporaryDirectory() as tmp:

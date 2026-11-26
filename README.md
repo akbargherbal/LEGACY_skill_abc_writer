@@ -3,7 +3,7 @@
 Source of the **`maqam-score`** skill and the 177-track calibration that
 justifies its numbers.
 
-**Version:** 1.0.0 (skill) · contract 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
+**Version:** 1.0.1 (skill) · contract 0.4.0 · offline corpus bundle · **remixer 0.2.0** ·
 **Asset layer:** unreleased (see `docs/DECISIONS.md`, `docs/ASSET-BANK.md`) · **Date:** 2026-11-25
 
 ## Layout
@@ -49,6 +49,19 @@ make remix-build     # build the 670-score remixer store
 make remix-test      # remixer unit tests
 make remix-release   # remixer tests + verify + full/public zips + checksums
 ```
+
+## 1.0.1 — release parity and state hygiene
+
+Bug-fix pass on 1.0.0; no gate or threshold changed.
+
+- `scorecard.py` now runs the release checks too and prints a
+  `RELEASE-BLOCKING` block, so the card can no longer say "no blocking" when
+  `release --dry-run` would fail. Exit code 1 covers both blocks.
+- `init` and a failed `release` write 1.0 next steps into `STATE.md` /
+  `score_state.json` (whole draft, then scorecard; rewrite whole, no patch).
+- `plan set` rejects unknown top-level keys and points at the dotted path
+  (`arrangement.ins_entries`); `--sections` documents `name=start_bar`.
+- `seed` chords are accidental-aware: `_e` -> `Eb`, `^f` -> `F#`.
 
 ## 1.0.0 — whole drafts, one scorecard
 

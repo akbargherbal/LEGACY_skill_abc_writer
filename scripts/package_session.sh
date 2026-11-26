@@ -50,12 +50,15 @@ sed -i "s|deepseek/deepseek-flash#[a-z]*|deepseek/deepseek-flash#$VARIANT|g" \
 sed -i "s/variant: \"[a-z]*\"/variant: \"$VARIANT\"/" "$STAGE/$NAME/.opencode/plugins/abc-guard.js"
 printf '%s\n' "$PROMPT" > "$STAGE/PROMPT.txt"
 
+# The skill's own version line, so the drop README cannot drift from SKILL.md.
+SKILL_VERSION=$(sed -n 's/^version: "\([^"]*\)"/\1/p' "$ROOT/02_maqam-score/$SKILL_DOC" | head -1)
+
 cat > "$STAGE/README.md" <<MD
 # $NAME
 
 The 1.0 whole-draft loop in a clean room: \`init\` -> whole draft -> scorecard
 -> whole rewrite -> scorecard -> seams -> release. One process change from
-session 15: thinking is **$VARIANT**, not high. Steps: $STEPS. Skill: 1.0.0.
+session 15: thinking is **$VARIANT**, not high. Steps: $STEPS. Skill: $SKILL_VERSION.
 Agent: whole-draft \`composer.md\`.
 
 \`\`\`bash

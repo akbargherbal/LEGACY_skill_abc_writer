@@ -1,6 +1,6 @@
 ---
 name: abc-score-writer
-version: "1.0.0"
+version: "1.0.1"
 description: >-
   Write a complete two-voice ABC score from Arabic lyrics and an arabmaqamrock
   style prompt in whole drafts, then validate it with one scorecard. The model
@@ -32,7 +32,9 @@ stop and report: the model or the plan is the limit, not the card.
 python3 <skill>/scripts/score_cli.py init --tempo 80
 ```
 
-Read `plan.json` and `phrases.json`. Use `--sections` when the form is decided.
+Read `plan.json` and `phrases.json`. Use `--sections` when the form is decided:
+`name=start_bar`, one entry per section in lyric order, repeating the name for a
+repeat (`chorus=37,...,chorus=65`, not `chorus2`).
 If `FORM BUDGET` appears, decide before the first draft: keep the compact form
 and accept the warning, or rerun with `--force --bars N` **and** `--sections`.
 
@@ -53,7 +55,9 @@ draft; it fits the call cap.
 - Keep the cell, period, cadence ladder, register arc and texture in your head
   or in a short note. Do not write a DSL or a composition compiler.
 
-If the draft is long, split by **section**, not by lyric line.
+If the draft is long, split by **section**, not by lyric line. If a call ends
+with no output (cut off while thinking), do not retry the whole file in one call:
+write it again by sections (at most three), thinking less per section.
 
 ## 3. Scorecard
 
@@ -61,15 +65,17 @@ If the draft is long, split by **section**, not by lyric line.
 python3 <skill>/scripts/scorecard.py score.abc --plan plan.json --phrases phrases.json
 ```
 
-The card has four parts:
+The card has five parts:
 
 - `KEY BANDS` — the checker's numbers and their verdicts (`FAIL` hard, `WARN`
   plan/polish).
 - `BLOCKING` — hard failures. Fix all of them in the next draft.
-- `POLISH` — warnings and taste risks. Fix what the ear hears.
+- `RELEASE-BLOCKING` — pass the card but fail `release` (style checks and the
+  final rest are strict there). Fix them in the same rewrite as `BLOCKING`.
+- `POLISH` — warnings that stay non-blocking at release. Fix what the ear hears.
 - `SEAMS` — line-to-line joints: cadence -> start, rest, register, overlap.
 
-Exit code `1` means blocking; `2` means a parse error. Read the card, not the
+Exit code `1` means `BLOCKING` or `RELEASE-BLOCKING`; `2` means a parse error. Read the card, not the
 exit code alone.
 
 `section plan metrics` is a known banded warning: the auto plan's
@@ -91,10 +97,11 @@ Repeat 1-4 times.
 
 ## 5. Polish seams, release
 
-When `BLOCKING` is empty, polish the flagged seams: section transitions,
+When `BLOCKING` and `RELEASE-BLOCKING` are empty, polish the flagged seams: section transitions,
 same-pitch joints, register jumps, short rests, guitar under the voice. Then:
 
 ```bash
+python3 <skill>/scripts/score_cli.py release --dry-run   # same verdicts, no state change
 python3 <skill>/scripts/score_cli.py release
 ```
 
@@ -110,16 +117,20 @@ a musical verdict.
   only score write is a whole-file rewrite. If the card says "rewrite the whole
   score", the next write must be a complete file.
 - Do not lower the checker or `calibration.json`; do not add taste gates.
-- Stop when the card has no blocking and the ear is satisfied. Do not keep
+- Stop when the card has no blocking or release-blocking and the ear is satisfied. Do not keep
   editing after a pass.
 - If the same blocking issue survives two full rewrites, stop and report.
 
 ## ABC contract (short)
 
-- Header: use the scaffold header that `init` writes (`X:1`, `T:`, `M:4/4`,
+- Header: use the scaffold header that `init` writes (`X:1`, a blank `T:`, `M:4/4`,
   `L:1/16`, `Q:1/4=<tempo>`, the two `V:` lines, `K:<key>`). Do not invent it.
 - Each `V:` block is followed by up to 4 bars; every bar sums to **16 units**;
-  `Z` is a whole-bar rest.
+  `Z` is a whole-bar rest, and `Z2`, `Z3`, `Z4` alone in a bar slot are 2-4
+  whole-bar rests that count toward the 4-bar limit (`Z3|` is three bars).
+- Put one comment line before each group of `V:` blocks, named for a section in
+  `plan.json` (`% intro`, `% verse`, `% chorus`, `% outro`). Every `%` line is read
+  as a section name; do not write other comments (`% bars 1-4`).
 - The last bar is `Z` in both voices.
 - Pitch is a letter plus octave marks: `A,` = A3, `A` = A4, `a` = A5. The
   number after a note is its **duration in units**, not its octave: `A4` is

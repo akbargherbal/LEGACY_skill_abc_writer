@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.0.1 — release parity and state hygiene
+
+Bug-fix pass on 1.0.0. No checker rule, calibration constant or threshold was
+touched.
+
+### Fixed
+- `scorecard.py` ran the checker in its default mode only, so it could report
+  "no blocking" while `release --dry-run` failed on style checks or the final
+  rest. It now also runs `checker.check(..., strict_style=True,
+  require_final_rest=True)` and prints a `RELEASE-BLOCKING` block; `POLISH`
+  lists only warnings that stay warnings at release; exit 1 covers both.
+- `init` wrote the 0.9 next step ("write the first 16 bars", `core --snapshot`)
+  into `score_state.json`, `state.json` and `STATE.md`. A failed `release` told
+  the composer to fix bars with `patch`. Both now describe the 1.0 loop:
+  write/rewrite the whole score, then `scorecard.py`.
+- `templates/STATE.md` and `templates/state.json` phases match 1.0 (no `core`
+  or `critic`).
+- `plan set` accepted any top-level key silently. It now rejects unknown keys
+  and suggests the dotted path (`arrangement.ins_entries`).
+- `seed` chord roots ignored accidentals: `_e` produced `Em`, `^f`/`=e`
+  produced `C`. Now `_e` -> `Eb`, `^f` -> `F#`; naturals unchanged.
+
+### Docs and tests
+- `SKILL.md`: five-part card, `RELEASE-BLOCKING`, `release --dry-run`,
+  `--sections` format, `Z2`-`Z4` rest bars, section-comment rule, blank `T:`.
+- Four regression tests: release-only blocking, init state text, `plan set`
+  rejection, accidental-aware chords.
+
 ## 1.0.0 — whole drafts, one scorecard
 
 **Change of process, not of the gates.** The composer writes the whole score

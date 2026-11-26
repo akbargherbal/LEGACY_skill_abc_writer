@@ -4,7 +4,7 @@
   "last_check": null,
   "pass": null,
   "report_sha": null,
-  "next_action": "syllabify",
+  "next_action": "write the whole score.abc, then run scorecard.py",
   "open_issues": [],
   "files": [],
   "generated_estimate": 0
